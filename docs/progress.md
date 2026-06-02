@@ -53,3 +53,38 @@
 2. Render Build Command와 Start Command 입력
 3. 배포 후 React 화면과 `/api/cars` 응답 확인
 4. GitHub Actions CI/CD 워크플로우 작성
+
+## Render 배포 및 GitHub Actions CI/CD 준비
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | Render 배포 및 GitHub Actions CI/CD 준비 |
+| 작업 일자 | 2026-06-02 |
+| 작업 목적 | Render 배포 가능 구조를 최종 점검하고, GitHub Actions에서 빌드 성공 후 Render Deploy Hook을 호출하는 CI/CD 흐름 구성 |
+| 수정한 파일 | `.env.example`, `docs/deploy-checklist.md`, `docs/progress.md` |
+| 생성한 파일 | `.github/workflows/deploy.yml`, `docs/deploy-guide.md` |
+| 실행한 명령어 | `rg --files`, `type package.json`, `type frontend/package.json`, `type server.js`, `rg fetch`, `rg localhost`, `rg /api`, `npm run build`, `PORT=3100 node server.js` |
+| 확인 결과 | 루트 Express + `frontend` React 구조로 판단했고, Render Web Service 단일 배포 방식이 적합함을 확인 |
+
+### 작업 내용
+
+- GitHub Actions workflow를 추가했다.
+- workflow에서 Node.js 20 설정, 루트 의존성 설치, `frontend` 의존성 설치, 선택적 테스트, 빌드, Render Deploy Hook 호출 흐름을 구성했다.
+- Render 배포 가이드를 초급 개발자가 따라 할 수 있는 순서로 작성했다.
+- 배포 체크리스트를 코드, package.json, API 경로, 환경변수, GitHub Actions, Render 설정, 배포 후 테스트 기준으로 보완했다.
+- `.env.example`에 `NODE_ENV=production` 예시를 추가했다.
+
+### 확인 결과
+
+- React API 호출은 `/api/...` 상대 경로를 사용한다.
+- 배포용 코드에 하드코딩된 localhost API 호출은 없다.
+- Vite 개발 프록시의 `localhost:3000`은 로컬 개발용 설정이므로 유지했다.
+- 실제 Render 배포, GitHub push, Git commit은 진행하지 않았다.
+
+### 다음 단계
+
+1. GitHub에 변경사항을 사용자가 직접 커밋하고 push한다.
+2. Render Web Service를 생성한다.
+3. Render Deploy Hook URL을 GitHub Secret `RENDER_DEPLOY_HOOK_URL`로 등록한다.
+4. GitHub Actions를 수동 실행하거나 `main` 브랜치 push로 실행한다.
+5. Render 배포 URL에서 React 화면과 `/api/cars` 응답을 확인한다.
