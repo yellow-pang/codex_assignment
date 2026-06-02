@@ -82,6 +82,7 @@ http://localhost:3000/api/cars
 | --- | --- |
 | Service Type | Web Service |
 | Runtime | Node |
+| Node Version | `20.x` |
 | Branch | `main` |
 | Root Directory | 비워둠 또는 루트 |
 | Build Command | `npm install && npm run build` |
@@ -162,6 +163,7 @@ Render 배포가 끝나면 Render에서 제공하는 URL로 접속한다.
 | 새로고침 시 404 | React fallback 설정 없음 | API 라우트 뒤에 `app.get("*")` fallback 배치 |
 | 환경변수 누락 | Render 또는 GitHub Secrets에 값이 없음 | Render Environment와 GitHub Secrets 확인 |
 | Deploy Hook 실패 | Secret 이름이 다르거나 URL이 비어 있음 | `RENDER_DEPLOY_HOOK_URL` 이름 확인 |
+| `Cannot find module 'tailwindcss'` | Render 빌드에서 프론트엔드 devDependencies가 설치되지 않음 | 루트 `build` 스크립트에서 `npm install --include=dev --prefix frontend` 사용 |
 
 ## 13. 과제 제출용 설명 문구
 

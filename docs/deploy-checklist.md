@@ -24,7 +24,8 @@
 | 위치 | 항목 | 상태 |
 | --- | --- | --- |
 | 루트 `package.json` | `start` 스크립트 | `npm start`로 `node server.js` 실행 |
-| 루트 `package.json` | `build` 스크립트 | `frontend` 설치 및 Vite 빌드 실행 |
+| 루트 `package.json` | `build` 스크립트 | `frontend` devDependencies 포함 설치 및 Vite 빌드 실행 |
+| 루트 `package.json` | `engines` | Node.js `20.x` 사용 |
 | `frontend/package.json` | `build` 스크립트 | `vite build` 실행 |
 | `frontend/package.json` | `test` 스크립트 | 없음, CI에서 건너뜀 |
 
@@ -65,6 +66,7 @@
 | --- | --- |
 | Service Type | Web Service |
 | Runtime | Node |
+| Node Version | `20.x` |
 | Branch | `main` |
 | Root Directory | 비워둠 또는 루트 |
 | Build Command | `npm install && npm run build` |

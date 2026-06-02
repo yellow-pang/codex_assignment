@@ -88,3 +88,28 @@
 3. Render Deploy Hook URL을 GitHub Secret `RENDER_DEPLOY_HOOK_URL`로 등록한다.
 4. GitHub Actions를 수동 실행하거나 `main` 브랜치 push로 실행한다.
 5. Render 배포 URL에서 React 화면과 `/api/cars` 응답을 확인한다.
+
+## Render Tailwind 빌드 오류 수정
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | Render Tailwind 빌드 오류 수정 |
+| 작업 일자 | 2026-06-02 |
+| 작업 목적 | Render 빌드 중 `Cannot find module 'tailwindcss'` 오류 해결 |
+| 수정한 파일 | `package.json`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/progress.md` |
+| 생성한 파일 | 없음 |
+| 실행한 명령어 | `npm run build` |
+| 확인 결과 | 프론트엔드 devDependencies를 포함해 설치하도록 루트 build 스크립트를 보완 |
+
+### 작업 내용
+
+- Render 빌드 환경에서 `NODE_ENV=production` 영향으로 `frontend`의 devDependencies가 빠질 수 있는 문제를 확인했다.
+- Tailwind CSS, PostCSS, daisyUI는 Vite 빌드에 필요한 패키지이므로 `npm install --include=dev --prefix frontend`를 사용하도록 수정했다.
+- Render와 GitHub Actions의 Node.js 버전을 맞추기 위해 루트 `package.json`에 `engines.node`를 `20.x`로 추가했다.
+
+### 다음 단계
+
+1. 변경사항을 커밋하고 GitHub에 push한다.
+2. Render에서 `Clear build cache & deploy`를 실행한다.
+3. Render 빌드 로그에서 `vite build` 성공 여부를 확인한다.
+4. 배포 URL에서 React 화면과 `/api/cars` 응답을 확인한다.
