@@ -29,6 +29,7 @@
 | 루트 `package.json` | `engines` | Node.js `20.19` 이상 사용 |
 | 루트 `package.json` | `dependencies` | `multer` 포함 |
 | `frontend/package.json` | `build` 스크립트 | `vite build` 실행 |
+| `frontend/package.json` | `dependencies` | 6단계 이후 `react-router-dom` 설치 필요 |
 | `frontend/package.json` | `test` 스크립트 | 없음, CI에서 건너뜀 |
 
 ## 3. API 경로 점검 항목
@@ -37,6 +38,8 @@
 - [x] React 코드에 배포용 `localhost` API 호출이 없다.
 - [x] Vite 개발 서버에서는 `/api` 프록시가 `http://localhost:3000`으로 연결된다.
 - [x] 배포 환경에서는 Express가 `/api/cars`를 직접 제공한다.
+- [x] 차량 상세 URL은 `/cars/:id`를 사용하고 서버 fallback으로 새로고침을 지원한다.
+- [x] 상담방 생성 API는 `/api/chats/rooms`를 사용한다.
 - [x] 기존 Express API 경로인 `/cars`는 유지된다.
 
 ## 4. 환경변수 점검 항목
@@ -100,6 +103,12 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 - [ ] 승인 전 `buyer`는 차량 등록, 수정, 삭제를 사용할 수 없다.
 - [ ] 승인된 딜러 `dealer`는 본인이 등록한 차량만 수정, 삭제할 수 있다.
 - [ ] admin은 자기 자신의 admin 권한을 해제할 수 없다.
+- [ ] 로그인 후 차량 상세 버튼 클릭 시 `/cars/:id`로 이동한다.
+- [ ] `/cars/:id`에서 새로고침해도 상세 정보가 유지된다.
+- [ ] 잘못된 차량 ID 접근 시 오류 안내가 표시된다.
+- [ ] 상세 화면의 `딜러와 상담하기` 버튼으로 `/chats/:roomId` 준비 화면에 이동한다.
+- [ ] MongoDB `chat_rooms` 컬렉션에 상담방 문서가 저장된다.
+- [ ] 자기 자신과 상담방을 만드는 요청은 차단된다.
 - [ ] Render 무료 환경에서는 `uploads/` 파일이 영구 보관되지 않을 수 있음을 확인했다.
 - [ ] 새로고침해도 React 화면이 유지된다.
 - [ ] Render Logs에 포트 오류가 없다.
