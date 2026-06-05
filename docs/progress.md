@@ -106,6 +106,7 @@
 - Render 빌드 환경에서 `NODE_ENV=production` 영향으로 `frontend`의 devDependencies가 빠질 수 있는 문제를 확인했다.
 - Tailwind CSS, PostCSS, daisyUI는 Vite 빌드에 필요한 패키지이므로 `npm install --include=dev --prefix frontend`를 사용하도록 수정했다.
 - Render와 GitHub Actions의 Node.js 버전을 맞추기 위해 루트 `package.json`에 `engines.node`를 `20.x`로 추가했다.
+- MongoDB 드라이버 7.x 도입 후 Node.js 요구 버전을 `20.19.0` 이상으로 보정했다.
 
 ### 다음 단계
 
@@ -137,3 +138,37 @@
 1. MongoDB Atlas 연동 단계에서 `mongodb`, `dotenv` 의존성을 추가한다.
 2. MongoDB 연결 파일을 분리하고 차량 CRUD 저장소를 메모리 배열에서 `cars` 컬렉션으로 전환한다.
 3. `/cars` 호환 라우트 제거 여부는 프론트엔드와 문서가 완전히 `/api/cars`로 정리된 뒤 결정한다.
+
+## 2단계 MongoDB Atlas 연동
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 향후 개발 계획 2단계 MongoDB Atlas 연동 |
+| 작업 일자 | 2026-06-05 |
+| 작업 목적 | Express 서버를 MongoDB Atlas `cars` 컬렉션 기반 CRUD로 전환 |
+| 설치한 패키지 | `mongodb`, `dotenv` |
+| 수정한 파일 | `server.js`, `frontend/src/App.jsx`, `.env.example`, `package.json`, `package-lock.json`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/progress.md` |
+| 생성한 파일 | `db.js` |
+
+### 작업 내용
+
+- `db.js`에 `MongoClient` 기반 MongoDB 연결 코드를 분리했다.
+- 서버 시작 시 `MONGODB_URI`로 Atlas에 연결하고 `cars`, `users`, `chat_rooms`, `messages` 컬렉션을 준비하도록 구성했다.
+- 차량 목록, 상세, 등록, 수정, 삭제 API를 메모리 배열 대신 MongoDB `cars` 컬렉션을 사용하도록 변경했다.
+- 기존 `/api/cars/search`, `/api/cars/filter`, `/cars` 호환 라우트는 유지했다.
+- 차량 등록 시 서버가 MongoDB ObjectId를 생성하도록 프론트엔드의 숫자 ID 생성 로직을 제거했다.
+- `.env.example`과 배포 문서에 MongoDB Atlas 환경변수를 추가했다.
+
+### 확인 결과
+
+- `node --check server.js` 성공
+- `node --check db.js` 성공
+- `npm run build` 성공
+- `npm start`는 현재 로컬 환경에 `MONGODB_URI`가 없어 `MongoDB 연결 실패: MONGODB_URI 환경변수가 설정되지 않았습니다.` 메시지로 종료됨을 확인했다.
+- 실제 MongoDB Atlas 접속과 `/api/cars` API 호출 검증은 실제 `MONGODB_URI` 등록 후 진행해야 한다.
+
+### 다음 단계
+
+1. 로컬 또는 Render 환경에 실제 `MONGODB_URI`를 등록한 뒤 서버 실행과 API 응답을 확인한다.
+2. 3단계에서 `GET /api/cars/search`를 차량명, 제조사, 가격, 연식 복합 검색 API로 고도화한다.
+3. 이후 사진 업로드 단계에서 `imageUrl`, 차종, 연료, 주행거리, 지역, 설명 필드를 확장한다.

@@ -25,7 +25,7 @@
 | --- | --- | --- |
 | 루트 `package.json` | `start` 스크립트 | `npm start`로 `node server.js` 실행 |
 | 루트 `package.json` | `build` 스크립트 | `frontend` devDependencies 포함 설치 및 Vite 빌드 실행 |
-| 루트 `package.json` | `engines` | Node.js `20.x` 사용 |
+| 루트 `package.json` | `engines` | Node.js `20.19` 이상 사용 |
 | `frontend/package.json` | `build` 스크립트 | `vite build` 실행 |
 | `frontend/package.json` | `test` 스크립트 | 없음, CI에서 건너뜀 |
 
@@ -34,17 +34,17 @@
 - [x] React API 호출은 `/api/...` 상대 경로를 사용한다.
 - [x] React 코드에 배포용 `localhost` API 호출이 없다.
 - [x] Vite 개발 서버에서는 `/api` 프록시가 `http://localhost:3000`으로 연결된다.
-- [x] 배포 환경에서는 Express 미들웨어가 `/api/cars`를 `/cars`로 연결한다.
+- [x] 배포 환경에서는 Express가 `/api/cars`를 직접 제공한다.
 - [x] 기존 Express API 경로인 `/cars`는 유지된다.
 
 ## 4. 환경변수 점검 항목
 
 | 파일 또는 위치 | 상태 |
 | --- | --- |
-| `.env.example` | `NODE_ENV`, `PORT` 예시 작성 |
+| `.env.example` | `NODE_ENV`, `PORT`, MongoDB Atlas 환경변수 예시 작성 |
 | `.env` | 커밋 금지 |
 | `.gitignore` | `.env`, `.env.*`, `node_modules`, `dist`, 로그 파일 제외 |
-| Render Environment | `NODE_ENV=production` 권장 |
+| Render Environment | `NODE_ENV=production`, `MONGODB_URI`, `DB_NAME`, 컬렉션 이름 등록 필요 |
 | GitHub Secrets | `RENDER_DEPLOY_HOOK_URL` 필요 |
 
 ## 5. GitHub Actions 점검 항목
@@ -66,7 +66,7 @@
 | --- | --- |
 | Service Type | Web Service |
 | Runtime | Node |
-| Node Version | `20.x` |
+| Node Version | `20.19` 이상 |
 | Branch | `main` |
 | Root Directory | 비워둠 또는 루트 |
 | Build Command | `npm install && npm run build` |
@@ -81,6 +81,7 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 
 - [ ] Render URL 접속 시 React 화면이 보인다.
 - [ ] `GET /api/cars`가 자동차 목록 JSON을 반환한다.
+- [ ] Render Logs에 `MongoDB connected: car_market` 메시지가 보인다.
 - [ ] 자동차 등록 기능이 동작한다.
 - [ ] 자동차 수정 기능이 동작한다.
 - [ ] 자동차 삭제 기능이 동작한다.
