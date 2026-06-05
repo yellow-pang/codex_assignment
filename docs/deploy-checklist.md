@@ -43,11 +43,11 @@
 
 | 파일 또는 위치 | 상태 |
 | --- | --- |
-| `.env.example` | `NODE_ENV`, `PORT`, MongoDB Atlas 환경변수 예시 작성 |
+| `.env.example` | `NODE_ENV`, `PORT`, MongoDB Atlas, Firebase 환경변수 예시 작성 |
 | `.env` | 커밋 금지 |
 | `.gitignore` | `.env`, `.env.*`, `node_modules`, `dist`, 로그 파일 제외 |
 | `.gitignore` | `uploads/*` 런타임 업로드 파일 제외, `uploads/default-car.png` 기본 이미지는 커밋 가능 |
-| Render Environment | `NODE_ENV=production`, `MONGODB_URI`, `DB_NAME`, 컬렉션 이름 등록 필요. DNS 문제가 있으면 `MONGODB_DNS_SERVERS` 선택 등록 |
+| Render Environment | `NODE_ENV=production`, `MONGODB_URI`, `DB_NAME`, 컬렉션 이름, Firebase `VITE_FIREBASE_*` 값 등록 필요. DNS 문제가 있으면 `MONGODB_DNS_SERVERS` 선택 등록 |
 | GitHub Secrets | `RENDER_DEPLOY_HOOK_URL` 필요 |
 
 ## 5. GitHub Actions 점검 항목
@@ -91,6 +91,11 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 - [ ] 차량 사진 교체가 동작한다.
 - [ ] 자동차 삭제 기능이 동작한다.
 - [ ] 사진 없는 차량에서 `/uploads/default-car.png` 기본 이미지가 보인다.
+- [ ] Firebase 이메일/비밀번호 회원가입이 동작한다.
+- [ ] 회원가입 후 MongoDB `users` 컬렉션에 사용자 프로필이 저장된다.
+- [ ] Firebase 로그인, 로그아웃, 새로고침 후 인증 상태 유지가 동작한다.
+- [ ] 일반 사용자 `buyer`는 차량 등록, 수정, 삭제를 사용할 수 없다.
+- [ ] 딜러 `dealer`는 본인이 등록한 차량만 수정, 삭제할 수 있다.
 - [ ] Render 무료 환경에서는 `uploads/` 파일이 영구 보관되지 않을 수 있음을 확인했다.
 - [ ] 새로고침해도 React 화면이 유지된다.
 - [ ] Render Logs에 포트 오류가 없다.

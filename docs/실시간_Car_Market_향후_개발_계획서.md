@@ -27,8 +27,8 @@
 | Tailwind CSS / daisyUI  | 적용 완료                                   | 구현                 |
 | 차량 데이터 저장        | 서버 메모리 배열 사용                       | 신규 요구사항 미충족 |
 | MongoDB Atlas           | 패키지와 연결 코드 없음                     | 미구현               |
-| Firebase Authentication | 패키지와 인증 화면 없음                     | 미구현               |
-| 사용자 역할             | 일반 사용자, 딜러 구분 없음                 | 미구현               |
+| Firebase Authentication | Firebase 이메일/비밀번호 인증 화면과 상태 관리 구현 | 구현                 |
+| 사용자 역할             | `buyer`, `dealer` 역할 저장과 딜러 권한 체크 구현 | 구현                 |
 | 차량 검색               | 제조사 검색, 가격 필터만 분리 구현          | 부분 구현            |
 | 차량 상세               | 상태 기반 상세 화면 제공                    | 부분 구현            |
 | 사진 업로드             | `multer`, `/uploads` 정적 제공, 등록/수정 사진 처리 | 구현                 |
@@ -50,7 +50,7 @@
 | 차량 삭제      | `DELETE /cars/:id`              | `DELETE /api/cars/:id`              | 기본 CRUD 가능            |
 | 제조사 검색    | `GET /cars/search?company=...`  | `GET /api/cars/search?...`          | 일부 가능                 |
 | 가격 검색      | `GET /cars/filter?minPrice=...` | `GET /api/cars/search?minPrice=...` | API 통합 필요             |
-| 사용자 API     | 없음                            | `/api/users/*`                      | 미구현                    |
+| 사용자 API     | `/api/users`, `/api/users/me`, `/api/users/dealers` | `/api/users/*`                      | 구현                      |
 | 상담 API       | 없음                            | `/api/chats/*`                      | 미구현                    |
 
 ## 5. CI/CD 및 Render 배포 상태
@@ -148,6 +148,8 @@
 - 로그인, 회원 가입, 로그아웃 화면을 추가한다.
 - 회원 가입 시 사용자 유형을 선택하고 MongoDB `users` 컬렉션에 추가 프로필을 저장한다.
 - 딜러만 차량 등록 화면에 접근할 수 있도록 권한 체크를 적용한다.
+- 구현 결과 차량 수정과 삭제는 차량을 등록한 딜러 본인만 가능하도록 제한한다.
+- MongoDB 사용자 프로필 저장 실패 시 방금 생성된 Firebase 계정 삭제 보정을 시도한다.
 
 ### 9.6 6단계: 차량 상세와 상담 진입
 

@@ -62,9 +62,15 @@ app.use("/uploads", express.static(uploadsPath));
 app.use(express.static(frontendDistPath));
 
 const carsRouter = express.Router();
+const usersRouter = express.Router();
+const userRoles = new Set(["buyer", "dealer"]);
 
 function getCarsCollection() {
   return getCollection("cars");
+}
+
+function getUsersCollection() {
+  return getCollection("users");
 }
 
 function createCarFilterById(id) {
@@ -78,6 +84,9 @@ function createCarFilterById(id) {
 function normalizeCarInput(input) {
   const car = { ...input };
   delete car._id;
+  delete car.dealerId;
+  delete car.dealerName;
+  delete car.dealerRole;
 
   if (car.company) {
     car.company = String(car.company).trim().toUpperCase();
@@ -104,6 +113,24 @@ function normalizeCarInput(input) {
   );
 
   return car;
+}
+
+function normalizeUserInput(input) {
+  return {
+    uid: String(input.uid || "").trim(),
+    email: String(input.email || "").trim(),
+    displayName: String(input.displayName || "").trim(),
+    role: String(input.role || "").trim(),
+  };
+}
+
+function validateUserInput(user) {
+  if (!user.uid) return "사용자 UID가 필요합니다.";
+  if (!user.email) return "이메일이 필요합니다.";
+  if (!user.displayName) return "사용자 이름이 필요합니다.";
+  if (!userRoles.has(user.role)) return "사용자 유형은 buyer 또는 dealer만 사용할 수 있습니다.";
+
+  return "";
 }
 
 function createImageUrl(file) {
@@ -206,6 +233,108 @@ function getMongoDocument(result) {
   return result && result.value !== undefined ? result.value : result;
 }
 
+async function findDealerByUid(uid) {
+  const dealerId = String(uid || "").trim();
+
+  if (!dealerId) {
+    return null;
+  }
+
+  return getUsersCollection().findOne({ uid: dealerId, role: "dealer" });
+}
+
+async function requireDealerProfile(dealerId) {
+  const dealer = await findDealerByUid(dealerId);
+
+  if (!dealer) {
+    const error = new Error("딜러 권한이 필요합니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  return dealer;
+}
+
+function assertCarOwner(car, dealerId) {
+  if (String(car.dealerId || "") !== String(dealerId || "")) {
+    const error = new Error("차량을 등록한 딜러만 수정하거나 삭제할 수 있습니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+}
+
+usersRouter.post("/", async (req, res) => {
+  try {
+    const now = new Date();
+    const userInput = normalizeUserInput(req.body);
+    const validationMessage = validateUserInput(userInput);
+
+    if (validationMessage) {
+      return res.status(400).json({ message: validationMessage });
+    }
+
+    const update = {
+      $set: {
+        email: userInput.email,
+        displayName: userInput.displayName,
+        role: userInput.role,
+        updatedAt: now,
+      },
+      $setOnInsert: {
+        uid: userInput.uid,
+        createdAt: now,
+      },
+    };
+
+    const result = await getUsersCollection().findOneAndUpdate(
+      { uid: userInput.uid },
+      update,
+      { upsert: true, returnDocument: "after" },
+    );
+    const savedUser = getMongoDocument(result);
+
+    res.status(201).json(savedUser);
+  } catch (error) {
+    console.error("사용자 정보 저장 실패:", error.message);
+    res.status(500).json({ message: "사용자 정보를 저장하지 못했습니다." });
+  }
+});
+
+usersRouter.get("/me", async (req, res) => {
+  try {
+    const uid = String(req.query.uid || "").trim();
+
+    if (!uid) {
+      return res.status(400).json({ message: "사용자 UID가 필요합니다." });
+    }
+
+    const user = await getUsersCollection().findOne({ uid });
+
+    if (!user) {
+      return res.status(404).json({ message: "사용자 정보를 찾을 수 없습니다." });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("내 정보 조회 실패:", error.message);
+    res.status(500).json({ message: "사용자 정보를 조회하지 못했습니다." });
+  }
+});
+
+usersRouter.get("/dealers", async (req, res) => {
+  try {
+    const dealers = await getUsersCollection()
+      .find({ role: "dealer" })
+      .sort({ displayName: 1, createdAt: -1 })
+      .toArray();
+
+    res.json(dealers);
+  } catch (error) {
+    console.error("딜러 목록 조회 실패:", error.message);
+    res.status(500).json({ message: "딜러 목록을 조회하지 못했습니다." });
+  }
+});
+
 // 전체 자동차 목록을 JSON으로 응답합니다.
 carsRouter.get("/", async (req, res) => {
   try {
@@ -263,9 +392,12 @@ carsRouter.get("/:id", async (req, res) => {
 carsRouter.post("/", upload.single("image"), async (req, res) => {
   try {
     const now = new Date();
+    const dealer = await requireDealerProfile(req.body.dealerId);
     const newCar = {
       ...normalizeCarInput(req.body),
       imageUrl: createImageUrl(req.file),
+      dealerId: dealer.uid,
+      dealerName: dealer.displayName,
       createdAt: now,
       updatedAt: now,
     };
@@ -275,7 +407,9 @@ carsRouter.post("/", upload.single("image"), async (req, res) => {
     res.status(201).json({ _id: result.insertedId, ...newCar });
   } catch (error) {
     console.error("자동차 등록 실패:", error.message);
-    res.status(500).json({ message: "자동차를 등록하지 못했습니다." });
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "자동차를 등록하지 못했습니다.",
+    });
   }
 });
 
@@ -283,6 +417,15 @@ carsRouter.post("/", upload.single("image"), async (req, res) => {
 carsRouter.put("/:id", upload.single("image"), async (req, res) => {
   try {
     const filter = createCarFilterById(req.params.id);
+    const dealer = await requireDealerProfile(req.body.dealerId);
+    const existingCar = await getCarsCollection().findOne(filter);
+
+    if (!existingCar) {
+      return res.status(404).json({ message: "자동차를 찾을 수 없습니다." });
+    }
+
+    assertCarOwner(existingCar, dealer.uid);
+
     const carInput = normalizeCarInput(req.body);
 
     if (req.file) {
@@ -308,16 +451,29 @@ carsRouter.put("/:id", upload.single("image"), async (req, res) => {
     res.json(updatedCar);
   } catch (error) {
     console.error("자동차 수정 실패:", error.message);
-    res.status(500).json({ message: "자동차 정보를 수정하지 못했습니다." });
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode
+        ? error.message
+        : "자동차 정보를 수정하지 못했습니다.",
+    });
   }
 });
 
 // URL의 id와 일치하는 자동차를 목록에서 삭제합니다.
 carsRouter.delete("/:id", async (req, res) => {
   try {
-    const result = await getCarsCollection().findOneAndDelete(
-      createCarFilterById(req.params.id),
-    );
+    const dealerId = req.body?.dealerId || req.query.dealerId;
+    const dealer = await requireDealerProfile(dealerId);
+    const filter = createCarFilterById(req.params.id);
+    const existingCar = await getCarsCollection().findOne(filter);
+
+    if (!existingCar) {
+      return res.status(404).json({ message: "자동차를 찾을 수 없습니다." });
+    }
+
+    assertCarOwner(existingCar, dealer.uid);
+
+    const result = await getCarsCollection().findOneAndDelete(filter);
     const deletedCar = getMongoDocument(result);
 
     if (!deletedCar) {
@@ -327,10 +483,13 @@ carsRouter.delete("/:id", async (req, res) => {
     res.json(deletedCar);
   } catch (error) {
     console.error("자동차 삭제 실패:", error.message);
-    res.status(500).json({ message: "자동차를 삭제하지 못했습니다." });
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode ? error.message : "자동차를 삭제하지 못했습니다.",
+    });
   }
 });
 
+app.use("/api/users", usersRouter);
 app.use("/api/cars", carsRouter);
 
 // 기존 CRUD 앱의 /cars 호출은 다음 단계 전까지 호환용으로 유지합니다.

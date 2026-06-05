@@ -1,4 +1,4 @@
-function CarDetail({ car, onBack, onEdit, onDelete }) {
+function CarDetail({ canManage, car, onBack, onEdit, onDelete }) {
   const defaultCarImageUrl = "/uploads/default-car.png";
 
   if (!car) {
@@ -70,12 +70,16 @@ function CarDetail({ car, onBack, onEdit, onDelete }) {
           <button className="btn btn-outline" onClick={onBack}>
             목록으로
           </button>
-          <button className="btn btn-warning" onClick={() => onEdit(car)}>
-            수정
-          </button>
-          <button className="btn btn-error" onClick={() => onDelete(car)}>
-            삭제
-          </button>
+          {canManage && (
+            <>
+              <button className="btn btn-warning" onClick={() => onEdit(car)}>
+                수정
+              </button>
+              <button className="btn btn-error" onClick={() => onDelete(car)}>
+                삭제
+              </button>
+            </>
+          )}
         </div>
       </div>
     </section>

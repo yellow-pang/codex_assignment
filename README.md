@@ -22,6 +22,35 @@ npm run dev
 
 React 코드는 `/api/*` 상대 경로로 요청하고, Vite 개발 서버에서는 프록시가 Express 서버로 요청을 전달합니다.
 
+## 환경 변수
+
+루트 `.env` 또는 Render Environment에 MongoDB와 Firebase 값을 등록합니다.
+
+```text
+MONGODB_URI=MongoDB Atlas 접속 문자열
+DB_NAME=car_market
+COLLECTION_CARS=cars
+COLLECTION_USERS=users
+COLLECTION_CHAT_ROOMS=chat_rooms
+COLLECTION_MESSAGES=messages
+VITE_FIREBASE_API_KEY=Firebase Web API key
+VITE_FIREBASE_AUTH_DOMAIN=프로젝트ID.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=Firebase 프로젝트 ID
+VITE_FIREBASE_APP_ID=Firebase 웹 앱 ID
+```
+
+Firebase 콘솔에서는 Authentication의 이메일/비밀번호 제공자를 활성화해야 합니다.
+
+## 인증과 권한
+
+- 회원가입과 로그인은 Firebase Authentication을 사용합니다.
+- 회원가입 시 사용자 유형은 `buyer`, `dealer` 중 하나를 선택합니다.
+- 추가 사용자 정보는 MongoDB `users` 컬렉션에 저장합니다.
+- 차량 목록은 비로그인 사용자도 볼 수 있습니다.
+- 차량 상세, 등록, 수정, 삭제는 로그인 후 사용할 수 있습니다.
+- 차량 등록은 딜러만 가능하고, 수정과 삭제는 차량을 등록한 딜러 본인만 가능합니다.
+- MongoDB 사용자 프로필 저장이 실패하면 방금 생성한 Firebase 계정 삭제 보정을 시도합니다.
+
 ## 자동차 API 사용 예시
 
 전체 자동차 목록 조회:
@@ -49,6 +78,7 @@ curl -X POST http://localhost:3000/api/cars \
   -F "mileage=35000" \
   -F "location=서울" \
   -F "description=출퇴근용으로 적합한 하이브리드 세단" \
+  -F "dealerId=Firebase 딜러 UID" \
   -F "image=@./sample-car.jpg"
 ```
 
