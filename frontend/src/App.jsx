@@ -87,13 +87,11 @@ function App() {
   }
 
   async function handleCreateCar(carInput) {
-    const nextId = cars.length > 0 ? Math.max(...cars.map((car) => Number(car._id))) + 1 : 1;
-
     try {
       await requestApi("/api/cars", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ _id: nextId, ...carInput }),
+        body: JSON.stringify(carInput),
       });
 
       await loadCars("자동차가 등록되었습니다.");

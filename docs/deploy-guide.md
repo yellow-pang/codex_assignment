@@ -7,6 +7,7 @@
 | 구분 | 위치 | 역할 |
 | --- | --- | --- |
 | Express API | `server.js` | 자동차 CRUD REST API 제공 |
+| MongoDB 연결 | `db.js` | MongoDB Atlas 연결과 컬렉션 준비 |
 | React 앱 | `frontend/` | 자동차 CRUD 화면 제공 |
 | React 빌드 결과 | `frontend/dist/` | Express가 정적 파일로 제공 |
 | CI/CD 설정 | `.github/workflows/deploy.yml` | 빌드 성공 후 Render Deploy Hook 호출 |
@@ -82,7 +83,7 @@ http://localhost:3000/api/cars
 | --- | --- |
 | Service Type | Web Service |
 | Runtime | Node |
-| Node Version | `20.x` |
+| Node Version | `20.19` 이상 |
 | Branch | `main` |
 | Root Directory | 비워둠 또는 루트 |
 | Build Command | `npm install && npm run build` |
@@ -96,8 +97,17 @@ http://localhost:3000/api/cars
 | --- | --- | --- |
 | `NODE_ENV` | `production` | 배포 환경 표시 |
 | `PORT` | Render 자동 제공 | Express 서버 포트 |
+| `MONGODB_URI` | MongoDB Atlas 접속 문자열 | 서버에서만 사용하는 DB 접속 비밀값 |
+| `MONGODB_DNS_SERVERS` | `1.1.1.1,8.8.8.8` | 로컬 또는 배포 환경에서 Atlas SRV DNS 조회가 막힐 때 선택적으로 사용 |
+| `DB_NAME` | `car_market` | 사용할 MongoDB 데이터베이스 이름 |
+| `COLLECTION_CARS` | `cars` | 차량 데이터 컬렉션 |
+| `COLLECTION_USERS` | `users` | 사용자 추가 정보 컬렉션 |
+| `COLLECTION_CHAT_ROOMS` | `chat_rooms` | 상담방 컬렉션 |
+| `COLLECTION_MESSAGES` | `messages` | 상담 메시지 컬렉션 |
+| `CLIENT_URL` | 로컬 또는 배포된 React 주소 | 이후 CORS와 Socket.io 설정에 사용할 클라이언트 주소 |
 
 `PORT`는 Render가 자동으로 제공하므로 직접 입력하지 않아도 된다.
+`MONGODB_URI`는 비밀값이므로 GitHub 저장소, 문서, 클라이언트 코드에 실제 값을 작성하지 않는다.
 
 ## 8. Render Deploy Hook 생성 방법
 
@@ -162,6 +172,9 @@ Render 배포가 끝나면 Render에서 제공하는 URL로 접속한다.
 | localhost API 호출 문제 | 배포 환경에서 localhost는 사용자 PC가 아님 | React에서는 `/api/...` 상대 경로 사용 |
 | 새로고침 시 404 | React fallback 설정 없음 | API 라우트 뒤에 `app.get("*")` fallback 배치 |
 | 환경변수 누락 | Render 또는 GitHub Secrets에 값이 없음 | Render Environment와 GitHub Secrets 확인 |
+| `MONGODB_URI 환경변수가 설정되지 않았습니다.` | 서버 실행 환경에 MongoDB 접속 문자열이 없음 | 로컬 `.env` 또는 Render Environment에 `MONGODB_URI` 등록 |
+| `querySrv ECONNREFUSED _mongodb._tcp...` | DNS 서버가 Atlas SRV 레코드 조회를 거부함 | `MONGODB_DNS_SERVERS=1.1.1.1,8.8.8.8` 설정 또는 PC DNS 변경 |
+| `MongoDB 연결 실패` | 접속 문자열, Atlas IP 허용, 사용자 권한 문제 | Atlas Network Access, Database User, 접속 문자열 확인 |
 | Deploy Hook 실패 | Secret 이름이 다르거나 URL이 비어 있음 | `RENDER_DEPLOY_HOOK_URL` 이름 확인 |
 | `Cannot find module 'tailwindcss'` | Render 빌드에서 프론트엔드 devDependencies가 설치되지 않음 | 루트 `build` 스크립트에서 `npm install --include=dev --prefix frontend` 사용 |
 
