@@ -286,3 +286,40 @@
 2. `buyer` 계정으로 차량 등록/수정/삭제가 차단되는지 확인한다.
 3. `dealer` 계정으로 차량 등록 후 본인 차량만 수정/삭제 가능한지 확인한다.
 4. 6단계에서 차량 상세 URL과 상담 진입 API를 구현한다.
+
+## 5-1단계 관리자 역할과 딜러 승인
+
+| 항목          | 내용                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | 향후 개발 계획 5-1단계 관리자 역할과 딜러 승인                                                                                                                                                                                                                                                                                                                                                                    |
+| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 작업 목적     | 회원가입 시 누구나 딜러가 될 수 있던 흐름을 admin 승인 기반 딜러 권한 정책으로 보강                                                                                                                                                                                                                                                                                                                               |
+| 설치한 패키지 | 없음                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 수정한 파일   | `server.js`, `frontend/src/App.jsx`, `frontend/src/contexts/AuthContext.jsx`, `frontend/src/components/Header.jsx`, `frontend/src/components/RegisterForm.jsx`, `.env.example`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md` |
+| 생성한 파일   | `frontend/src/components/AdminUserPanel.jsx`, `docs/plans/plan-05-1-admin-role-management.md`, `docs/steps/2026-06-05-05-1-admin-role-management.md`, `docs/pr/2026-06-05-05-1-admin-role-management-pr.md`                                                                                                                                                                                                      |
+
+### 작업 내용
+
+- 일반 회원가입은 항상 `buyer`로 저장되도록 변경했다.
+- 최초 admin 자동 지정을 위해 서버 전용 환경변수 `INITIAL_ADMIN_EMAILS`를 추가했다.
+- 사용자 프로필에 `dealerStatus`, `dealerRequestedAt`, `dealerApprovedAt`, `dealerApprovedBy` 흐름을 추가했다.
+- `POST /api/users/dealer-request`로 딜러 신청 API를 추가했다.
+- `GET /api/users`와 `PATCH /api/users/:uid/role`로 admin 사용자 관리 API를 추가했다.
+- 차량 등록, 수정, 삭제 권한을 `role: dealer`와 `dealerStatus: approved`를 모두 만족하는 사용자로 제한했다.
+- admin이 자기 자신의 admin 권한을 해제하지 못하도록 서버에서 방어했다.
+- 관리자 화면 초안 `AdminUserPanel`을 추가해 사용자 목록, 딜러 승인, 역할 변경을 처리하도록 했다.
+- Header에 딜러 신청, 승인 대기, 거절 상태, 관리자 화면 진입 흐름을 추가했다.
+- README와 배포 문서에 최초 admin 설정 방법과 Render 환경변수 안내를 보강했다.
+
+### 확인 결과
+
+- 명령어 실행은 사용자 요청에 따라 사용자가 직접 진행한다.
+- 실제 Firebase와 MongoDB 환경변수 등록 후 admin 자동 지정, 딜러 신청, 승인, 차량 등록 권한을 확인해야 한다.
+
+### 다음 단계
+
+1. `.env`와 Render Environment에 `INITIAL_ADMIN_EMAILS`를 등록한다.
+2. 해당 이메일로 회원가입 후 MongoDB `users.role`이 `admin`인지 확인한다.
+3. buyer 계정으로 딜러 신청을 보내고 admin 화면에서 승인한다.
+4. 승인된 dealer만 차량 등록이 가능한지 확인한다.
+5. 6단계에서 차량 상세 URL과 상담 진입 API를 구현한다.

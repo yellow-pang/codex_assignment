@@ -1,13 +1,24 @@
 function Header({
   currentView,
+  isAdmin,
   isDealer,
+  onGoAdmin,
   onGoList,
   onGoCreate,
   onGoLogin,
   onGoRegister,
+  onRequestDealer,
   onLogout,
   userProfile,
 }) {
+  const canRequestDealer =
+    userProfile?.role === "buyer" &&
+    (!userProfile.dealerStatus || userProfile.dealerStatus === "none");
+  const isDealerPending =
+    userProfile?.role === "buyer" && userProfile.dealerStatus === "pending";
+  const isDealerRejected =
+    userProfile?.role === "buyer" && userProfile.dealerStatus === "rejected";
+
   return (
     <header className="navbar border-b border-base-200 bg-base-100 px-4 shadow-sm sm:px-8">
       <div className="flex-1">
@@ -27,8 +38,31 @@ function Header({
             등록
           </button>
         )}
+        {isAdmin && (
+          <button
+            className={`btn btn-sm ${currentView === "admin" ? "btn-primary" : "btn-outline"}`}
+            onClick={onGoAdmin}
+          >
+            관리자
+          </button>
+        )}
         {userProfile ? (
           <>
+            {canRequestDealer && (
+              <button className="btn btn-sm btn-outline" onClick={onRequestDealer}>
+                딜러 신청
+              </button>
+            )}
+            {isDealerPending && (
+              <span className="hidden items-center text-sm text-warning sm:flex">
+                딜러 승인 대기
+              </span>
+            )}
+            {isDealerRejected && (
+              <span className="hidden items-center text-sm text-error sm:flex">
+                딜러 신청 거절
+              </span>
+            )}
             <span className="hidden items-center text-sm text-base-content/70 sm:flex">
               {userProfile.displayName} · {userProfile.role}
             </span>

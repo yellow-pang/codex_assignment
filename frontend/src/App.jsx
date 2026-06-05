@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import AdminUserPanel from "./components/AdminUserPanel.jsx";
 import AlertMessage from "./components/AlertMessage.jsx";
 import CarDetail from "./components/CarDetail.jsx";
 import CarForm from "./components/CarForm.jsx";
@@ -12,9 +13,12 @@ import { useAuth } from "./contexts/AuthContext.jsx";
 function App() {
   const {
     authError,
+    isAdmin,
     isAuthLoading,
     isDealer,
     logout,
+    refreshUserProfile,
+    requestDealerApproval,
     userProfile,
   } = useAuth();
   const [cars, setCars] = useState([]);
@@ -289,6 +293,27 @@ function App() {
     setCurrentView("create");
   }
 
+  function handleGoAdmin() {
+    if (!isAdmin) {
+      setMessage({ type: "error", text: "관리자만 접근할 수 있습니다." });
+      return;
+    }
+
+    setCurrentView("admin");
+  }
+
+  async function handleRequestDealer() {
+    try {
+      await requestDealerApproval();
+      setMessage({
+        type: "success",
+        text: "딜러 신청이 접수되었습니다. 관리자 승인을 기다려주세요.",
+      });
+    } catch (error) {
+      setMessage({ type: "error", text: error.message });
+    }
+  }
+
   async function handleLogout() {
     await logout();
     setSelectedCar(null);
@@ -349,11 +374,14 @@ function App() {
     <div className="min-h-screen bg-base-200">
       <Header
         currentView={currentView}
+        isAdmin={isAdmin}
         isDealer={isDealer}
+        onGoAdmin={handleGoAdmin}
         onGoList={handleGoList}
         onGoCreate={handleGoCreate}
         onGoLogin={() => setCurrentView("login")}
         onGoRegister={() => setCurrentView("register")}
+        onRequestDealer={handleRequestDealer}
         onLogout={handleLogout}
         userProfile={userProfile}
       />
@@ -395,6 +423,7 @@ function App() {
                 <button
                   className="btn btn-primary"
                   onClick={handleGoCreate}
+                  disabled={!isDealer}
                 >
                   등록하기
                 </button>
@@ -537,6 +566,14 @@ function App() {
               setCurrentView("list");
               setMessage({ type: "success", text: "회원가입이 완료되었습니다." });
             }}
+          />
+        )}
+
+        {currentView === "admin" && isAdmin && (
+          <AdminUserPanel
+            currentUserProfile={userProfile}
+            onBack={handleGoList}
+            onProfileChanged={refreshUserProfile}
           />
         )}
       </main>

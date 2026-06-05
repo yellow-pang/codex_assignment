@@ -7,7 +7,6 @@ function RegisterForm({ onGoLogin, onRegisterSuccess }) {
     email: "",
     password: "",
     displayName: "",
-    role: "buyer",
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,10 +20,6 @@ function RegisterForm({ onGoLogin, onRegisterSuccess }) {
     if (!form.email.trim()) return "이메일을 입력해주세요.";
     if (form.password.length < 6) return "비밀번호는 6자 이상으로 입력해주세요.";
     if (!form.displayName.trim()) return "사용자 이름을 입력해주세요.";
-    if (!["buyer", "dealer"].includes(form.role)) {
-      return "사용자 유형을 선택해주세요.";
-    }
-
     return "";
   }
 
@@ -45,7 +40,7 @@ function RegisterForm({ onGoLogin, onRegisterSuccess }) {
         email: form.email.trim(),
         password: form.password,
         displayName: form.displayName.trim(),
-        role: form.role,
+        role: "buyer",
       });
       onRegisterSuccess();
     } catch (error) {
@@ -61,7 +56,7 @@ function RegisterForm({ onGoLogin, onRegisterSuccess }) {
         <div>
           <h1 className="card-title text-2xl">회원가입</h1>
           <p className="mt-1 text-sm text-base-content/60">
-            가입 후 선택한 사용자 유형에 따라 사용할 수 있는 기능이 달라집니다.
+            가입 직후에는 일반 사용자로 시작하며, 딜러 권한은 로그인 후 신청할 수 있습니다.
           </p>
         </div>
 
@@ -114,40 +109,9 @@ function RegisterForm({ onGoLogin, onRegisterSuccess }) {
             />
           </label>
 
-          <div className="form-control">
-            <div className="label">
-              <span className="label-text font-semibold">사용자 유형</span>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="cursor-pointer rounded-lg border border-base-300 p-4">
-                <input
-                  className="radio radio-primary"
-                  name="role"
-                  type="radio"
-                  value="buyer"
-                  checked={form.role === "buyer"}
-                  onChange={handleChange}
-                />
-                <span className="ml-3 font-semibold">일반 사용자</span>
-                <p className="mt-2 text-sm text-base-content/60">
-                  차량 검색과 상세 조회를 사용할 수 있습니다.
-                </p>
-              </label>
-              <label className="cursor-pointer rounded-lg border border-base-300 p-4">
-                <input
-                  className="radio radio-primary"
-                  name="role"
-                  type="radio"
-                  value="dealer"
-                  checked={form.role === "dealer"}
-                  onChange={handleChange}
-                />
-                <span className="ml-3 font-semibold">딜러</span>
-                <p className="mt-2 text-sm text-base-content/60">
-                  차량 등록과 본인 매물 관리를 사용할 수 있습니다.
-                </p>
-              </label>
-            </div>
+          <div className="rounded-lg border border-base-300 bg-base-200 p-4 text-sm text-base-content/70">
+            회원가입 계정은 기본적으로 일반 사용자로 생성됩니다. 딜러로 차량을
+            등록하려면 로그인 후 딜러 신청을 보내고 관리자 승인을 받아야 합니다.
           </div>
 
           <div className="card-actions justify-end">
