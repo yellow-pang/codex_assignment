@@ -48,7 +48,11 @@ const upload = multer({
       return;
     }
 
-    cb(new Error("차량 사진은 jpg, jpeg, png, webp 형식만 업로드할 수 있습니다."));
+    cb(
+      new Error(
+        "차량 사진은 jpg, jpeg, png, webp 형식만 업로드할 수 있습니다.",
+      ),
+    );
   },
 });
 
@@ -83,6 +87,10 @@ function getUsersCollection() {
 
 function getChatRoomsCollection() {
   return getCollection("chatRooms");
+}
+
+function getMessagesCollection() {
+  return getCollection("messages");
 }
 
 function createCarFilterById(id) {
@@ -138,7 +146,9 @@ function normalizeCarInput(input) {
 function normalizeUserInput(input) {
   return {
     uid: String(input.uid || "").trim(),
-    email: String(input.email || "").trim().toLowerCase(),
+    email: String(input.email || "")
+      .trim()
+      .toLowerCase(),
     displayName: String(input.displayName || "").trim(),
     role: String(input.role || "").trim(),
   };
@@ -160,7 +170,9 @@ function normalizeUserDocument(user) {
   return {
     ...user,
     role,
-    dealerStatus: normalizeDealerStatus(user.dealerStatus || defaultDealerStatus),
+    dealerStatus: normalizeDealerStatus(
+      user.dealerStatus || defaultDealerStatus,
+    ),
     dealerRequestedAt: user.dealerRequestedAt || null,
     dealerApprovedAt: user.dealerApprovedAt || null,
     dealerApprovedBy: user.dealerApprovedBy || null,
@@ -304,7 +316,9 @@ async function findUserByUid(uid) {
     return null;
   }
 
-  return normalizeUserDocument(await getUsersCollection().findOne({ uid: userId }));
+  return normalizeUserDocument(
+    await getUsersCollection().findOne({ uid: userId }),
+  );
 }
 
 async function requireDealerProfile(dealerId) {
@@ -328,7 +342,9 @@ async function requireAdminProfile(adminUid) {
     throw error;
   }
 
-  const admin = normalizeUserDocument(await getUsersCollection().findOne({ uid }));
+  const admin = normalizeUserDocument(
+    await getUsersCollection().findOne({ uid }),
+  );
 
   if (!admin || admin.role !== "admin") {
     const error = new Error("관리자 권한이 필요합니다.");
@@ -341,7 +357,9 @@ async function requireAdminProfile(adminUid) {
 
 function assertCarOwner(car, dealerId) {
   if (String(car.dealerId || "") !== String(dealerId || "")) {
-    const error = new Error("차량을 등록한 딜러만 수정하거나 삭제할 수 있습니다.");
+    const error = new Error(
+      "차량을 등록한 딜러만 수정하거나 삭제할 수 있습니다.",
+    );
     error.statusCode = 403;
     throw error;
   }
@@ -405,9 +423,12 @@ usersRouter.post("/", async (req, res) => {
     const existingUser = normalizeUserDocument(
       await getUsersCollection().findOne({ uid: userInput.uid }),
     );
-    const initialRole = existingUser?.role || getInitialUserRole(userInput.email);
+    const initialRole =
+      existingUser?.role || getInitialUserRole(userInput.email);
     const initialDealerStatus =
-      initialRole === "dealer" ? "approved" : existingUser?.dealerStatus || "none";
+      initialRole === "dealer"
+        ? "approved"
+        : existingUser?.dealerStatus || "none";
 
     const update = {
       $set: {
@@ -468,10 +489,14 @@ usersRouter.get("/me", async (req, res) => {
       return res.status(400).json({ message: "사용자 UID가 필요합니다." });
     }
 
-    const user = normalizeUserDocument(await getUsersCollection().findOne({ uid }));
+    const user = normalizeUserDocument(
+      await getUsersCollection().findOne({ uid }),
+    );
 
     if (!user) {
-      return res.status(404).json({ message: "사용자 정보를 찾을 수 없습니다." });
+      return res
+        .status(404)
+        .json({ message: "사용자 정보를 찾을 수 없습니다." });
     }
 
     res.json(user);
@@ -494,11 +519,15 @@ usersRouter.post("/dealer-request", async (req, res) => {
     );
 
     if (!user) {
-      return res.status(404).json({ message: "사용자 정보를 찾을 수 없습니다." });
+      return res
+        .status(404)
+        .json({ message: "사용자 정보를 찾을 수 없습니다." });
     }
 
     if (user.role === "admin") {
-      return res.status(400).json({ message: "관리자는 딜러 신청이 필요하지 않습니다." });
+      return res
+        .status(400)
+        .json({ message: "관리자는 딜러 신청이 필요하지 않습니다." });
     }
 
     if (user.role === "dealer" && user.dealerStatus === "approved") {
@@ -542,7 +571,9 @@ usersRouter.patch("/:uid/role", async (req, res) => {
     }
 
     if (!userRoles.has(nextRole)) {
-      return res.status(400).json({ message: "사용자 역할 값이 올바르지 않습니다." });
+      return res
+        .status(400)
+        .json({ message: "사용자 역할 값이 올바르지 않습니다." });
     }
 
     if (targetUid === admin.uid && nextRole !== "admin") {
@@ -556,7 +587,9 @@ usersRouter.patch("/:uid/role", async (req, res) => {
     );
 
     if (!targetUser) {
-      return res.status(404).json({ message: "대상 사용자를 찾을 수 없습니다." });
+      return res
+        .status(404)
+        .json({ message: "대상 사용자를 찾을 수 없습니다." });
     }
 
     const now = new Date();
@@ -672,7 +705,9 @@ carsRouter.post("/", upload.single("image"), async (req, res) => {
   } catch (error) {
     console.error("자동차 등록 실패:", error.message);
     res.status(error.statusCode || 500).json({
-      message: error.statusCode ? error.message : "자동차를 등록하지 못했습니다.",
+      message: error.statusCode
+        ? error.message
+        : "자동차를 등록하지 못했습니다.",
     });
   }
 });
@@ -748,7 +783,9 @@ carsRouter.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("자동차 삭제 실패:", error.message);
     res.status(error.statusCode || 500).json({
-      message: error.statusCode ? error.message : "자동차를 삭제하지 못했습니다.",
+      message: error.statusCode
+        ? error.message
+        : "자동차를 삭제하지 못했습니다.",
     });
   }
 });
@@ -769,7 +806,9 @@ chatsRouter.post("/rooms", async (req, res) => {
     const buyer = await findUserByUid(buyerId);
 
     if (!buyer) {
-      return res.status(404).json({ message: "사용자 정보를 찾을 수 없습니다." });
+      return res
+        .status(404)
+        .json({ message: "사용자 정보를 찾을 수 없습니다." });
     }
 
     const car = await getCarsCollection().findOne(createCarFilterById(carId));
@@ -825,11 +864,51 @@ chatsRouter.post("/rooms", async (req, res) => {
   }
 });
 
+// GET /api/chats/rooms?uid=xxx - 내 상담방 목록 조회
+chatsRouter.get("/rooms", async (req, res) => {
+  try {
+    const uid = normalizeUid(req.query.uid);
+
+    if (!uid) {
+      return res.status(400).json({ message: "사용자 UID가 필요합니다." });
+    }
+
+    const rooms = await getChatRoomsCollection()
+      .find({ $or: [{ buyerId: uid }, { dealerId: uid }] })
+      .sort({ updatedAt: -1 })
+      .toArray();
+
+    res.json(rooms);
+  } catch (error) {
+    console.error("상담방 목록 조회 실패:", error.message);
+    res.status(500).json({ message: "상담방 목록을 조회하지 못했습니다." });
+  }
+});
+
+// GET /api/chats/rooms/:roomId/messages - 이전 메시지 조회
+chatsRouter.get("/rooms/:roomId/messages", async (req, res) => {
+  try {
+    const roomId = String(req.params.roomId || "").trim();
+
+    if (!roomId) {
+      return res.status(400).json({ message: "상담방 ID가 필요합니다." });
+    }
+
+    const messages = await getMessagesCollection()
+      .find({ roomId })
+      .sort({ createdAt: 1 })
+      .toArray();
+
+    res.json(messages);
+  } catch (error) {
+    console.error("메시지 조회 실패:", error.message);
+    res.status(500).json({ message: "메시지를 조회하지 못했습니다." });
+  }
+});
+
 app.use("/api/users", usersRouter);
 app.use("/api/cars", carsRouter);
 app.use("/api/chats", chatsRouter);
-
-// 기존 CRUD 앱의 /cars 호출은 다음 단계 전까지 호환용으로 유지합니다.
 app.use("/cars", carsRouter);
 
 app.use((error, req, res, next) => {

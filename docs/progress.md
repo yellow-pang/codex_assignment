@@ -1,5 +1,39 @@
 # 작업 진행 기록
 
+## UI 전면 개선 — daisyUI 제거, 순수 Tailwind Modern Marketplace 적용
+
+| 항목             | 내용                                                                                                                                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | UI 전면 개선                                                                                                                                                                                                                     |
+| 작업 일자        | 2026-06-05                                                                                                                                                                                                                       |
+| 작업 내용        | daisyUI를 완전 제거하고 순수 Tailwind CSS 기반의 Modern Car Marketplace 스타일로 전면 개선                                                                                                                                       |
+| 제거한 패키지    | `daisyui`                                                                                                                                                                                                                        |
+| 수정한 주요 파일 | `style.css`, `App.jsx`, `Header.jsx`, `AlertMessage.jsx`, `CarTable.jsx`, `CarDetail.jsx`, `CarForm.jsx`, `LoginForm.jsx`, `RegisterForm.jsx`, `DeleteConfirmModal.jsx`, `AdminUserPanel.jsx`, `tailwind.config.js`, `server.js` |
+| 추가한 주요 파일 | `CarCardGrid.jsx`, `ChatRoomList.jsx`, `ChatRoom.jsx`, `docs/plans/plan-07-ui-redesign.md`, `docs/steps/2026-06-05-07-ui-redesign.md`, `docs/pr/2026-06-05-07-ui-redesign-pr.md`                                                 |
+| 확인한 명령어    | `npm run build` (64 modules, 4.10s, 성공), `node --check server.js` (성공)                                                                                                                                                       |
+
+### 작업 내용
+
+- `style.css`에 `@layer components`로 `c-btn-*`, `c-input`, `c-card`, `c-badge-*`, `c-alert-*` 공통 클래스 패턴을 정의했다.
+- `Header.jsx`를 CAR MARKET 로고 + 모바일 햄버거 메뉴 + 내 상담 링크로 재작성했다.
+- `App.jsx` 목록 화면을 Hero 섹션 + 검색 패널 + `CarCardGrid`로 개편했다.
+- 일반 사용자 차량 목록용 `CarCardGrid.jsx`를 신규 생성했다.
+- `CarDetail.jsx`를 이미지 2열 + 스펙 그리드 + 딜러 CTA 레이아웃으로 재작성했다.
+- `LoginForm.jsx`를 중앙 정렬 인증 카드로, `RegisterForm.jsx`에 buyer/dealer 역할 선택 카드 UI를 추가했다.
+- `CarForm.jsx`를 섹션 분리 딜러 등록 폼으로 재작성했다.
+- `DeleteConfirmModal.jsx`를 순수 Tailwind fixed overlay + dialog로 교체했다.
+- `AdminUserPanel.jsx`를 색상별 요약 카드 + 탭 + 순수 Tailwind 테이블로 재작성했다.
+- `ChatRoomList.jsx`, `ChatRoom.jsx`를 신규 구현했다 (Socket.io 연결은 8단계).
+- `server.js`에 `GET /api/chats/rooms`, `GET /api/chats/rooms/:roomId/messages` API를 추가했다.
+- `daisyui` 패키지와 `tailwind.config.js` 플러그인 설정을 제거했다.
+
+### 다음 단계
+
+1. Socket.io 실시간 상담 연결 (8단계)
+2. `join-room`, `send-message`, `receive-message`, `dealer-online`, `dealer-offline` 이벤트 구현
+3. ChatRoom 메시지 전송·수신 기능 활성화
+4. 딜러 온라인 상태 표시
+
 ## Tailwind CSS와 daisyUI 기반 화면 개선
 
 | 항목             | 내용                                                                                                                                                                                                                                                       |
@@ -211,14 +245,14 @@
 
 ## 4단계 차량 등록과 사진 업로드
 
-| 항목          | 내용                                                                                                                                                                                                                               |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 작업 단계명   | 향후 개발 계획 4단계 차량 등록과 사진 업로드                                                                                                                                                                                       |
-| 작업 일자     | 2026-06-05                                                                                                                                                                                                                         |
-| 작업 목적     | 차량 등록 데이터 구조를 확장하고 `multer` 기반 사진 업로드를 추가                                                                                                                                                                  |
-| 설치한 패키지 | `multer`                                                                                                                                                                                                                           |
+| 항목          | 내용                                                                                                                                                                                                                                                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | 향후 개발 계획 4단계 차량 등록과 사진 업로드                                                                                                                                                                                                                                                                                                      |
+| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                                                                                                        |
+| 작업 목적     | 차량 등록 데이터 구조를 확장하고 `multer` 기반 사진 업로드를 추가                                                                                                                                                                                                                                                                                 |
+| 설치한 패키지 | `multer`                                                                                                                                                                                                                                                                                                                                          |
 | 수정한 파일   | `server.js`, `frontend/src/App.jsx`, `frontend/src/components/CarForm.jsx`, `frontend/src/components/CarTable.jsx`, `frontend/src/components/CarDetail.jsx`, `.gitignore`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `package.json`, `package-lock.json`, `docs/progress.md` |
-| 생성한 파일   | `docs/plans/plan-04-car-photo-upload.md`, `docs/steps/2026-06-05-04-car-photo-upload.md`, `docs/pr/2026-06-05-04-car-photo-upload-pr.md`                                                                                           |
+| 생성한 파일   | `docs/plans/plan-04-car-photo-upload.md`, `docs/steps/2026-06-05-04-car-photo-upload.md`, `docs/pr/2026-06-05-04-car-photo-upload-pr.md`                                                                                                                                                                                                          |
 
 ### 작업 내용
 
@@ -250,14 +284,14 @@
 
 ## 5단계 Firebase 인증
 
-| 항목          | 내용                                                                                                                                                                                                                                                                                                                             |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 작업 단계명   | 향후 개발 계획 5단계 Firebase 인증                                                                                                                                                                                                                                                                                                |
-| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                                                                                        |
-| 작업 목적     | Firebase Authentication 기반 회원가입/로그인과 MongoDB 사용자 프로필 저장, 딜러 권한 체크 구현                                                                                                                                                                                                                                     |
-| 설치한 패키지 | `firebase`                                                                                                                                                                                                                                                                                                                        |
+| 항목          | 내용                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 작업 단계명   | 향후 개발 계획 5단계 Firebase 인증                                                                                                                                                                                                                                                                                                                                                                                       |
+| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 작업 목적     | Firebase Authentication 기반 회원가입/로그인과 MongoDB 사용자 프로필 저장, 딜러 권한 체크 구현                                                                                                                                                                                                                                                                                                                           |
+| 설치한 패키지 | `firebase`                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 수정한 파일   | `server.js`, `frontend/vite.config.js`, `frontend/src/App.jsx`, `frontend/src/main.jsx`, `frontend/src/components/Header.jsx`, `frontend/src/components/CarTable.jsx`, `frontend/src/components/CarDetail.jsx`, `.env.example`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `frontend/package.json`, `frontend/package-lock.json`, `docs/progress.md` |
-| 생성한 파일   | `frontend/src/firebase.js`, `frontend/src/contexts/AuthContext.jsx`, `frontend/src/components/LoginForm.jsx`, `frontend/src/components/RegisterForm.jsx`, `docs/plans/plan-05-firebase-auth.md`, `docs/steps/2026-06-05-05-firebase-auth.md`, `docs/pr/2026-06-05-05-firebase-auth-pr.md`                                          |
+| 생성한 파일   | `frontend/src/firebase.js`, `frontend/src/contexts/AuthContext.jsx`, `frontend/src/components/LoginForm.jsx`, `frontend/src/components/RegisterForm.jsx`, `docs/plans/plan-05-firebase-auth.md`, `docs/steps/2026-06-05-05-firebase-auth.md`, `docs/pr/2026-06-05-05-firebase-auth-pr.md`                                                                                                                                |
 
 ### 작업 내용
 
@@ -289,14 +323,14 @@
 
 ## 5-1단계 관리자 역할과 딜러 승인
 
-| 항목          | 내용                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 작업 단계명   | 향후 개발 계획 5-1단계 관리자 역할과 딜러 승인                                                                                                                                                                                                                                                                                                                                                                    |
-| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                                                                                                                                                                        |
-| 작업 목적     | 회원가입 시 누구나 딜러가 될 수 있던 흐름을 admin 승인 기반 딜러 권한 정책으로 보강                                                                                                                                                                                                                                                                                                                               |
-| 설치한 패키지 | 없음                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 항목          | 내용                                                                                                                                                                                                                                                                                                              |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | 향후 개발 계획 5-1단계 관리자 역할과 딜러 승인                                                                                                                                                                                                                                                                    |
+| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                                                                        |
+| 작업 목적     | 회원가입 시 누구나 딜러가 될 수 있던 흐름을 admin 승인 기반 딜러 권한 정책으로 보강                                                                                                                                                                                                                               |
+| 설치한 패키지 | 없음                                                                                                                                                                                                                                                                                                              |
 | 수정한 파일   | `server.js`, `frontend/src/App.jsx`, `frontend/src/contexts/AuthContext.jsx`, `frontend/src/components/Header.jsx`, `frontend/src/components/RegisterForm.jsx`, `.env.example`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md` |
-| 생성한 파일   | `frontend/src/components/AdminUserPanel.jsx`, `docs/plans/plan-05-1-admin-role-management.md`, `docs/steps/2026-06-05-05-1-admin-role-management.md`, `docs/pr/2026-06-05-05-1-admin-role-management-pr.md`                                                                                                                                                                                                      |
+| 생성한 파일   | `frontend/src/components/AdminUserPanel.jsx`, `docs/plans/plan-05-1-admin-role-management.md`, `docs/steps/2026-06-05-05-1-admin-role-management.md`, `docs/pr/2026-06-05-05-1-admin-role-management-pr.md`                                                                                                       |
 
 ### 작업 내용
 
@@ -326,14 +360,14 @@
 
 ## 6단계 차량 상세와 상담 진입
 
-| 항목          | 내용                                                                                                                                                                                                                                                                 |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 작업 단계명   | 향후 개발 계획 6단계 차량 상세와 상담 진입                                                                                                                                                                                                                           |
-| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                           |
-| 작업 목적     | 차량 상세 화면을 `/cars/:id` URL 기반으로 전환하고 상담방 생성 API를 추가                                                                                                                                                                                            |
-| 설치한 패키지 | `react-router-dom` 설치 필요. 권한 문제를 피하기 위해 사용자가 `npm.cmd --prefix frontend install react-router-dom` 명령어로 직접 설치                                                                                                                                |
+| 항목          | 내용                                                                                                                                                                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | 향후 개발 계획 6단계 차량 상세와 상담 진입                                                                                                                                                                                               |
+| 작업 일자     | 2026-06-05                                                                                                                                                                                                                               |
+| 작업 목적     | 차량 상세 화면을 `/cars/:id` URL 기반으로 전환하고 상담방 생성 API를 추가                                                                                                                                                                |
+| 설치한 패키지 | `react-router-dom` 설치 필요. 권한 문제를 피하기 위해 사용자가 `npm.cmd --prefix frontend install react-router-dom` 명령어로 직접 설치                                                                                                   |
 | 수정한 파일   | `server.js`, `frontend/src/App.jsx`, `frontend/src/main.jsx`, `frontend/src/components/CarDetail.jsx`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md` |
-| 생성한 파일   | `docs/plans/plan-06-car-detail-chat-entry.md`, `docs/steps/2026-06-05-06-car-detail-chat-entry.md`, `docs/pr/2026-06-05-06-car-detail-chat-entry-pr.md`                                                                                                             |
+| 생성한 파일   | `docs/plans/plan-06-car-detail-chat-entry.md`, `docs/steps/2026-06-05-06-car-detail-chat-entry.md`, `docs/pr/2026-06-05-06-car-detail-chat-entry-pr.md`                                                                                  |
 
 ### 작업 내용
 

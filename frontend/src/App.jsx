@@ -9,9 +9,11 @@ import {
 } from "react-router-dom";
 import AdminUserPanel from "./components/AdminUserPanel.jsx";
 import AlertMessage from "./components/AlertMessage.jsx";
+import CarCardGrid from "./components/CarCardGrid.jsx";
 import CarDetail from "./components/CarDetail.jsx";
 import CarForm from "./components/CarForm.jsx";
-import CarTable from "./components/CarTable.jsx";
+import ChatRoom from "./components/ChatRoom.jsx";
+import ChatRoomList from "./components/ChatRoomList.jsx";
 import DeleteConfirmModal from "./components/DeleteConfirmModal.jsx";
 import Header from "./components/Header.jsx";
 import LoginForm from "./components/LoginForm.jsx";
@@ -46,11 +48,6 @@ function App() {
     maxYear: "",
   });
   const [isSearchMode, setIsSearchMode] = useState(false);
-
-  const totalPrice = useMemo(
-    () => cars.reduce((sum, car) => sum + Number(car.price || 0), 0),
-    [cars],
-  );
 
   const activeView = useMemo(() => {
     if (location.pathname === "/") {
@@ -210,7 +207,10 @@ function App() {
 
   async function handleCreateCar(carInput) {
     if (!isDealer || !userProfile) {
-      setMessage({ type: "error", text: "딜러만 자동차를 등록할 수 있습니다." });
+      setMessage({
+        type: "error",
+        text: "딜러만 자동차를 등록할 수 있습니다.",
+      });
       handleGoList();
       return;
     }
@@ -317,13 +317,19 @@ function App() {
 
   function handleGoCreate() {
     if (!userProfile) {
-      setMessage({ type: "error", text: "로그인 후 자동차를 등록할 수 있습니다." });
+      setMessage({
+        type: "error",
+        text: "로그인 후 자동차를 등록할 수 있습니다.",
+      });
       navigate("/login");
       return;
     }
 
     if (!isDealer) {
-      setMessage({ type: "error", text: "딜러만 자동차를 등록할 수 있습니다." });
+      setMessage({
+        type: "error",
+        text: "딜러만 자동차를 등록할 수 있습니다.",
+      });
       return;
     }
 
@@ -355,7 +361,10 @@ function App() {
 
   async function handleStartChat(car) {
     if (!userProfile) {
-      setMessage({ type: "error", text: "로그인 후 상담을 시작할 수 있습니다." });
+      setMessage({
+        type: "error",
+        text: "로그인 후 상담을 시작할 수 있습니다.",
+      });
       navigate("/login");
       return;
     }
@@ -389,6 +398,10 @@ function App() {
     setCurrentView("list");
     navigate("/");
     setMessage({ type: "success", text: "로그아웃되었습니다." });
+  }
+
+  function handleGoChats() {
+    navigate("/chats");
   }
 
   function handleFilterChange(event) {
@@ -425,9 +438,9 @@ function App() {
   function canManageCar(car) {
     return Boolean(
       isDealer &&
-        userProfile?.uid &&
-        car?.dealerId &&
-        String(car.dealerId) === String(userProfile.uid),
+      userProfile?.uid &&
+      car?.dealerId &&
+      String(car.dealerId) === String(userProfile.uid),
     );
   }
 
@@ -454,59 +467,60 @@ function App() {
     }
 
     return (
-      <section className="card bg-base-100 shadow">
-        <div className="card-body">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="card-title text-2xl">자동차 목록</h1>
-              <p className="mt-1 text-sm text-base-content/60">
-                자동차 REST API에서 조회한 데이터를 관리합니다.
-              </p>
-            </div>
-            <button
-              className="btn btn-primary"
-              onClick={handleGoCreate}
-              disabled={!isDealer}
-            >
-              등록하기
-            </button>
-          </div>
+      <div className="space-y-6">
+        {/* Hero 섹션 */}
+        <section className="rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 px-6 py-10 text-white">
+          <h1 className="text-2xl font-extrabold sm:text-3xl">
+            내 조건에 맞는 중고차를 찾아보세요
+          </h1>
+          <p className="mt-2 text-blue-100">
+            검색하고, 비교하고, 마음에 드는 딜러와 바로 상담하세요
+          </p>
+        </section>
 
-          <div className="mt-4 grid gap-3 lg:grid-cols-6">
+        {/* 검색 패널 */}
+        <div className="c-card p-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <input
-              className="input input-bordered"
+              className="c-input"
               name="keyword"
               value={filters.keyword}
               onChange={handleFilterChange}
               placeholder="차량명: Sonata"
             />
-            <input
-              className="input input-bordered"
+            <select
+              className="c-select"
               name="company"
               value={filters.company}
               onChange={handleFilterChange}
-              placeholder="제조사 검색: HYUNDAI"
-            />
+            >
+              <option value="">제조사 전체</option>
+              <option value="HYUNDAI">HYUNDAI</option>
+              <option value="KIA">KIA</option>
+              <option value="RENAULT">RENAULT</option>
+              <option value="GENESIS">GENESIS</option>
+              <option value="CHEVROLET">CHEVROLET</option>
+            </select>
             <input
-              className="input input-bordered"
+              className="c-input"
               name="minPrice"
               type="number"
               min="0"
               value={filters.minPrice}
               onChange={handleFilterChange}
-              placeholder="최소 가격"
+              placeholder="최소 가격 (만원)"
             />
             <input
-              className="input input-bordered"
+              className="c-input"
               name="maxPrice"
               type="number"
               min="0"
               value={filters.maxPrice}
               onChange={handleFilterChange}
-              placeholder="최대 가격"
+              placeholder="최대 가격 (만원)"
             />
             <input
-              className="input input-bordered"
+              className="c-input"
               name="minYear"
               type="number"
               min="1900"
@@ -515,7 +529,7 @@ function App() {
               placeholder="최소 연식"
             />
             <input
-              className="input input-bordered"
+              className="c-input"
               name="maxYear"
               type="number"
               min="1900"
@@ -523,56 +537,108 @@ function App() {
               onChange={handleFilterChange}
               placeholder="최대 연식"
             />
-            <div className="flex flex-col gap-3 sm:flex-row lg:col-span-6 lg:justify-end">
-              <button className="btn btn-primary" onClick={searchCars}>
-                검색
-              </button>
-              <button className="btn btn-outline" onClick={resetSearchFilters}>
-                초기화
-              </button>
-            </div>
           </div>
-
-          <div className="mt-4">
-            {isLoading ? (
-              <div className="flex min-h-40 items-center justify-center">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
-              </div>
-            ) : (
-              <CarTable
-                canManageCar={canManageCar}
-                cars={cars}
-                emptyMessage={
-                  isSearchMode
-                    ? "검색 결과가 없습니다."
-                    : "등록된 자동차가 없습니다."
-                }
-                emptyDescription={
-                  isSearchMode
-                    ? "검색 조건을 바꾸거나 초기화해 전체 목록을 다시 확인해보세요."
-                    : "등록 버튼을 눌러 첫 자동차를 추가해보세요."
-                }
-                onView={handleViewCar}
-                onEdit={handleEditCar}
-                onDelete={setDeleteTarget}
-              />
-            )}
+          <div className="mt-3 flex justify-end gap-2">
+            <button className="c-btn-outline" onClick={resetSearchFilters}>
+              초기화
+            </button>
+            <button className="c-btn-primary" onClick={searchCars}>
+              검색하기
+            </button>
           </div>
         </div>
-      </section>
+
+        {/* 차량 목록 */}
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold text-gray-900">
+              {isSearchMode ? "검색 결과" : "추천 매물"}{" "}
+              <span className="text-gray-400">({cars.length})</span>
+            </h2>
+            {isDealer && (
+              <button
+                className="c-btn-primary px-3 py-1.5 text-xs"
+                onClick={handleGoCreate}
+              >
+                + 차량 등록
+              </button>
+            )}
+          </div>
+
+          {isLoading ? (
+            <div className="flex min-h-40 items-center justify-center">
+              <svg
+                className="h-8 w-8 animate-spin text-blue-600"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                />
+              </svg>
+            </div>
+          ) : (
+            <CarCardGrid
+              canManageCar={canManageCar}
+              cars={cars}
+              emptyMessage={
+                isSearchMode
+                  ? "검색 결과가 없습니다."
+                  : "등록된 자동차가 없습니다."
+              }
+              emptyDescription={
+                isSearchMode
+                  ? "검색 조건을 바꾸거나 초기화해 전체 목록을 다시 확인해보세요."
+                  : "등록 버튼을 눌러 첫 자동차를 추가해보세요."
+              }
+              onView={handleViewCar}
+              onEdit={handleEditCar}
+              onDelete={setDeleteTarget}
+            />
+          )}
+        </div>
+      </div>
     );
   }
 
   if (isAuthLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-base-200">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <svg
+          className="h-10 w-10 animate-spin text-blue-600"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          />
+        </svg>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-gray-50">
       <Header
         currentView={activeView}
         isAdmin={isAdmin}
@@ -582,34 +648,21 @@ function App() {
         onGoCreate={handleGoCreate}
         onGoLogin={() => navigate("/login")}
         onGoRegister={() => navigate("/register")}
+        onGoChats={handleGoChats}
         onRequestDealer={handleRequestDealer}
         onLogout={handleLogout}
         userProfile={userProfile}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <div className="stats bg-base-100 shadow">
-            <div className="stat">
-              <div className="stat-title">등록 자동차</div>
-              <div className="stat-value text-primary">{cars.length}</div>
-              <div className="stat-desc">현재 화면 기준</div>
-            </div>
+        {displayMessage.text && (
+          <div className="mb-5">
+            <AlertMessage
+              type={displayMessage.type}
+              message={displayMessage.text}
+            />
           </div>
-          <div className="stats bg-base-100 shadow sm:col-span-2">
-            <div className="stat">
-              <div className="stat-title">총 가격</div>
-              <div className="stat-value text-2xl">
-                {totalPrice.toLocaleString()}만원
-              </div>
-              <div className="stat-desc">조회된 목록의 합계</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <AlertMessage type={displayMessage.type} message={displayMessage.text} />
-        </div>
+        )}
 
         <Routes>
           <Route path="/" element={renderListRoute()} />
@@ -631,12 +684,19 @@ function App() {
             }
           />
           <Route
+            path="/chats"
+            element={
+              userProfile ? (
+                <ChatRoomList userProfile={userProfile} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
             path="/chats/:roomId"
             element={
-              <ChatReadyRoute
-                onBack={handleGoList}
-                userProfile={userProfile}
-              />
+              <ChatReadyRoute onBack={handleGoList} userProfile={userProfile} />
             }
           />
           <Route
@@ -658,7 +718,10 @@ function App() {
                 onGoLogin={() => navigate("/login")}
                 onRegisterSuccess={() => {
                   navigate("/");
-                  setMessage({ type: "success", text: "회원가입이 완료되었습니다." });
+                  setMessage({
+                    type: "success",
+                    text: "회원가입이 완료되었습니다.",
+                  });
                 }}
               />
             }
@@ -673,38 +736,38 @@ function App() {
                   onProfileChanged={refreshUserProfile}
                 />
               ) : (
-                <section className="card bg-base-100 shadow">
-                  <div className="card-body">
-                    <h1 className="card-title text-2xl">접근할 수 없습니다</h1>
-                    <p className="text-base-content/70">
-                      관리자만 접근할 수 있는 화면입니다.
-                    </p>
-                    <div className="card-actions justify-end">
-                      <button className="btn btn-primary" onClick={handleGoList}>
-                        목록으로
-                      </button>
-                    </div>
+                <div className="c-card p-8">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    접근할 수 없습니다
+                  </h1>
+                  <p className="mt-2 text-sm text-gray-500">
+                    관리자만 접근할 수 있는 화면입니다.
+                  </p>
+                  <div className="mt-5 flex justify-end">
+                    <button className="c-btn-primary" onClick={handleGoList}>
+                      목록으로
+                    </button>
                   </div>
-                </section>
+                </div>
               )
             }
           />
           <Route
             path="*"
             element={
-              <section className="card bg-base-100 shadow">
-                <div className="card-body">
-                  <h1 className="card-title text-2xl">페이지를 찾을 수 없습니다</h1>
-                  <p className="text-base-content/70">
-                    요청한 화면이 없거나 아직 구현되지 않았습니다.
-                  </p>
-                  <div className="card-actions justify-end">
-                    <button className="btn btn-primary" onClick={handleGoList}>
-                      목록으로
-                    </button>
-                  </div>
+              <div className="c-card p-8">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  페이지를 찾을 수 없습니다
+                </h1>
+                <p className="mt-2 text-sm text-gray-500">
+                  요청한 화면이 없거나 아직 구현되지 않았습니다.
+                </p>
+                <div className="mt-5 flex justify-end">
+                  <button className="c-btn-primary" onClick={handleGoList}>
+                    목록으로
+                  </button>
                 </div>
-              </section>
+              </div>
             }
           />
         </Routes>
@@ -781,24 +844,42 @@ function CarDetailRoute({
   if (!userProfile || isDetailLoading) {
     return (
       <div className="flex min-h-40 items-center justify-center">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+        <svg
+          className="h-8 w-8 animate-spin text-blue-600"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          />
+        </svg>
       </div>
     );
   }
 
   if (detailError) {
     return (
-      <section className="card bg-base-100 shadow">
-        <div className="card-body">
-          <h1 className="card-title text-2xl">차량을 찾을 수 없습니다</h1>
-          <p className="text-base-content/70">{detailError}</p>
-          <div className="card-actions justify-end">
-            <button className="btn btn-primary" onClick={onBack}>
-              목록으로
-            </button>
-          </div>
+      <div className="c-card p-8">
+        <h1 className="text-2xl font-bold text-gray-900">
+          차량을 찾을 수 없습니다
+        </h1>
+        <p className="mt-2 text-sm text-gray-500">{detailError}</p>
+        <div className="mt-5 flex justify-end">
+          <button className="c-btn-primary" onClick={onBack}>
+            목록으로
+          </button>
         </div>
-      </section>
+      </div>
     );
   }
 
@@ -824,44 +905,12 @@ function ChatReadyRoute({ onBack, userProfile }) {
   }
 
   return (
-    <section className="card bg-base-100 shadow">
-      <div className="card-body">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="card-title text-2xl">상담방 준비 완료</h1>
-            <p className="mt-1 text-sm text-base-content/60">
-              실시간 메시지는 다음 Socket.io 단계에서 연결합니다.
-            </p>
-          </div>
-          <span className="badge badge-info badge-outline">상담 대기</span>
-        </div>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-lg bg-base-200 p-4">
-            <p className="text-xs text-base-content/60">상담방 ID</p>
-            <p className="mt-1 break-all font-semibold">{roomId}</p>
-          </div>
-          <div className="rounded-lg bg-base-200 p-4">
-            <p className="text-xs text-base-content/60">차량</p>
-            <p className="mt-1 font-semibold">{chatRoom?.carName || "-"}</p>
-          </div>
-          <div className="rounded-lg bg-base-200 p-4">
-            <p className="text-xs text-base-content/60">딜러</p>
-            <p className="mt-1 font-semibold">{chatRoom?.dealerName || "-"}</p>
-          </div>
-          <div className="rounded-lg bg-base-200 p-4">
-            <p className="text-xs text-base-content/60">상담 요청자</p>
-            <p className="mt-1 font-semibold">{userProfile.displayName}</p>
-          </div>
-        </div>
-
-        <div className="card-actions mt-4 justify-end">
-          <button className="btn btn-outline" onClick={onBack}>
-            목록으로
-          </button>
-        </div>
-      </div>
-    </section>
+    <ChatRoom
+      roomId={roomId}
+      chatRoom={chatRoom}
+      userProfile={userProfile}
+      onBack={onBack}
+    />
   );
 }
 

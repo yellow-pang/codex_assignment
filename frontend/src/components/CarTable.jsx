@@ -11,58 +11,76 @@ function CarTable({
 
   if (cars.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-base-300 bg-base-100 p-8 text-center">
-        <p className="font-semibold">{emptyMessage}</p>
-        <p className="mt-2 text-sm text-base-content/60">{emptyDescription}</p>
+      <div className="rounded-xl border-2 border-dashed border-gray-200 py-12 text-center">
+        <p className="font-semibold text-gray-500">{emptyMessage}</p>
+        <p className="mt-2 text-sm text-gray-400">{emptyDescription}</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="table table-zebra">
-        <thead>
+    <div className="overflow-x-auto rounded-xl border border-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 bg-white">
+        <thead className="bg-gray-50">
           <tr>
-            <th>사진</th>
-            <th>ID</th>
-            <th>이름</th>
-            <th>제조사</th>
-            <th>연식</th>
-            <th>가격</th>
-            <th>주행거리</th>
-            <th>지역</th>
-            <th className="text-right">관리</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              사진
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              이름
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              제조사
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              연식
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              가격
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              주행거리
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              지역
+            </th>
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-gray-500">
+              관리
+            </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-200">
           {cars.map((car) => (
-            <tr key={car._id}>
-              <td>
+            <tr key={car._id} className="hover:bg-gray-50">
+              <td className="px-4 py-3">
                 <img
                   alt={`${car.name} 차량 사진`}
                   className="h-14 w-20 rounded-md object-cover"
                   src={car.imageUrl || defaultCarImageUrl}
                 />
               </td>
-              <td>{car._id}</td>
-              <td className="font-semibold">{car.name}</td>
-              <td>
-                <span className="badge badge-info badge-outline">
-                  {car.company}
-                </span>
+              <td className="px-4 py-3 font-semibold text-gray-900">
+                {car.name}
               </td>
-              <td>{car.year}</td>
-              <td>{Number(car.price).toLocaleString()}만원</td>
-              <td>
+              <td className="px-4 py-3">
+                <span className="c-badge-blue">{car.company}</span>
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-700">{car.year}</td>
+              <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                {Number(car.price).toLocaleString()}만원
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-700">
                 {car.mileage !== undefined
                   ? `${Number(car.mileage).toLocaleString()}km`
                   : "-"}
               </td>
-              <td>{car.location || "-"}</td>
-              <td>
+              <td className="px-4 py-3 text-sm text-gray-700">
+                {car.location || "-"}
+              </td>
+              <td className="px-4 py-3">
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
-                    className="btn btn-xs btn-outline"
+                    className="c-btn-outline px-2.5 py-1 text-xs"
                     onClick={() => onView(car)}
                   >
                     상세
@@ -70,13 +88,13 @@ function CarTable({
                   {canManageCar(car) && (
                     <>
                       <button
-                        className="btn btn-xs btn-warning"
+                        className="c-btn-warning px-2.5 py-1 text-xs"
                         onClick={() => onEdit(car)}
                       >
                         수정
                       </button>
                       <button
-                        className="btn btn-xs btn-error"
+                        className="c-btn-danger px-2.5 py-1 text-xs"
                         onClick={() => onDelete(car)}
                       >
                         삭제
