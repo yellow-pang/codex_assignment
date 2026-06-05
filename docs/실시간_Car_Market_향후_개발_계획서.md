@@ -30,9 +30,9 @@
 | Firebase Authentication | Firebase 이메일/비밀번호 인증 화면과 상태 관리 구현 | 구현                 |
 | 사용자 역할             | `buyer`, `dealer`, `admin` 역할과 딜러 승인 흐름 구현 | 구현                 |
 | 차량 검색               | 제조사 검색, 가격 필터만 분리 구현          | 부분 구현            |
-| 차량 상세               | 상태 기반 상세 화면 제공                    | 부분 구현            |
+| 차량 상세               | `/cars/:id` URL 기반 상세 조회와 새로고침 유지 구현 | 구현                 |
 | 사진 업로드             | `multer`, `/uploads` 정적 제공, 등록/수정 사진 처리 | 구현                 |
-| Socket.io 상담          | 패키지와 서버/클라이언트 코드 없음          | 미구현               |
+| Socket.io 상담          | 상담방 생성 API와 `/chats/:roomId` 준비 화면 구현, 실시간 메시지는 미구현 | 부분 구현            |
 | AI Agent 확장 구조      | 상담 처리 함수 분리 구조 없음               | 미구현               |
 | Render 배포             | 단일 Web Service 배포 문서와 빌드 구조 있음 | 구현                 |
 | GitHub Actions CI/CD    | 빌드 후 Render Deploy Hook 호출             | 구현                 |
@@ -51,7 +51,7 @@
 | 제조사 검색    | `GET /cars/search?company=...`  | `GET /api/cars/search?...`          | 일부 가능                 |
 | 가격 검색      | `GET /cars/filter?minPrice=...` | `GET /api/cars/search?minPrice=...` | API 통합 필요             |
 | 사용자 API     | `/api/users`, `/api/users/me`, `/api/users/dealers` | `/api/users/*`                      | 구현                      |
-| 상담 API       | 없음                            | `/api/chats/*`                      | 미구현                    |
+| 상담 API       | `POST /api/chats/rooms`         | `/api/chats/*`                      | 상담방 생성 구현          |
 
 ## 5. CI/CD 및 Render 배포 상태
 
@@ -164,10 +164,12 @@
 
 ### 9.7 6단계: 차량 상세와 상담 진입
 
-- React Router를 도입해 `/cars/:id` 상세 URL을 지원한다.
+- React Router를 도입해 `/cars/:id` 상세 URL을 지원한다. `react-router-dom` 설치는 사용자가 직접 진행한다.
 - 새로고침해도 상세 조회가 가능하도록 `GET /api/cars/:id`를 호출한다.
 - 상세 화면에 딜러 정보와 `딜러와 상담하기` 버튼을 배치한다.
 - 상담방 생성 API `POST /api/chats/rooms`를 구현한다.
+- 상담방 생성 후 `/chats/:roomId` 준비 화면으로 이동한다.
+- 자기 자신과 상담방을 만드는 요청은 서버에서 차단한다.
 
 ### 9.8 7단계: Socket.io 실시간 상담
 

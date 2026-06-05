@@ -62,6 +62,7 @@ app.use("/uploads", express.static(uploadsPath));
 app.use(express.static(frontendDistPath));
 
 const carsRouter = express.Router();
+const chatsRouter = express.Router();
 const usersRouter = express.Router();
 const userRoles = new Set(["buyer", "dealer", "admin"]);
 const dealerStatuses = new Set(["none", "pending", "approved", "rejected"]);
@@ -80,12 +81,24 @@ function getUsersCollection() {
   return getCollection("users");
 }
 
+function getChatRoomsCollection() {
+  return getCollection("chatRooms");
+}
+
 function createCarFilterById(id) {
   if (ObjectId.isValid(id)) {
     return { _id: new ObjectId(id) };
   }
 
   return { _id: Number(id) };
+}
+
+function normalizeUid(value) {
+  return String(value || "").trim();
+}
+
+function createChatRoomId({ buyerId, carId, dealerId }) {
+  return `${carId}_${buyerId}_${dealerId}`;
 }
 
 function normalizeCarInput(input) {
@@ -269,7 +282,7 @@ function getMongoDocument(result) {
 }
 
 async function findDealerByUid(uid) {
-  const dealerId = String(uid || "").trim();
+  const dealerId = normalizeUid(uid);
 
   if (!dealerId) {
     return null;
@@ -282,6 +295,16 @@ async function findDealerByUid(uid) {
   });
 
   return normalizeUserDocument(dealer);
+}
+
+async function findUserByUid(uid) {
+  const userId = normalizeUid(uid);
+
+  if (!userId) {
+    return null;
+  }
+
+  return normalizeUserDocument(await getUsersCollection().findOne({ uid: userId }));
 }
 
 async function requireDealerProfile(dealerId) {
@@ -730,8 +753,81 @@ carsRouter.delete("/:id", async (req, res) => {
   }
 });
 
+chatsRouter.post("/rooms", async (req, res) => {
+  try {
+    const carId = String(req.body.carId || "").trim();
+    const buyerId = normalizeUid(req.body.buyerId);
+
+    if (!carId) {
+      return res.status(400).json({ message: "차량 ID가 필요합니다." });
+    }
+
+    if (!buyerId) {
+      return res.status(400).json({ message: "사용자 UID가 필요합니다." });
+    }
+
+    const buyer = await findUserByUid(buyerId);
+
+    if (!buyer) {
+      return res.status(404).json({ message: "사용자 정보를 찾을 수 없습니다." });
+    }
+
+    const car = await getCarsCollection().findOne(createCarFilterById(carId));
+
+    if (!car) {
+      return res.status(404).json({ message: "자동차를 찾을 수 없습니다." });
+    }
+
+    const dealerId = normalizeUid(car.dealerId);
+
+    if (!dealerId) {
+      return res.status(400).json({
+        message: "이 차량에는 상담 가능한 딜러 정보가 없습니다.",
+      });
+    }
+
+    if (buyerId === dealerId) {
+      return res.status(400).json({
+        message: "자기 자신과는 상담방을 만들 수 없습니다.",
+      });
+    }
+
+    const now = new Date();
+    const roomId = createChatRoomId({ buyerId, carId, dealerId });
+    const roomUpdate = {
+      $set: {
+        carId,
+        buyerId,
+        buyerName: buyer.displayName,
+        dealerId,
+        dealerName: car.dealerName || "딜러",
+        carName: car.name || "",
+        imageUrl: car.imageUrl || "",
+        updatedAt: now,
+      },
+      $setOnInsert: {
+        roomId,
+        createdAt: now,
+      },
+    };
+
+    const result = await getChatRoomsCollection().findOneAndUpdate(
+      { roomId },
+      roomUpdate,
+      { upsert: true, returnDocument: "after" },
+    );
+    const chatRoom = getMongoDocument(result);
+
+    res.status(201).json(chatRoom);
+  } catch (error) {
+    console.error("상담방 생성 실패:", error.message);
+    res.status(500).json({ message: "상담방을 생성하지 못했습니다." });
+  }
+});
+
 app.use("/api/users", usersRouter);
 app.use("/api/cars", carsRouter);
+app.use("/api/chats", chatsRouter);
 
 // 기존 CRUD 앱의 /cars 호출은 다음 단계 전까지 호환용으로 유지합니다.
 app.use("/cars", carsRouter);

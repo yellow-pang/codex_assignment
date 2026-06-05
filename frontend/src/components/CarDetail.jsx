@@ -1,4 +1,4 @@
-function CarDetail({ canManage, car, onBack, onEdit, onDelete }) {
+function CarDetail({ canManage, car, onBack, onEdit, onDelete, onStartChat }) {
   const defaultCarImageUrl = "/uploads/default-car.png";
 
   if (!car) {
@@ -64,6 +64,24 @@ function CarDetail({ canManage, car, onBack, onEdit, onDelete }) {
           <p className="mt-2 whitespace-pre-wrap leading-7">
             {car.description || "등록된 설명이 없습니다."}
           </p>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-base-300 bg-base-100 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs text-base-content/60">담당 딜러</p>
+              <p className="mt-1 text-lg font-semibold">
+                {car.dealerName || "딜러 정보 없음"}
+              </p>
+            </div>
+            <button
+              className="btn btn-primary"
+              disabled={!car.dealerId}
+              onClick={() => onStartChat(car)}
+            >
+              딜러와 상담하기
+            </button>
+          </div>
         </div>
 
         <div className="card-actions mt-4 justify-end">

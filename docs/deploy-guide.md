@@ -25,6 +25,13 @@ Express 서버는 `frontend/dist` 폴더를 정적 파일로 제공하므로 사
 React와 Express를 분리해서 React Static Site와 Express Web Service 두 개로 배포하는 방법도 가능하다.
 하지만 과제용 프로젝트에서는 설정이 늘어나므로 단일 Web Service 방식이 더 단순하다.
 
+6단계 차량 상세 URL부터는 React Router를 사용한다.
+권한 문제로 의존성 설치를 사용자가 직접 진행하는 경우 루트 폴더에서 아래 명령어를 먼저 실행한다.
+
+```bash
+npm.cmd --prefix frontend install react-router-dom
+```
+
 ## 3. GitHub Actions CI/CD 흐름 설명
 
 `main` 브랜치에 push되거나 수동 실행하면 GitHub Actions가 다음 순서로 동작한다.
@@ -206,6 +213,10 @@ Render 배포가 끝나면 Render에서 제공하는 URL로 접속한다.
 - 자동차 등록, 수정, 삭제 버튼이 동작하는지 확인한다.
 - 차량 사진 업로드 후 목록과 상세 화면에 이미지가 보이는지 확인한다.
 - 사진 없는 차량에서 `/uploads/default-car.png` 기본 이미지가 보이는지 확인한다.
+- 로그인 후 `/cars/:id` 상세 URL에 직접 접근하고 새로고침해도 상세 정보가 유지되는지 확인한다.
+- 차량 상세 화면에서 `딜러와 상담하기`를 눌렀을 때 `/chats/:roomId` 준비 화면으로 이동하는지 확인한다.
+- MongoDB `chat_rooms` 컬렉션에 상담방 문서가 생성 또는 갱신되는지 확인한다.
+- 차량 등록자 본인이 자기 차량으로 상담방을 만들면 서버가 차단하는지 확인한다.
 - 브라우저 새로고침 후 화면이 유지되는지 확인한다.
 - Render Logs에 포트 또는 빌드 오류가 없는지 확인한다.
 
@@ -224,6 +235,9 @@ Render 배포가 끝나면 Render에서 제공하는 URL로 접속한다.
 | `MongoDB 연결 실패` | 접속 문자열, Atlas IP 허용, 사용자 권한 문제 | Atlas Network Access, Database User, 접속 문자열 확인 |
 | 차량 이미지 404 | `uploads` 파일이 없거나 기본 이미지가 없음 | `uploads/default-car.png` 또는 업로드된 파일 존재 여부 확인 |
 | 업로드 파일 사라짐 | Render 무료 환경의 파일 시스템 비영속성 | 외부 이미지 스토리지 도입 검토 |
+| `Cannot find module 'react-router-dom'` | React Router 의존성이 아직 설치되지 않음 | `npm.cmd --prefix frontend install react-router-dom` 실행 후 lockfile 커밋 |
+| `/cars/:id` 새로고침 문제 | React fallback 또는 Router 설정 문제 | Express fallback이 API 라우트 뒤에 있는지, `BrowserRouter`가 적용됐는지 확인 |
+| 상담방 생성 실패 | 차량 딜러 정보 누락, 사용자 UID 없음, 자기 자신 상담 요청 | 차량의 `dealerId`, MongoDB `users` 문서, 요청 UID 확인 |
 | Deploy Hook 실패 | Secret 이름이 다르거나 URL이 비어 있음 | `RENDER_DEPLOY_HOOK_URL` 이름 확인 |
 | `Cannot find module 'tailwindcss'` | Render 빌드에서 프론트엔드 devDependencies가 설치되지 않음 | 루트 `build` 스크립트에서 `npm install --include=dev --prefix frontend` 사용 |
 

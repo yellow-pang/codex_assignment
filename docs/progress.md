@@ -323,3 +323,39 @@
 3. buyer 계정으로 딜러 신청을 보내고 admin 화면에서 승인한다.
 4. 승인된 dealer만 차량 등록이 가능한지 확인한다.
 5. 6단계에서 차량 상세 URL과 상담 진입 API를 구현한다.
+
+## 6단계 차량 상세와 상담 진입
+
+| 항목          | 내용                                                                                                                                                                                                                                                                 |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | 향후 개발 계획 6단계 차량 상세와 상담 진입                                                                                                                                                                                                                           |
+| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                           |
+| 작업 목적     | 차량 상세 화면을 `/cars/:id` URL 기반으로 전환하고 상담방 생성 API를 추가                                                                                                                                                                                            |
+| 설치한 패키지 | `react-router-dom` 설치 필요. 권한 문제를 피하기 위해 사용자가 `npm.cmd --prefix frontend install react-router-dom` 명령어로 직접 설치                                                                                                                                |
+| 수정한 파일   | `server.js`, `frontend/src/App.jsx`, `frontend/src/main.jsx`, `frontend/src/components/CarDetail.jsx`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md` |
+| 생성한 파일   | `docs/plans/plan-06-car-detail-chat-entry.md`, `docs/steps/2026-06-05-06-car-detail-chat-entry.md`, `docs/pr/2026-06-05-06-car-detail-chat-entry-pr.md`                                                                                                             |
+
+### 작업 내용
+
+- `BrowserRouter`를 적용하고 `/`, `/cars/:id`, `/chats/:roomId`, `/login`, `/register`, `/admin` 라우트를 연결했다.
+- 목록의 상세 버튼이 `/cars/:id`로 이동하도록 변경했다.
+- 상세 URL 진입 시 `GET /api/cars/:id`를 호출해 차량 정보를 다시 조회하도록 했다.
+- 상세 화면에 담당 딜러 정보와 `딜러와 상담하기` 버튼을 추가했다.
+- `POST /api/chats/rooms` 상담방 생성 API를 추가했다.
+- 상담방은 `carId`, 요청자 UID, 차량 문서의 `dealerId` 기준으로 생성하거나 기존 방을 재사용한다.
+- 상담방 생성 권한은 로그인한 모든 사용자에게 열어 두었다.
+- 자기 자신과 상담방을 만드는 요청은 서버에서 차단했다.
+- 상담방 생성 후 `/chats/:roomId` 준비 화면으로 이동하도록 했다.
+
+### 확인 결과
+
+- `cmd.exe /c node --check server.js` 성공
+- `react-router-dom`이 아직 설치되지 않았으므로 프론트엔드 빌드는 사용자가 의존성 설치 후 직접 실행해야 한다.
+- 실제 Firebase와 MongoDB 환경변수가 있어야 상세 URL 직접 접근, 상담방 생성, `chat_rooms` 저장을 확인할 수 있다.
+
+### 다음 단계
+
+1. 사용자가 `npm.cmd --prefix frontend install react-router-dom`을 실행한다.
+2. 사용자가 `npm.cmd --prefix frontend run build`와 `npm.cmd run build`를 실행한다.
+3. 실제 로그인 상태에서 `/cars/:id` 새로고침과 `/chats/:roomId` 이동을 확인한다.
+4. 7단계에서 Socket.io 실시간 상담과 메시지 저장을 구현한다.

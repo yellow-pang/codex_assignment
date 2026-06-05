@@ -1,4 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import AdminUserPanel from "./components/AdminUserPanel.jsx";
 import AlertMessage from "./components/AlertMessage.jsx";
 import CarDetail from "./components/CarDetail.jsx";
@@ -21,6 +29,8 @@ function App() {
     requestDealerApproval,
     userProfile,
   } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [cars, setCars] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -41,6 +51,28 @@ function App() {
     () => cars.reduce((sum, car) => sum + Number(car.price || 0), 0),
     [cars],
   );
+
+  const activeView = useMemo(() => {
+    if (location.pathname === "/") {
+      return currentView;
+    }
+    if (location.pathname.startsWith("/cars/")) {
+      return "detail";
+    }
+    if (location.pathname.startsWith("/chats/")) {
+      return "chat";
+    }
+    if (location.pathname === "/login") {
+      return "login";
+    }
+    if (location.pathname === "/register") {
+      return "register";
+    }
+    if (location.pathname === "/admin") {
+      return "admin";
+    }
+    return currentView;
+  }, [currentView, location.pathname]);
 
   const displayMessage = message.text
     ? message
@@ -80,7 +112,6 @@ function App() {
     }
 
     try {
-      // Vite 프록시 설정 덕분에 /api/cars 요청이 Express 서버로 전달됩니다.
       const data = await requestApi("/api/cars");
       setCars(data);
       setCurrentView("list");
@@ -180,7 +211,7 @@ function App() {
   async function handleCreateCar(carInput) {
     if (!isDealer || !userProfile) {
       setMessage({ type: "error", text: "딜러만 자동차를 등록할 수 있습니다." });
-      setCurrentView("list");
+      handleGoList();
       return;
     }
 
@@ -191,6 +222,7 @@ function App() {
       });
 
       await loadCars("자동차가 등록되었습니다.");
+      navigate("/");
     } catch (error) {
       setMessage({ type: "error", text: error.message });
     }
@@ -204,7 +236,7 @@ function App() {
         type: "error",
         text: "차량을 등록한 딜러만 수정할 수 있습니다.",
       });
-      setCurrentView("list");
+      handleGoList();
       return;
     }
 
@@ -216,6 +248,7 @@ function App() {
 
       setSelectedCar(updatedCar);
       await loadCars("자동차 정보가 수정되었습니다.");
+      navigate(`/cars/${updatedCar._id}`);
     } catch (error) {
       setMessage({ type: "error", text: error.message });
     }
@@ -241,6 +274,7 @@ function App() {
       setDeleteTarget(null);
       setSelectedCar(null);
       await loadCars("자동차가 삭제되었습니다.");
+      navigate("/");
     } catch (error) {
       setMessage({ type: "error", text: error.message });
     }
@@ -252,12 +286,13 @@ function App() {
         type: "error",
         text: "차량 상세 정보는 로그인 후 확인할 수 있습니다.",
       });
-      setCurrentView("login");
+      navigate("/login");
       return;
     }
 
     setSelectedCar(car);
-    setCurrentView("detail");
+    setCurrentView("list");
+    navigate(`/cars/${car._id}`);
   }
 
   function handleEditCar(car) {
@@ -271,17 +306,19 @@ function App() {
 
     setSelectedCar(car);
     setCurrentView("edit");
+    navigate("/");
   }
 
   function handleGoList() {
     setSelectedCar(null);
     setCurrentView("list");
+    navigate("/");
   }
 
   function handleGoCreate() {
     if (!userProfile) {
       setMessage({ type: "error", text: "로그인 후 자동차를 등록할 수 있습니다." });
-      setCurrentView("login");
+      navigate("/login");
       return;
     }
 
@@ -291,6 +328,7 @@ function App() {
     }
 
     setCurrentView("create");
+    navigate("/");
   }
 
   function handleGoAdmin() {
@@ -299,7 +337,8 @@ function App() {
       return;
     }
 
-    setCurrentView("admin");
+    setCurrentView("list");
+    navigate("/admin");
   }
 
   async function handleRequestDealer() {
@@ -314,11 +353,41 @@ function App() {
     }
   }
 
+  async function handleStartChat(car) {
+    if (!userProfile) {
+      setMessage({ type: "error", text: "로그인 후 상담을 시작할 수 있습니다." });
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const chatRoom = await requestApi("/api/chats/rooms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          carId: String(car._id),
+          buyerId: userProfile.uid,
+        }),
+      });
+
+      setMessage({
+        type: "success",
+        text: "상담방이 준비되었습니다.",
+      });
+      navigate(`/chats/${encodeURIComponent(chatRoom.roomId)}`, {
+        state: { chatRoom },
+      });
+    } catch (error) {
+      setMessage({ type: "error", text: error.message });
+    }
+  }
+
   async function handleLogout() {
     await logout();
     setSelectedCar(null);
     setDeleteTarget(null);
     setCurrentView("list");
+    navigate("/");
     setMessage({ type: "success", text: "로그아웃되었습니다." });
   }
 
@@ -362,6 +431,138 @@ function App() {
     );
   }
 
+  function renderListRoute() {
+    if (currentView === "create") {
+      return (
+        <CarForm
+          mode="create"
+          onCancel={handleGoList}
+          onSubmit={handleCreateCar}
+        />
+      );
+    }
+
+    if (currentView === "edit" && selectedCar) {
+      return (
+        <CarForm
+          mode="edit"
+          initialCar={selectedCar}
+          onCancel={handleGoList}
+          onSubmit={handleUpdateCar}
+        />
+      );
+    }
+
+    return (
+      <section className="card bg-base-100 shadow">
+        <div className="card-body">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="card-title text-2xl">자동차 목록</h1>
+              <p className="mt-1 text-sm text-base-content/60">
+                자동차 REST API에서 조회한 데이터를 관리합니다.
+              </p>
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={handleGoCreate}
+              disabled={!isDealer}
+            >
+              등록하기
+            </button>
+          </div>
+
+          <div className="mt-4 grid gap-3 lg:grid-cols-6">
+            <input
+              className="input input-bordered"
+              name="keyword"
+              value={filters.keyword}
+              onChange={handleFilterChange}
+              placeholder="차량명: Sonata"
+            />
+            <input
+              className="input input-bordered"
+              name="company"
+              value={filters.company}
+              onChange={handleFilterChange}
+              placeholder="제조사 검색: HYUNDAI"
+            />
+            <input
+              className="input input-bordered"
+              name="minPrice"
+              type="number"
+              min="0"
+              value={filters.minPrice}
+              onChange={handleFilterChange}
+              placeholder="최소 가격"
+            />
+            <input
+              className="input input-bordered"
+              name="maxPrice"
+              type="number"
+              min="0"
+              value={filters.maxPrice}
+              onChange={handleFilterChange}
+              placeholder="최대 가격"
+            />
+            <input
+              className="input input-bordered"
+              name="minYear"
+              type="number"
+              min="1900"
+              value={filters.minYear}
+              onChange={handleFilterChange}
+              placeholder="최소 연식"
+            />
+            <input
+              className="input input-bordered"
+              name="maxYear"
+              type="number"
+              min="1900"
+              value={filters.maxYear}
+              onChange={handleFilterChange}
+              placeholder="최대 연식"
+            />
+            <div className="flex flex-col gap-3 sm:flex-row lg:col-span-6 lg:justify-end">
+              <button className="btn btn-primary" onClick={searchCars}>
+                검색
+              </button>
+              <button className="btn btn-outline" onClick={resetSearchFilters}>
+                초기화
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            {isLoading ? (
+              <div className="flex min-h-40 items-center justify-center">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+              </div>
+            ) : (
+              <CarTable
+                canManageCar={canManageCar}
+                cars={cars}
+                emptyMessage={
+                  isSearchMode
+                    ? "검색 결과가 없습니다."
+                    : "등록된 자동차가 없습니다."
+                }
+                emptyDescription={
+                  isSearchMode
+                    ? "검색 조건을 바꾸거나 초기화해 전체 목록을 다시 확인해보세요."
+                    : "등록 버튼을 눌러 첫 자동차를 추가해보세요."
+                }
+                onView={handleViewCar}
+                onEdit={handleEditCar}
+                onDelete={setDeleteTarget}
+              />
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (isAuthLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-base-200">
@@ -373,14 +574,14 @@ function App() {
   return (
     <div className="min-h-screen bg-base-200">
       <Header
-        currentView={currentView}
+        currentView={activeView}
         isAdmin={isAdmin}
         isDealer={isDealer}
         onGoAdmin={handleGoAdmin}
         onGoList={handleGoList}
         onGoCreate={handleGoCreate}
-        onGoLogin={() => setCurrentView("login")}
-        onGoRegister={() => setCurrentView("register")}
+        onGoLogin={() => navigate("/login")}
+        onGoRegister={() => navigate("/register")}
         onRequestDealer={handleRequestDealer}
         onLogout={handleLogout}
         userProfile={userProfile}
@@ -410,172 +611,103 @@ function App() {
           <AlertMessage type={displayMessage.type} message={displayMessage.text} />
         </div>
 
-        {currentView === "list" && (
-          <section className="card bg-base-100 shadow">
-            <div className="card-body">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h1 className="card-title text-2xl">자동차 목록</h1>
-                  <p className="mt-1 text-sm text-base-content/60">
-                    자동차 REST API에서 조회한 데이터를 관리합니다.
-                  </p>
-                </div>
-                <button
-                  className="btn btn-primary"
-                  onClick={handleGoCreate}
-                  disabled={!isDealer}
-                >
-                  등록하기
-                </button>
-              </div>
-
-              <div className="mt-4 grid gap-3 lg:grid-cols-6">
-                <input
-                  className="input input-bordered"
-                  name="keyword"
-                  value={filters.keyword}
-                  onChange={handleFilterChange}
-                  placeholder="차량명: Sonata"
+        <Routes>
+          <Route path="/" element={renderListRoute()} />
+          <Route
+            path="/cars/:id"
+            element={
+              <CarDetailRoute
+                canManageCar={canManageCar}
+                onBack={handleGoList}
+                onDelete={setDeleteTarget}
+                onEdit={handleEditCar}
+                onStartChat={handleStartChat}
+                requestApi={requestApi}
+                selectedCar={selectedCar}
+                setMessage={setMessage}
+                setSelectedCar={setSelectedCar}
+                userProfile={userProfile}
+              />
+            }
+          />
+          <Route
+            path="/chats/:roomId"
+            element={
+              <ChatReadyRoute
+                onBack={handleGoList}
+                userProfile={userProfile}
+              />
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <LoginForm
+                onGoRegister={() => navigate("/register")}
+                onLoginSuccess={() => {
+                  navigate("/");
+                  setMessage({ type: "success", text: "로그인되었습니다." });
+                }}
+              />
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <RegisterForm
+                onGoLogin={() => navigate("/login")}
+                onRegisterSuccess={() => {
+                  navigate("/");
+                  setMessage({ type: "success", text: "회원가입이 완료되었습니다." });
+                }}
+              />
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              isAdmin ? (
+                <AdminUserPanel
+                  currentUserProfile={userProfile}
+                  onBack={handleGoList}
+                  onProfileChanged={refreshUserProfile}
                 />
-                <input
-                  className="input input-bordered"
-                  name="company"
-                  value={filters.company}
-                  onChange={handleFilterChange}
-                  placeholder="제조사 검색: HYUNDAI"
-                />
-                <input
-                  className="input input-bordered"
-                  name="minPrice"
-                  type="number"
-                  min="0"
-                  value={filters.minPrice}
-                  onChange={handleFilterChange}
-                  placeholder="최소 가격"
-                />
-                <input
-                  className="input input-bordered"
-                  name="maxPrice"
-                  type="number"
-                  min="0"
-                  value={filters.maxPrice}
-                  onChange={handleFilterChange}
-                  placeholder="최대 가격"
-                />
-                <input
-                  className="input input-bordered"
-                  name="minYear"
-                  type="number"
-                  min="1900"
-                  value={filters.minYear}
-                  onChange={handleFilterChange}
-                  placeholder="최소 연식"
-                />
-                <input
-                  className="input input-bordered"
-                  name="maxYear"
-                  type="number"
-                  min="1900"
-                  value={filters.maxYear}
-                  onChange={handleFilterChange}
-                  placeholder="최대 연식"
-                />
-                <div className="flex flex-col gap-3 sm:flex-row lg:col-span-6 lg:justify-end">
-                  <button className="btn btn-primary" onClick={searchCars}>
-                    검색
-                  </button>
-                  <button
-                    className="btn btn-outline"
-                    onClick={resetSearchFilters}
-                  >
-                    초기화
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                {isLoading ? (
-                  <div className="flex min-h-40 items-center justify-center">
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
+              ) : (
+                <section className="card bg-base-100 shadow">
+                  <div className="card-body">
+                    <h1 className="card-title text-2xl">접근할 수 없습니다</h1>
+                    <p className="text-base-content/70">
+                      관리자만 접근할 수 있는 화면입니다.
+                    </p>
+                    <div className="card-actions justify-end">
+                      <button className="btn btn-primary" onClick={handleGoList}>
+                        목록으로
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <CarTable
-                    canManageCar={canManageCar}
-                    cars={cars}
-                    emptyMessage={
-                      isSearchMode
-                        ? "검색 결과가 없습니다."
-                        : "등록된 자동차가 없습니다."
-                    }
-                    emptyDescription={
-                      isSearchMode
-                        ? "검색 조건을 바꾸거나 초기화해 전체 목록을 다시 확인해보세요."
-                        : "등록 버튼을 눌러 첫 자동차를 추가해보세요."
-                    }
-                    onView={handleViewCar}
-                    onEdit={handleEditCar}
-                    onDelete={setDeleteTarget}
-                  />
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {currentView === "create" && (
-          <CarForm
-            mode="create"
-            onCancel={handleGoList}
-            onSubmit={handleCreateCar}
+                </section>
+              )
+            }
           />
-        )}
-
-        {currentView === "edit" && selectedCar && (
-          <CarForm
-            mode="edit"
-            initialCar={selectedCar}
-            onCancel={handleGoList}
-            onSubmit={handleUpdateCar}
+          <Route
+            path="*"
+            element={
+              <section className="card bg-base-100 shadow">
+                <div className="card-body">
+                  <h1 className="card-title text-2xl">페이지를 찾을 수 없습니다</h1>
+                  <p className="text-base-content/70">
+                    요청한 화면이 없거나 아직 구현되지 않았습니다.
+                  </p>
+                  <div className="card-actions justify-end">
+                    <button className="btn btn-primary" onClick={handleGoList}>
+                      목록으로
+                    </button>
+                  </div>
+                </div>
+              </section>
+            }
           />
-        )}
-
-        {currentView === "detail" && (
-          <CarDetail
-            canManage={canManageCar(selectedCar)}
-            car={selectedCar}
-            onBack={handleGoList}
-            onEdit={handleEditCar}
-            onDelete={setDeleteTarget}
-          />
-        )}
-
-        {currentView === "login" && (
-          <LoginForm
-            onGoRegister={() => setCurrentView("register")}
-            onLoginSuccess={() => {
-              setCurrentView("list");
-              setMessage({ type: "success", text: "로그인되었습니다." });
-            }}
-          />
-        )}
-
-        {currentView === "register" && (
-          <RegisterForm
-            onGoLogin={() => setCurrentView("login")}
-            onRegisterSuccess={() => {
-              setCurrentView("list");
-              setMessage({ type: "success", text: "회원가입이 완료되었습니다." });
-            }}
-          />
-        )}
-
-        {currentView === "admin" && isAdmin && (
-          <AdminUserPanel
-            currentUserProfile={userProfile}
-            onBack={handleGoList}
-            onProfileChanged={refreshUserProfile}
-          />
-        )}
+        </Routes>
       </main>
 
       <DeleteConfirmModal
@@ -584,6 +716,152 @@ function App() {
         onConfirm={handleDeleteCar}
       />
     </div>
+  );
+}
+
+function CarDetailRoute({
+  canManageCar,
+  onBack,
+  onDelete,
+  onEdit,
+  onStartChat,
+  requestApi,
+  selectedCar,
+  setMessage,
+  setSelectedCar,
+  userProfile,
+}) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [detailCar, setDetailCar] = useState(selectedCar);
+  const [isDetailLoading, setIsDetailLoading] = useState(true);
+  const [detailError, setDetailError] = useState("");
+
+  useEffect(() => {
+    if (!userProfile) {
+      setMessage({
+        type: "error",
+        text: "차량 상세 정보는 로그인 후 확인할 수 있습니다.",
+      });
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    let isMounted = true;
+
+    async function loadCarDetail() {
+      setIsDetailLoading(true);
+      setDetailError("");
+
+      try {
+        const data = await requestApi(`/api/cars/${encodeURIComponent(id)}`);
+
+        if (!isMounted) return;
+
+        setDetailCar(data);
+        setSelectedCar(data);
+      } catch (error) {
+        if (!isMounted) return;
+
+        setDetailError(error.message);
+      } finally {
+        if (isMounted) {
+          setIsDetailLoading(false);
+        }
+      }
+    }
+
+    loadCarDetail();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, userProfile?.uid]);
+
+  if (!userProfile || isDetailLoading) {
+    return (
+      <div className="flex min-h-40 items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (detailError) {
+    return (
+      <section className="card bg-base-100 shadow">
+        <div className="card-body">
+          <h1 className="card-title text-2xl">차량을 찾을 수 없습니다</h1>
+          <p className="text-base-content/70">{detailError}</p>
+          <div className="card-actions justify-end">
+            <button className="btn btn-primary" onClick={onBack}>
+              목록으로
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <CarDetail
+      canManage={canManageCar(detailCar)}
+      car={detailCar}
+      onBack={onBack}
+      onDelete={onDelete}
+      onEdit={onEdit}
+      onStartChat={onStartChat}
+    />
+  );
+}
+
+function ChatReadyRoute({ onBack, userProfile }) {
+  const { roomId } = useParams();
+  const routeLocation = useLocation();
+  const chatRoom = routeLocation.state?.chatRoom;
+
+  if (!userProfile) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return (
+    <section className="card bg-base-100 shadow">
+      <div className="card-body">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="card-title text-2xl">상담방 준비 완료</h1>
+            <p className="mt-1 text-sm text-base-content/60">
+              실시간 메시지는 다음 Socket.io 단계에서 연결합니다.
+            </p>
+          </div>
+          <span className="badge badge-info badge-outline">상담 대기</span>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg bg-base-200 p-4">
+            <p className="text-xs text-base-content/60">상담방 ID</p>
+            <p className="mt-1 break-all font-semibold">{roomId}</p>
+          </div>
+          <div className="rounded-lg bg-base-200 p-4">
+            <p className="text-xs text-base-content/60">차량</p>
+            <p className="mt-1 font-semibold">{chatRoom?.carName || "-"}</p>
+          </div>
+          <div className="rounded-lg bg-base-200 p-4">
+            <p className="text-xs text-base-content/60">딜러</p>
+            <p className="mt-1 font-semibold">{chatRoom?.dealerName || "-"}</p>
+          </div>
+          <div className="rounded-lg bg-base-200 p-4">
+            <p className="text-xs text-base-content/60">상담 요청자</p>
+            <p className="mt-1 font-semibold">{userProfile.displayName}</p>
+          </div>
+        </div>
+
+        <div className="card-actions mt-4 justify-end">
+          <button className="btn btn-outline" onClick={onBack}>
+            목록으로
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }
 
