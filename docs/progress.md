@@ -166,6 +166,7 @@
 - `npm run build` 성공
 - `npm start`는 현재 로컬 환경에 `MONGODB_URI`가 없어 `MongoDB 연결 실패: MONGODB_URI 환경변수가 설정되지 않았습니다.` 메시지로 종료됨을 확인했다.
 - 실제 MongoDB Atlas 접속과 `/api/cars` API 호출 검증은 실제 `MONGODB_URI` 등록 후 진행해야 한다.
+- 로컬 DNS에서 `querySrv ECONNREFUSED`가 발생할 수 있어 `MONGODB_DNS_SERVERS` 선택 환경변수와 문서 안내를 추가했다.
 
 ### 다음 단계
 
