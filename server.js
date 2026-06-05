@@ -63,7 +63,14 @@ app.use(express.static(frontendDistPath));
 
 const carsRouter = express.Router();
 const usersRouter = express.Router();
-const userRoles = new Set(["buyer", "dealer"]);
+const userRoles = new Set(["buyer", "dealer", "admin"]);
+const dealerStatuses = new Set(["none", "pending", "approved", "rejected"]);
+const initialAdminEmails = new Set(
+  String(process.env.INITIAL_ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean),
+);
 
 function getCarsCollection() {
   return getCollection("cars");
@@ -118,17 +125,45 @@ function normalizeCarInput(input) {
 function normalizeUserInput(input) {
   return {
     uid: String(input.uid || "").trim(),
-    email: String(input.email || "").trim(),
+    email: String(input.email || "").trim().toLowerCase(),
     displayName: String(input.displayName || "").trim(),
     role: String(input.role || "").trim(),
   };
+}
+
+function normalizeDealerStatus(value) {
+  const status = String(value || "").trim();
+  return dealerStatuses.has(status) ? status : "none";
+}
+
+function normalizeUserDocument(user) {
+  if (!user) {
+    return null;
+  }
+
+  const role = userRoles.has(user.role) ? user.role : "buyer";
+  const defaultDealerStatus = role === "dealer" ? "approved" : "none";
+
+  return {
+    ...user,
+    role,
+    dealerStatus: normalizeDealerStatus(user.dealerStatus || defaultDealerStatus),
+    dealerRequestedAt: user.dealerRequestedAt || null,
+    dealerApprovedAt: user.dealerApprovedAt || null,
+    dealerApprovedBy: user.dealerApprovedBy || null,
+  };
+}
+
+function getInitialUserRole(email) {
+  return initialAdminEmails.has(String(email || "").toLowerCase())
+    ? "admin"
+    : "buyer";
 }
 
 function validateUserInput(user) {
   if (!user.uid) return "사용자 UID가 필요합니다.";
   if (!user.email) return "이메일이 필요합니다.";
   if (!user.displayName) return "사용자 이름이 필요합니다.";
-  if (!userRoles.has(user.role)) return "사용자 유형은 buyer 또는 dealer만 사용할 수 있습니다.";
 
   return "";
 }
@@ -240,7 +275,13 @@ async function findDealerByUid(uid) {
     return null;
   }
 
-  return getUsersCollection().findOne({ uid: dealerId, role: "dealer" });
+  const dealer = await getUsersCollection().findOne({
+    uid: dealerId,
+    role: "dealer",
+    dealerStatus: "approved",
+  });
+
+  return normalizeUserDocument(dealer);
 }
 
 async function requireDealerProfile(dealerId) {
@@ -255,12 +296,77 @@ async function requireDealerProfile(dealerId) {
   return dealer;
 }
 
+async function requireAdminProfile(adminUid) {
+  const uid = String(adminUid || "").trim();
+
+  if (!uid) {
+    const error = new Error("관리자 UID가 필요합니다.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const admin = normalizeUserDocument(await getUsersCollection().findOne({ uid }));
+
+  if (!admin || admin.role !== "admin") {
+    const error = new Error("관리자 권한이 필요합니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  return admin;
+}
+
 function assertCarOwner(car, dealerId) {
   if (String(car.dealerId || "") !== String(dealerId || "")) {
     const error = new Error("차량을 등록한 딜러만 수정하거나 삭제할 수 있습니다.");
     error.statusCode = 403;
     throw error;
   }
+}
+
+function createRoleUpdate({
+  admin,
+  nextDealerStatus,
+  nextRole,
+  now,
+  targetUser,
+}) {
+  const update = {
+    role: nextRole,
+    dealerStatus: nextDealerStatus,
+    updatedAt: now,
+  };
+
+  if (nextRole === "dealer") {
+    update.dealerStatus = "approved";
+    update.dealerApprovedAt = now;
+    update.dealerApprovedBy = admin.uid;
+    update.dealerRequestedAt = targetUser.dealerRequestedAt || now;
+    return update;
+  }
+
+  if (nextRole === "admin") {
+    update.dealerStatus = "none";
+    update.dealerApprovedAt = null;
+    update.dealerApprovedBy = null;
+    update.dealerRequestedAt = targetUser.dealerRequestedAt || null;
+    return update;
+  }
+
+  update.role = "buyer";
+  update.dealerApprovedAt = null;
+  update.dealerApprovedBy = null;
+
+  if (nextDealerStatus === "pending") {
+    update.dealerRequestedAt = targetUser.dealerRequestedAt || now;
+  } else if (nextDealerStatus === "rejected") {
+    update.dealerRequestedAt = targetUser.dealerRequestedAt || now;
+  } else {
+    update.dealerStatus = "none";
+    update.dealerRequestedAt = null;
+  }
+
+  return update;
 }
 
 usersRouter.post("/", async (req, res) => {
@@ -273,11 +379,22 @@ usersRouter.post("/", async (req, res) => {
       return res.status(400).json({ message: validationMessage });
     }
 
+    const existingUser = normalizeUserDocument(
+      await getUsersCollection().findOne({ uid: userInput.uid }),
+    );
+    const initialRole = existingUser?.role || getInitialUserRole(userInput.email);
+    const initialDealerStatus =
+      initialRole === "dealer" ? "approved" : existingUser?.dealerStatus || "none";
+
     const update = {
       $set: {
         email: userInput.email,
         displayName: userInput.displayName,
-        role: userInput.role,
+        role: initialRole,
+        dealerStatus: initialDealerStatus,
+        dealerRequestedAt: existingUser?.dealerRequestedAt || null,
+        dealerApprovedAt: existingUser?.dealerApprovedAt || null,
+        dealerApprovedBy: existingUser?.dealerApprovedBy || null,
         updatedAt: now,
       },
       $setOnInsert: {
@@ -291,12 +408,32 @@ usersRouter.post("/", async (req, res) => {
       update,
       { upsert: true, returnDocument: "after" },
     );
-    const savedUser = getMongoDocument(result);
+    const savedUser = normalizeUserDocument(getMongoDocument(result));
 
     res.status(201).json(savedUser);
   } catch (error) {
     console.error("사용자 정보 저장 실패:", error.message);
     res.status(500).json({ message: "사용자 정보를 저장하지 못했습니다." });
+  }
+});
+
+usersRouter.get("/", async (req, res) => {
+  try {
+    await requireAdminProfile(req.query.requesterUid);
+
+    const users = await getUsersCollection()
+      .find({})
+      .sort({ createdAt: -1, email: 1 })
+      .toArray();
+
+    res.json(users.map(normalizeUserDocument));
+  } catch (error) {
+    console.error("사용자 목록 조회 실패:", error.message);
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode
+        ? error.message
+        : "사용자 목록을 조회하지 못했습니다.",
+    });
   }
 });
 
@@ -308,7 +445,7 @@ usersRouter.get("/me", async (req, res) => {
       return res.status(400).json({ message: "사용자 UID가 필요합니다." });
     }
 
-    const user = await getUsersCollection().findOne({ uid });
+    const user = normalizeUserDocument(await getUsersCollection().findOne({ uid }));
 
     if (!user) {
       return res.status(404).json({ message: "사용자 정보를 찾을 수 없습니다." });
@@ -321,14 +458,118 @@ usersRouter.get("/me", async (req, res) => {
   }
 });
 
+usersRouter.post("/dealer-request", async (req, res) => {
+  try {
+    const requesterUid = String(req.body.requesterUid || "").trim();
+
+    if (!requesterUid) {
+      return res.status(400).json({ message: "사용자 UID가 필요합니다." });
+    }
+
+    const user = normalizeUserDocument(
+      await getUsersCollection().findOne({ uid: requesterUid }),
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "사용자 정보를 찾을 수 없습니다." });
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({ message: "관리자는 딜러 신청이 필요하지 않습니다." });
+    }
+
+    if (user.role === "dealer" && user.dealerStatus === "approved") {
+      return res.status(400).json({ message: "이미 승인된 딜러입니다." });
+    }
+
+    const now = new Date();
+    const result = await getUsersCollection().findOneAndUpdate(
+      { uid: requesterUid },
+      {
+        $set: {
+          role: "buyer",
+          dealerStatus: "pending",
+          dealerRequestedAt: now,
+          dealerApprovedAt: null,
+          dealerApprovedBy: null,
+          updatedAt: now,
+        },
+      },
+      { returnDocument: "after" },
+    );
+
+    res.json(normalizeUserDocument(getMongoDocument(result)));
+  } catch (error) {
+    console.error("딜러 신청 실패:", error.message);
+    res.status(500).json({ message: "딜러 신청을 처리하지 못했습니다." });
+  }
+});
+
+usersRouter.patch("/:uid/role", async (req, res) => {
+  try {
+    const targetUid = String(req.params.uid || "").trim();
+    const requesterUid = String(req.body.requesterUid || "").trim();
+    const nextRole = String(req.body.role || "").trim();
+    const nextDealerStatus = normalizeDealerStatus(req.body.dealerStatus);
+
+    const admin = await requireAdminProfile(requesterUid);
+
+    if (!targetUid) {
+      return res.status(400).json({ message: "대상 사용자 UID가 필요합니다." });
+    }
+
+    if (!userRoles.has(nextRole)) {
+      return res.status(400).json({ message: "사용자 역할 값이 올바르지 않습니다." });
+    }
+
+    if (targetUid === admin.uid && nextRole !== "admin") {
+      return res.status(400).json({
+        message: "자기 자신의 관리자 권한은 해제할 수 없습니다.",
+      });
+    }
+
+    const targetUser = normalizeUserDocument(
+      await getUsersCollection().findOne({ uid: targetUid }),
+    );
+
+    if (!targetUser) {
+      return res.status(404).json({ message: "대상 사용자를 찾을 수 없습니다." });
+    }
+
+    const now = new Date();
+    const roleUpdate = createRoleUpdate({
+      admin,
+      nextDealerStatus,
+      nextRole,
+      now,
+      targetUser,
+    });
+
+    const result = await getUsersCollection().findOneAndUpdate(
+      { uid: targetUid },
+      { $set: roleUpdate },
+      { returnDocument: "after" },
+    );
+
+    res.json(normalizeUserDocument(getMongoDocument(result)));
+  } catch (error) {
+    console.error("사용자 역할 변경 실패:", error.message);
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode
+        ? error.message
+        : "사용자 역할을 변경하지 못했습니다.",
+    });
+  }
+});
+
 usersRouter.get("/dealers", async (req, res) => {
   try {
     const dealers = await getUsersCollection()
-      .find({ role: "dealer" })
+      .find({ role: "dealer", dealerStatus: "approved" })
       .sort({ displayName: 1, createdAt: -1 })
       .toArray();
 
-    res.json(dealers);
+    res.json(dealers.map(normalizeUserDocument));
   } catch (error) {
     console.error("딜러 목록 조회 실패:", error.message);
     res.status(500).json({ message: "딜러 목록을 조회하지 못했습니다." });

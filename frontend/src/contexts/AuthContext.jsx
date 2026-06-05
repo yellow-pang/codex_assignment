@@ -58,7 +58,7 @@ export function AuthProvider({ children }) {
         uid: createdUser.uid,
         email: createdUser.email,
         displayName,
-        role,
+        role: role || "buyer",
       });
 
       setCurrentUser(createdUser);
@@ -97,15 +97,56 @@ export function AuthProvider({ children }) {
     setAuthError("");
   }
 
+  async function refreshUserProfile() {
+    if (!auth.currentUser) {
+      setUserProfile(null);
+      return null;
+    }
+
+    const profile = await fetchUserProfile(auth.currentUser.uid);
+    setUserProfile(profile);
+    setAuthError("");
+    return profile;
+  }
+
+  async function requestDealerApproval() {
+    if (!currentUser) {
+      throw new Error("로그인 후 딜러 신청을 할 수 있습니다.");
+    }
+
+    const response = await fetch("/api/users/dealer-request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requesterUid: currentUser.uid }),
+    });
+
+    if (!response.ok) {
+      const message = await getApiErrorMessage(
+        response,
+        "딜러 신청을 처리하지 못했습니다.",
+      );
+      throw new Error(message);
+    }
+
+    const profile = await response.json();
+    setUserProfile(profile);
+    return profile;
+  }
+
   const value = useMemo(
     () => ({
       authError,
       currentUser,
       isAuthLoading,
-      isDealer: userProfile?.role === "dealer",
+      isAdmin: userProfile?.role === "admin",
+      isDealer:
+        userProfile?.role === "dealer" &&
+        userProfile?.dealerStatus === "approved",
       login,
       logout,
+      refreshUserProfile,
       register,
+      requestDealerApproval,
       userProfile,
     }),
     [authError, currentUser, isAuthLoading, userProfile],
