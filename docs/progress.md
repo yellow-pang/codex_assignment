@@ -247,3 +247,42 @@
 1. 사진 샘플 파일을 준비해 `/api/cars` 등록과 `/api/cars/:id` 수정 업로드를 직접 확인한다.
 2. 기본 이미지 파일이 `uploads/default-car.png` 위치에 있는지 확인한다.
 3. 5단계에서 Firebase 인증과 딜러 권한 체크를 진행한다.
+
+## 5단계 Firebase 인증
+
+| 항목          | 내용                                                                                                                                                                                                                                                                                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | 향후 개발 계획 5단계 Firebase 인증                                                                                                                                                                                                                                                                                                |
+| 작업 일자     | 2026-06-05                                                                                                                                                                                                                                                                                                                        |
+| 작업 목적     | Firebase Authentication 기반 회원가입/로그인과 MongoDB 사용자 프로필 저장, 딜러 권한 체크 구현                                                                                                                                                                                                                                     |
+| 설치한 패키지 | `firebase`                                                                                                                                                                                                                                                                                                                        |
+| 수정한 파일   | `server.js`, `frontend/vite.config.js`, `frontend/src/App.jsx`, `frontend/src/main.jsx`, `frontend/src/components/Header.jsx`, `frontend/src/components/CarTable.jsx`, `frontend/src/components/CarDetail.jsx`, `.env.example`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `frontend/package.json`, `frontend/package-lock.json`, `docs/progress.md` |
+| 생성한 파일   | `frontend/src/firebase.js`, `frontend/src/contexts/AuthContext.jsx`, `frontend/src/components/LoginForm.jsx`, `frontend/src/components/RegisterForm.jsx`, `docs/plans/plan-05-firebase-auth.md`, `docs/steps/2026-06-05-05-firebase-auth.md`, `docs/pr/2026-06-05-05-firebase-auth-pr.md`                                          |
+
+### 작업 내용
+
+- Firebase Web config를 Vite 환경변수로 읽는 `frontend/src/firebase.js`를 추가했다.
+- Firebase 인증 상태를 전역에서 사용할 수 있도록 `AuthContext`를 추가했다.
+- 이메일/비밀번호 로그인, 회원가입, 로그아웃 흐름을 구현했다.
+- 회원가입 시 사용자 유형 `buyer`, `dealer`를 선택하고 MongoDB `users` 컬렉션에 추가 프로필을 저장하도록 했다.
+- MongoDB 사용자 프로필 저장 실패 시 방금 생성된 Firebase 계정 삭제 보정을 시도하도록 했다.
+- Express에 `/api/users`, `/api/users/me`, `/api/users/dealers` API를 추가했다.
+- 차량 등록은 딜러만 가능하도록 서버와 화면에서 제한했다.
+- 차량 수정과 삭제는 차량을 등록한 딜러 본인만 가능하도록 제한했다.
+- `.env.example`, README, 배포 문서에 Firebase 환경변수와 인증 설정 안내를 추가했다.
+- Vite가 로컬 개발에서도 루트 `.env`의 `VITE_FIREBASE_*` 값을 읽도록 `frontend/vite.config.js`에 `envDir: "../"`를 추가했다.
+
+### 확인 결과
+
+- `cmd.exe /c node --check server.js` 성공
+- `cmd.exe /c npm.cmd --prefix frontend run build` 성공
+- `npm.cmd run build`와 `npm.cmd start`는 사용자 요청에 따라 사용자가 직접 실행한다.
+- 실제 Firebase 프로젝트 설정값이 없는 환경에서는 회원가입/로그인 실동작 검증이 제한된다.
+- 실제 `MONGODB_URI`가 있어야 MongoDB `users` 프로필 저장과 딜러 권한 API를 직접 확인할 수 있다.
+
+### 다음 단계
+
+1. 실제 Firebase Web config와 `MONGODB_URI`를 등록한 뒤 회원가입, 로그인, 새로고침 인증 유지, 로그아웃을 확인한다.
+2. `buyer` 계정으로 차량 등록/수정/삭제가 차단되는지 확인한다.
+3. `dealer` 계정으로 차량 등록 후 본인 차량만 수정/삭제 가능한지 확인한다.
+4. 6단계에서 차량 상세 URL과 상담 진입 API를 구현한다.

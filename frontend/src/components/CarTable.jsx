@@ -2,6 +2,7 @@ function CarTable({
   cars,
   emptyMessage = "등록된 자동차가 없습니다.",
   emptyDescription = "등록 버튼을 눌러 첫 자동차를 추가해보세요.",
+  canManageCar = () => false,
   onView,
   onEdit,
   onDelete,
@@ -66,18 +67,22 @@ function CarTable({
                   >
                     상세
                   </button>
-                  <button
-                    className="btn btn-xs btn-warning"
-                    onClick={() => onEdit(car)}
-                  >
-                    수정
-                  </button>
-                  <button
-                    className="btn btn-xs btn-error"
-                    onClick={() => onDelete(car)}
-                  >
-                    삭제
-                  </button>
+                  {canManageCar(car) && (
+                    <>
+                      <button
+                        className="btn btn-xs btn-warning"
+                        onClick={() => onEdit(car)}
+                      >
+                        수정
+                      </button>
+                      <button
+                        className="btn btn-xs btn-error"
+                        onClick={() => onDelete(car)}
+                      >
+                        삭제
+                      </button>
+                    </>
+                  )}
                 </div>
               </td>
             </tr>

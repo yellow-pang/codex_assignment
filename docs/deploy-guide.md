@@ -106,9 +106,25 @@ http://localhost:3000/api/cars
 | `COLLECTION_CHAT_ROOMS` | `chat_rooms` | 상담방 컬렉션 |
 | `COLLECTION_MESSAGES` | `messages` | 상담 메시지 컬렉션 |
 | `CLIENT_URL` | 로컬 또는 배포된 React 주소 | 이후 CORS와 Socket.io 설정에 사용할 클라이언트 주소 |
+| `VITE_FIREBASE_API_KEY` | Firebase Web API key | React Firebase Authentication 설정 |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain | 예: `프로젝트ID.firebaseapp.com` |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase Project ID | Firebase 프로젝트 ID |
+| `VITE_FIREBASE_APP_ID` | Firebase App ID | Firebase 웹 앱 식별자 |
 
 `PORT`는 Render가 자동으로 제공하므로 직접 입력하지 않아도 된다.
 `MONGODB_URI`는 비밀값이므로 GitHub 저장소, 문서, 클라이언트 코드에 실제 값을 작성하지 않는다.
+Firebase Web config 값은 클라이언트에서 사용하는 공개 식별 정보이지만, 실제 값은 `.env` 또는 Render Environment에만 등록하고 `.env.example`에는 예시만 작성한다.
+
+### Firebase Authentication 설정 주의사항
+
+이번 단계의 인증은 Firebase Authentication 이메일/비밀번호 로그인을 사용한다.
+Firebase 콘솔에서 사용자가 직접 이메일/비밀번호 제공자를 활성화해야 한다.
+
+회원가입 후 추가 사용자 정보는 MongoDB `users` 컬렉션에 저장한다.
+MongoDB 사용자 프로필 저장이 실패하면 클라이언트에서 방금 생성한 Firebase 계정을 삭제하는 보정을 시도한다.
+
+서버는 Firebase Admin SDK를 사용하지 않고, MongoDB `users` 컬렉션의 `uid`와 `role`을 조회해 딜러 권한을 확인한다.
+차량 등록, 수정, 삭제는 딜러만 가능하며 수정과 삭제는 차량을 등록한 딜러 본인만 가능하다.
 
 ### 차량 사진 업로드 주의사항
 

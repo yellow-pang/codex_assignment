@@ -5,8 +5,18 @@ import CarForm from "./components/CarForm.jsx";
 import CarTable from "./components/CarTable.jsx";
 import DeleteConfirmModal from "./components/DeleteConfirmModal.jsx";
 import Header from "./components/Header.jsx";
+import LoginForm from "./components/LoginForm.jsx";
+import RegisterForm from "./components/RegisterForm.jsx";
+import { useAuth } from "./contexts/AuthContext.jsx";
 
 function App() {
+  const {
+    authError,
+    isAuthLoading,
+    isDealer,
+    logout,
+    userProfile,
+  } = useAuth();
   const [cars, setCars] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -27,6 +37,12 @@ function App() {
     () => cars.reduce((sum, car) => sum + Number(car.price || 0), 0),
     [cars],
   );
+
+  const displayMessage = message.text
+    ? message
+    : authError
+      ? { type: "error", text: authError }
+      : message;
 
   useEffect(() => {
     loadCars();
@@ -158,10 +174,16 @@ function App() {
   }
 
   async function handleCreateCar(carInput) {
+    if (!isDealer || !userProfile) {
+      setMessage({ type: "error", text: "딜러만 자동차를 등록할 수 있습니다." });
+      setCurrentView("list");
+      return;
+    }
+
     try {
       await requestApi("/api/cars", {
         method: "POST",
-        body: createCarFormData(carInput),
+        body: createCarFormData(addDealerFields(carInput)),
       });
 
       await loadCars("자동차가 등록되었습니다.");
@@ -173,10 +195,19 @@ function App() {
   async function handleUpdateCar(carInput) {
     if (!selectedCar) return;
 
+    if (!canManageCar(selectedCar)) {
+      setMessage({
+        type: "error",
+        text: "차량을 등록한 딜러만 수정할 수 있습니다.",
+      });
+      setCurrentView("list");
+      return;
+    }
+
     try {
       const updatedCar = await requestApi(`/api/cars/${selectedCar._id}`, {
         method: "PUT",
-        body: createCarFormData(carInput),
+        body: createCarFormData(addDealerFields(carInput)),
       });
 
       setSelectedCar(updatedCar);
@@ -189,8 +220,20 @@ function App() {
   async function handleDeleteCar() {
     if (!deleteTarget) return;
 
+    if (!canManageCar(deleteTarget)) {
+      setMessage({
+        type: "error",
+        text: "차량을 등록한 딜러만 삭제할 수 있습니다.",
+      });
+      setDeleteTarget(null);
+      return;
+    }
+
     try {
-      await requestApi(`/api/cars/${deleteTarget._id}`, { method: "DELETE" });
+      const dealerId = encodeURIComponent(userProfile.uid);
+      await requestApi(`/api/cars/${deleteTarget._id}?dealerId=${dealerId}`, {
+        method: "DELETE",
+      });
       setDeleteTarget(null);
       setSelectedCar(null);
       await loadCars("자동차가 삭제되었습니다.");
@@ -200,11 +243,28 @@ function App() {
   }
 
   function handleViewCar(car) {
+    if (!userProfile) {
+      setMessage({
+        type: "error",
+        text: "차량 상세 정보는 로그인 후 확인할 수 있습니다.",
+      });
+      setCurrentView("login");
+      return;
+    }
+
     setSelectedCar(car);
     setCurrentView("detail");
   }
 
   function handleEditCar(car) {
+    if (!canManageCar(car)) {
+      setMessage({
+        type: "error",
+        text: "차량을 등록한 딜러만 수정할 수 있습니다.",
+      });
+      return;
+    }
+
     setSelectedCar(car);
     setCurrentView("edit");
   }
@@ -212,6 +272,29 @@ function App() {
   function handleGoList() {
     setSelectedCar(null);
     setCurrentView("list");
+  }
+
+  function handleGoCreate() {
+    if (!userProfile) {
+      setMessage({ type: "error", text: "로그인 후 자동차를 등록할 수 있습니다." });
+      setCurrentView("login");
+      return;
+    }
+
+    if (!isDealer) {
+      setMessage({ type: "error", text: "딜러만 자동차를 등록할 수 있습니다." });
+      return;
+    }
+
+    setCurrentView("create");
+  }
+
+  async function handleLogout() {
+    await logout();
+    setSelectedCar(null);
+    setDeleteTarget(null);
+    setCurrentView("list");
+    setMessage({ type: "success", text: "로그아웃되었습니다." });
   }
 
   function handleFilterChange(event) {
@@ -236,12 +319,43 @@ function App() {
     return formData;
   }
 
+  function addDealerFields(carInput) {
+    return {
+      ...carInput,
+      dealerId: userProfile.uid,
+      dealerName: userProfile.displayName,
+      dealerRole: userProfile.role,
+    };
+  }
+
+  function canManageCar(car) {
+    return Boolean(
+      isDealer &&
+        userProfile?.uid &&
+        car?.dealerId &&
+        String(car.dealerId) === String(userProfile.uid),
+    );
+  }
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-base-200">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-base-200">
       <Header
         currentView={currentView}
+        isDealer={isDealer}
         onGoList={handleGoList}
-        onGoCreate={() => setCurrentView("create")}
+        onGoCreate={handleGoCreate}
+        onGoLogin={() => setCurrentView("login")}
+        onGoRegister={() => setCurrentView("register")}
+        onLogout={handleLogout}
+        userProfile={userProfile}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
@@ -265,7 +379,7 @@ function App() {
         </div>
 
         <div className="mb-4">
-          <AlertMessage type={message.type} message={message.text} />
+          <AlertMessage type={displayMessage.type} message={displayMessage.text} />
         </div>
 
         {currentView === "list" && (
@@ -280,7 +394,7 @@ function App() {
                 </div>
                 <button
                   className="btn btn-primary"
-                  onClick={() => setCurrentView("create")}
+                  onClick={handleGoCreate}
                 >
                   등록하기
                 </button>
@@ -357,6 +471,7 @@ function App() {
                   </div>
                 ) : (
                   <CarTable
+                    canManageCar={canManageCar}
                     cars={cars}
                     emptyMessage={
                       isSearchMode
@@ -397,10 +512,31 @@ function App() {
 
         {currentView === "detail" && (
           <CarDetail
+            canManage={canManageCar(selectedCar)}
             car={selectedCar}
             onBack={handleGoList}
             onEdit={handleEditCar}
             onDelete={setDeleteTarget}
+          />
+        )}
+
+        {currentView === "login" && (
+          <LoginForm
+            onGoRegister={() => setCurrentView("register")}
+            onLoginSuccess={() => {
+              setCurrentView("list");
+              setMessage({ type: "success", text: "로그인되었습니다." });
+            }}
+          />
+        )}
+
+        {currentView === "register" && (
+          <RegisterForm
+            onGoLogin={() => setCurrentView("login")}
+            onRegisterSuccess={() => {
+              setCurrentView("list");
+              setMessage({ type: "success", text: "회원가입이 완료되었습니다." });
+            }}
           />
         )}
       </main>
