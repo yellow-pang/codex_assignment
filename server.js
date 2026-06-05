@@ -13,41 +13,25 @@ const frontendIndexPath = path.join(frontendDistPath, "index.html");
 // JSON 형식의 요청 body를 req.body에서 사용할 수 있게 합니다.
 app.use(express.json());
 
-// 배포 환경에서도 React의 /api 요청이 기존 Express API 경로로 연결되게 합니다.
-app.use((req, res, next) => {
-  if (req.url.startsWith("/api/")) {
-    req.url = req.url.replace(/^\/api/, "");
-  }
-
-  next();
-});
-
 // React 빌드 결과물이 있으면 Express가 정적 파일로 제공합니다.
 app.use(express.static(frontendDistPath));
 
-// 서버가 실행되는 동안 메모리에 저장할 자동차 초기 데이터입니다.
+// MongoDB 연결 전까지 seed/fallback 용도로 사용하는 메모리 자동차 데이터입니다.
 let cars = [
   { _id: 1, name: "Sonata", price: 2500, company: "HYUNDAI", year: 2023 },
   { _id: 2, name: "K5", price: 2700, company: "KIA", year: 2024 },
   { _id: 3, name: "SM6", price: 2300, company: "RENAULT", year: 2022 },
 ];
 
-// 브라우저나 클라이언트가 GET / 요청을 보내면 "Hello Codex"를 응답합니다.
-app.get("/", (req, res) => {
-  if (fs.existsSync(frontendIndexPath)) {
-    return res.sendFile(frontendIndexPath);
-  }
-
-  res.send("Hello Codex");
-});
+const carsRouter = express.Router();
 
 // 전체 자동차 목록을 JSON으로 응답합니다.
-app.get("/cars", (req, res) => {
+carsRouter.get("/", (req, res) => {
   res.json(cars);
 });
 
 // company 쿼리 값이 있으면 해당 회사 자동차만 검색하고, 없으면 전체 목록을 응답합니다.
-app.get("/cars/search", (req, res) => {
+carsRouter.get("/search", (req, res) => {
   const { company } = req.query;
 
   if (!company) {
@@ -59,7 +43,7 @@ app.get("/cars/search", (req, res) => {
 });
 
 // minPrice와 maxPrice 쿼리 값으로 가격 범위에 맞는 자동차만 응답합니다.
-app.get("/cars/filter", (req, res) => {
+carsRouter.get("/filter", (req, res) => {
   const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
   const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
 
@@ -74,7 +58,7 @@ app.get("/cars/filter", (req, res) => {
 });
 
 // URL의 id와 일치하는 자동차 한 대를 조회합니다.
-app.get("/cars/:id", (req, res) => {
+carsRouter.get("/:id", (req, res) => {
   const id = Number(req.params.id);
   const car = cars.find((item) => item._id === id);
 
@@ -86,7 +70,7 @@ app.get("/cars/:id", (req, res) => {
 });
 
 // 요청 body로 받은 자동차 정보를 목록에 추가합니다.
-app.post("/cars", (req, res) => {
+carsRouter.post("/", (req, res) => {
   const newCar = req.body;
   cars.push(newCar);
 
@@ -94,7 +78,7 @@ app.post("/cars", (req, res) => {
 });
 
 // URL의 id와 일치하는 자동차 정보를 요청 body의 값으로 수정합니다.
-app.put("/cars/:id", (req, res) => {
+carsRouter.put("/:id", (req, res) => {
   const id = Number(req.params.id);
   const carIndex = cars.findIndex((item) => item._id === id);
 
@@ -107,7 +91,7 @@ app.put("/cars/:id", (req, res) => {
 });
 
 // URL의 id와 일치하는 자동차를 목록에서 삭제합니다.
-app.delete("/cars/:id", (req, res) => {
+carsRouter.delete("/:id", (req, res) => {
   const id = Number(req.params.id);
   const carIndex = cars.findIndex((item) => item._id === id);
 
@@ -117,6 +101,20 @@ app.delete("/cars/:id", (req, res) => {
 
   const deletedCar = cars.splice(carIndex, 1);
   res.json(deletedCar[0]);
+});
+
+app.use("/api/cars", carsRouter);
+
+// 기존 CRUD 앱의 /cars 호출은 다음 단계 전까지 호환용으로 유지합니다.
+app.use("/cars", carsRouter);
+
+// 브라우저나 클라이언트가 GET / 요청을 보내면 React 화면 또는 기본 문구를 응답합니다.
+app.get("/", (req, res) => {
+  if (fs.existsSync(frontendIndexPath)) {
+    return res.sendFile(frontendIndexPath);
+  }
+
+  res.send("Hello Codex");
 });
 
 // React 화면 새로고침 시에도 index.html을 응답합니다.
