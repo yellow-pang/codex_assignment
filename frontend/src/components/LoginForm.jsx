@@ -38,69 +38,77 @@ function LoginForm({ onGoRegister, onLoginSuccess }) {
   }
 
   return (
-    <section className="card mx-auto max-w-xl bg-base-100 shadow">
-      <div className="card-body">
-        <div>
-          <h1 className="card-title text-2xl">로그인</h1>
-          <p className="mt-1 text-sm text-base-content/60">
+    <div className="flex min-h-[70vh] items-center justify-center px-4">
+      <div className="c-card w-full max-w-md p-8">
+        {/* 로고 */}
+        <div className="mb-6 text-center">
+          <p className="text-2xl font-extrabold tracking-tight">
+            <span className="text-blue-600">CAR</span>
+            <span className="text-gray-900"> MARKET</span>
+          </p>
+          <p className="mt-2 text-sm text-gray-500">
             차량 상세 정보와 딜러 기능은 로그인 후 사용할 수 있습니다.
           </p>
         </div>
 
         {errorMessage && (
-          <div className="alert alert-error">
+          <div className="c-alert-error mb-4">
             <span>{errorMessage}</span>
           </div>
         )}
 
-        <form className="grid gap-4" onSubmit={handleSubmit}>
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text font-semibold">이메일</span>
-            </div>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="c-label mb-1" htmlFor="login-email">
+              이메일
+            </label>
             <input
-              className="input input-bordered"
+              className="c-input"
+              id="login-email"
               name="email"
               type="email"
               value={form.email}
               onChange={handleChange}
               placeholder="user@test.com"
             />
-          </label>
+          </div>
 
-          <label className="form-control">
-            <div className="label">
-              <span className="label-text font-semibold">비밀번호</span>
-            </div>
+          <div>
+            <label className="c-label mb-1" htmlFor="login-password">
+              비밀번호
+            </label>
             <input
-              className="input input-bordered"
+              className="c-input"
+              id="login-password"
               name="password"
               type="password"
               value={form.password}
               onChange={handleChange}
               placeholder="비밀번호"
             />
-          </label>
-
-          <div className="card-actions justify-end">
-            <button
-              className="btn btn-ghost"
-              type="button"
-              onClick={onGoRegister}
-            >
-              회원가입
-            </button>
-            <button
-              className="btn btn-primary"
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "로그인 중..." : "로그인"}
-            </button>
           </div>
+
+          <button
+            className="c-btn-primary mt-2 w-full py-2.5"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "로그인 중..." : "로그인"}
+          </button>
         </form>
+
+        <p className="mt-5 text-center text-sm text-gray-500">
+          계정이 없으신가요?{" "}
+          <button
+            className="font-medium text-blue-600 hover:underline"
+            type="button"
+            onClick={onGoRegister}
+          >
+            회원가입
+          </button>
+        </p>
       </div>
-    </section>
+    </div>
   );
 }
 
