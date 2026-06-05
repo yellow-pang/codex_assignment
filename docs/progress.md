@@ -113,3 +113,27 @@
 2. Render에서 `Clear build cache & deploy`를 실행한다.
 3. Render 빌드 로그에서 `vite build` 성공 여부를 확인한다.
 4. 배포 URL에서 React 화면과 `/api/cars` 응답을 확인한다.
+
+## 1단계 서버 구조 정리
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 향후 개발 계획 1단계 서버 구조 정리 |
+| 작업 일자 | 2026-06-05 |
+| 작업 목적 | MongoDB 연동 전 서버 API 경로를 신규 요구사항 기준인 `/api/cars`로 정리 |
+| 수정한 파일 | `server.js`, `frontend/vite.config.js`, `frontend/src/App.jsx`, `docs/progress.md` |
+| 생성한 파일 | 없음 |
+
+### 작업 내용
+
+- `server.js`에서 `/api` 접두사를 제거하던 우회 미들웨어를 삭제했다.
+- 자동차 CRUD API를 `express.Router()`로 묶고 `/api/cars`에 직접 등록했다.
+- 기존 `/cars` API는 다음 단계 전까지 레거시 호환 라우트로 유지했다.
+- 메모리 자동차 데이터는 MongoDB 연결 전 seed/fallback 용도임을 코드 주석에 명시했다.
+- Vite 개발 프록시가 `/api/cars`를 그대로 Express 서버에 전달하도록 정리했다.
+
+### 다음 단계
+
+1. MongoDB Atlas 연동 단계에서 `mongodb`, `dotenv` 의존성을 추가한다.
+2. MongoDB 연결 파일을 분리하고 차량 CRUD 저장소를 메모리 배열에서 `cars` 컬렉션으로 전환한다.
+3. `/cars` 호환 라우트 제거 여부는 프론트엔드와 문서가 완전히 `/api/cars`로 정리된 뒤 결정한다.

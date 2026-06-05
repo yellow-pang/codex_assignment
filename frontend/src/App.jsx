@@ -41,7 +41,7 @@ function App() {
     }
 
     try {
-      // Vite 프록시 설정 덕분에 /api/cars 요청이 Express의 /cars API로 전달됩니다.
+      // Vite 프록시 설정 덕분에 /api/cars 요청이 Express 서버로 전달됩니다.
       const data = await requestApi("/api/cars");
       setCars(data);
       setCurrentView("list");
