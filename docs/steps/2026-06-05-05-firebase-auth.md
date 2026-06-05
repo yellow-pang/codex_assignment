@@ -192,6 +192,131 @@ npm.cmd --prefix frontend run build
 8. 로그아웃 확인
 ```
 
+## Firebase Console에서 사용자가 해야 할 일
+
+Firebase 프로젝트 설정과 인증 제공자 활성화는 코드에서 대신 처리하지 않는다.
+사용자가 Firebase Console에서 아래 항목을 직접 확인한다.
+
+| 항목 | 처리 내용 |
+| --- | --- |
+| 프로젝트 확인 | 사용할 Firebase 프로젝트가 맞는지 확인한다. |
+| 웹 앱 등록 | 프로젝트 설정에서 웹 앱이 등록되어 있는지 확인한다. |
+| Web config 확인 | `apiKey`, `authDomain`, `projectId`, `appId` 값을 확인해 `.env`의 `VITE_FIREBASE_*` 값과 맞춘다. |
+| Authentication 이동 | Firebase Console의 `Authentication` 메뉴로 이동한다. |
+| 이메일/비밀번호 활성화 | `Sign-in method`에서 `Email/Password` 제공자를 활성화한다. |
+| Authorized domains 확인 | 로컬 개발용 `localhost`와 배포 도메인이 허용 도메인에 있는지 확인한다. |
+| 테스트 사용자 확인 | 회원가입 테스트 후 Authentication 사용자 목록에 계정이 생성되는지 확인한다. |
+| 실패 계정 확인 | MongoDB 저장 실패 등으로 자동 삭제 보정이 실패한 계정이 남아 있으면 직접 삭제한다. |
+
+Firebase Web config 값은 클라이언트에서 쓰는 공개 식별 정보다.
+하지만 실제 값은 `.env`, Render Environment에만 등록하고 저장소 문서에는 예시값만 둔다.
+
+### Authorized domains 확인 위치
+
+Firebase Console에서 허용 도메인은 아래 경로에서 확인한다.
+
+```text
+Firebase Console
+→ 프로젝트 선택
+→ Authentication
+→ Settings
+→ Authorized domains
+```
+
+로컬 개발을 위해 `localhost`가 있어야 한다.
+Firebase Hosting을 사용하지 않더라도 Firebase 프로젝트 생성 시 기본 도메인들이 함께 들어 있을 수 있다.
+
+예시:
+
+```text
+localhost
+프로젝트ID.firebaseapp.com
+프로젝트ID.web.app
+```
+
+Render에 배포한 뒤에는 Render 도메인도 추가한다.
+입력할 때는 `https://`를 빼고 도메인만 입력한다.
+
+예시:
+
+```text
+your-service-name.onrender.com
+```
+
+## Render에서 처리해야 할 일
+
+Render Web Service 단일 배포 구조를 유지한다.
+Render에서는 코드 변경보다 환경변수 등록과 배포 후 확인이 핵심이다.
+
+### 1. Environment Variables 등록
+
+Render 서비스의 `Environment` 또는 `Settings`에서 아래 값을 등록한다.
+
+```text
+NODE_ENV=production
+MONGODB_URI=MongoDB Atlas 접속 문자열
+MONGODB_DNS_SERVERS=1.1.1.1,8.8.8.8
+DB_NAME=car_market
+COLLECTION_CARS=cars
+COLLECTION_USERS=users
+COLLECTION_CHAT_ROOMS=chat_rooms
+COLLECTION_MESSAGES=messages
+CLIENT_URL=https://Render 배포 주소
+VITE_FIREBASE_API_KEY=Firebase Web API key
+VITE_FIREBASE_AUTH_DOMAIN=Firebase auth domain
+VITE_FIREBASE_PROJECT_ID=Firebase project id
+VITE_FIREBASE_APP_ID=Firebase app id
+```
+
+`PORT`는 Render가 자동으로 제공하므로 직접 등록하지 않아도 된다.
+`MONGODB_URI`에는 실제 비밀번호가 들어가므로 GitHub, README, 문서에 작성하지 않는다.
+
+### 2. Build와 Start 설정 확인
+
+Render Web Service 설정은 아래 기준을 유지한다.
+
+| 항목 | 값 |
+| --- | --- |
+| Runtime | Node |
+| Build Command | `npm install && npm run build` |
+| Start Command | `npm start` |
+| Root Directory | 비워둠 또는 루트 |
+| Auto-Deploy | GitHub Actions Deploy Hook을 쓸 경우 Off 권장 |
+
+`npm run build`는 `frontend` 빌드를 함께 실행한다.
+이번 단계에서 `frontend/vite.config.js`에 `envDir: "../"`를 설정했으므로, Vite 빌드가 루트 환경변수의 `VITE_FIREBASE_*` 값을 읽을 수 있다.
+
+### 3. MongoDB Atlas 접근 허용
+
+Render에서 MongoDB Atlas에 접속하려면 Atlas 쪽 Network Access도 확인해야 한다.
+
+| 항목 | 처리 내용 |
+| --- | --- |
+| Database User | `MONGODB_URI`에 사용하는 DB 사용자가 존재하는지 확인한다. |
+| Password | 비밀번호가 접속 문자열과 일치하는지 확인한다. |
+| Network Access | 과제용이면 `0.0.0.0/0` 허용을 사용할 수 있으나, 운영에서는 제한된 IP 허용을 검토한다. |
+| Database | `car_market` DB에 `cars`, `users` 컬렉션이 생성되는지 확인한다. |
+
+### 4. 배포 후 확인
+
+Render 배포 후 아래 흐름을 확인한다.
+
+```text
+1. Render URL 접속
+2. 차량 목록 조회
+3. buyer 회원가입
+4. buyer 로그인과 새로고침 유지
+5. buyer 차량 등록 차단 확인
+6. dealer 회원가입
+7. dealer 차량 등록 확인
+8. dealer 본인 차량 수정/삭제 확인
+9. 다른 사용자로 같은 차량 수정/삭제 차단 확인
+10. MongoDB users 컬렉션에 사용자 프로필 저장 확인
+```
+
+Render 무료 환경에서는 `uploads/`에 저장한 차량 사진이 재배포나 인스턴스 재시작 후 사라질 수 있다.
+이 제한은 사진 업로드 단계와 동일하며, 운영 확장 시 외부 이미지 스토리지를 검토한다.
+
 ## 남은 리스크
 
 - Firebase Admin SDK를 사용하지 않으므로 운영 수준의 ID 토큰 검증은 아직 없다.
