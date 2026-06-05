@@ -2,15 +2,15 @@
 
 ## Tailwind CSS와 daisyUI 기반 화면 개선
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | React CRUD 화면 UI 개선 |
-| 작업 일자 | 2026-06-02 |
-| 작업 내용 | Tailwind CSS와 daisyUI를 설정하고, 자동차 CRUD 화면을 목록, 등록, 수정, 상세, 삭제 모달 중심으로 개선 |
-| 설치한 패키지 | `tailwindcss`, `postcss`, `autoprefixer`, `daisyui` |
-| 수정한 주요 파일 | `frontend/package.json`, `frontend/package-lock.json`, `frontend/tailwind.config.js`, `frontend/postcss.config.js`, `frontend/src/style.css`, `frontend/src/App.jsx` |
+| 항목             | 내용                                                                                                                                                                                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | React CRUD 화면 UI 개선                                                                                                                                                                                                                                    |
+| 작업 일자        | 2026-06-02                                                                                                                                                                                                                                                 |
+| 작업 내용        | Tailwind CSS와 daisyUI를 설정하고, 자동차 CRUD 화면을 목록, 등록, 수정, 상세, 삭제 모달 중심으로 개선                                                                                                                                                      |
+| 설치한 패키지    | `tailwindcss`, `postcss`, `autoprefixer`, `daisyui`                                                                                                                                                                                                        |
+| 수정한 주요 파일 | `frontend/package.json`, `frontend/package-lock.json`, `frontend/tailwind.config.js`, `frontend/postcss.config.js`, `frontend/src/style.css`, `frontend/src/App.jsx`                                                                                       |
 | 추가한 주요 파일 | `frontend/src/components/Header.jsx`, `frontend/src/components/AlertMessage.jsx`, `frontend/src/components/CarTable.jsx`, `frontend/src/components/CarForm.jsx`, `frontend/src/components/CarDetail.jsx`, `frontend/src/components/DeleteConfirmModal.jsx` |
-| 확인한 명령어 | `npm install -D tailwindcss@3.4.17 postcss autoprefixer daisyui@4.12.24`, `npm run build` |
+| 확인한 명령어    | `npm install -D tailwindcss@3.4.17 postcss autoprefixer daisyui@4.12.24`, `npm run build`                                                                                                                                                                  |
 
 ### 작업 내용
 
@@ -29,14 +29,14 @@
 
 ## Render 배포 전 구조 점검
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | Render 배포 전 프로젝트 구조 점검 |
-| 작업 일자 | 2026-06-02 |
-| 작업 내용 | Render 단일 Web Service 배포 기준으로 Express와 React 통합 구조를 점검하고 최소 설정 보완 |
-| 설치한 패키지 | 없음 |
-| 수정한 주요 파일 | `server.js`, `package.json`, `.env.example`, `docs/deploy-checklist.md`, `docs/progress.md` |
-| 확인한 명령어 | `rg --files`, `type package.json`, `type frontend/package.json`, `type server.js`, `npm run build`, `PORT=3100 node server.js` |
+| 항목             | 내용                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 작업 단계명      | Render 배포 전 프로젝트 구조 점검                                                                                              |
+| 작업 일자        | 2026-06-02                                                                                                                     |
+| 작업 내용        | Render 단일 Web Service 배포 기준으로 Express와 React 통합 구조를 점검하고 최소 설정 보완                                      |
+| 설치한 패키지    | 없음                                                                                                                           |
+| 수정한 주요 파일 | `server.js`, `package.json`, `.env.example`, `docs/deploy-checklist.md`, `docs/progress.md`                                    |
+| 확인한 명령어    | `rg --files`, `type package.json`, `type frontend/package.json`, `type server.js`, `npm run build`, `PORT=3100 node server.js` |
 
 ### 작업 내용
 
@@ -56,15 +56,15 @@
 
 ## Render 배포 및 GitHub Actions CI/CD 준비
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | Render 배포 및 GitHub Actions CI/CD 준비 |
-| 작업 일자 | 2026-06-02 |
-| 작업 목적 | Render 배포 가능 구조를 최종 점검하고, GitHub Actions에서 빌드 성공 후 Render Deploy Hook을 호출하는 CI/CD 흐름 구성 |
-| 수정한 파일 | `.env.example`, `docs/deploy-checklist.md`, `docs/progress.md` |
-| 생성한 파일 | `.github/workflows/deploy.yml`, `docs/deploy-guide.md` |
+| 항목          | 내용                                                                                                                                                                  |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | Render 배포 및 GitHub Actions CI/CD 준비                                                                                                                              |
+| 작업 일자     | 2026-06-02                                                                                                                                                            |
+| 작업 목적     | Render 배포 가능 구조를 최종 점검하고, GitHub Actions에서 빌드 성공 후 Render Deploy Hook을 호출하는 CI/CD 흐름 구성                                                  |
+| 수정한 파일   | `.env.example`, `docs/deploy-checklist.md`, `docs/progress.md`                                                                                                        |
+| 생성한 파일   | `.github/workflows/deploy.yml`, `docs/deploy-guide.md`                                                                                                                |
 | 실행한 명령어 | `rg --files`, `type package.json`, `type frontend/package.json`, `type server.js`, `rg fetch`, `rg localhost`, `rg /api`, `npm run build`, `PORT=3100 node server.js` |
-| 확인 결과 | 루트 Express + `frontend` React 구조로 판단했고, Render Web Service 단일 배포 방식이 적합함을 확인 |
+| 확인 결과     | 루트 Express + `frontend` React 구조로 판단했고, Render Web Service 단일 배포 방식이 적합함을 확인                                                                    |
 
 ### 작업 내용
 
@@ -91,15 +91,15 @@
 
 ## Render Tailwind 빌드 오류 수정
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | Render Tailwind 빌드 오류 수정 |
-| 작업 일자 | 2026-06-02 |
-| 작업 목적 | Render 빌드 중 `Cannot find module 'tailwindcss'` 오류 해결 |
-| 수정한 파일 | `package.json`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/progress.md` |
-| 생성한 파일 | 없음 |
-| 실행한 명령어 | `npm run build` |
-| 확인 결과 | 프론트엔드 devDependencies를 포함해 설치하도록 루트 build 스크립트를 보완 |
+| 항목          | 내용                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------- |
+| 작업 단계명   | Render Tailwind 빌드 오류 수정                                                         |
+| 작업 일자     | 2026-06-02                                                                             |
+| 작업 목적     | Render 빌드 중 `Cannot find module 'tailwindcss'` 오류 해결                            |
+| 수정한 파일   | `package.json`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/progress.md` |
+| 생성한 파일   | 없음                                                                                   |
+| 실행한 명령어 | `npm run build`                                                                        |
+| 확인 결과     | 프론트엔드 devDependencies를 포함해 설치하도록 루트 build 스크립트를 보완              |
 
 ### 작업 내용
 
@@ -117,13 +117,13 @@
 
 ## 1단계 서버 구조 정리
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 향후 개발 계획 1단계 서버 구조 정리 |
-| 작업 일자 | 2026-06-05 |
-| 작업 목적 | MongoDB 연동 전 서버 API 경로를 신규 요구사항 기준인 `/api/cars`로 정리 |
+| 항목        | 내용                                                                               |
+| ----------- | ---------------------------------------------------------------------------------- |
+| 작업 단계명 | 향후 개발 계획 1단계 서버 구조 정리                                                |
+| 작업 일자   | 2026-06-05                                                                         |
+| 작업 목적   | MongoDB 연동 전 서버 API 경로를 신규 요구사항 기준인 `/api/cars`로 정리            |
 | 수정한 파일 | `server.js`, `frontend/vite.config.js`, `frontend/src/App.jsx`, `docs/progress.md` |
-| 생성한 파일 | 없음 |
+| 생성한 파일 | 없음                                                                               |
 
 ### 작업 내용
 
@@ -141,14 +141,14 @@
 
 ## 2단계 MongoDB Atlas 연동
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 향후 개발 계획 2단계 MongoDB Atlas 연동 |
-| 작업 일자 | 2026-06-05 |
-| 작업 목적 | Express 서버를 MongoDB Atlas `cars` 컬렉션 기반 CRUD로 전환 |
-| 설치한 패키지 | `mongodb`, `dotenv` |
-| 수정한 파일 | `server.js`, `frontend/src/App.jsx`, `.env.example`, `package.json`, `package-lock.json`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/progress.md` |
-| 생성한 파일 | `db.js` |
+| 항목          | 내용                                                                                                                                                             |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | 향후 개발 계획 2단계 MongoDB Atlas 연동                                                                                                                          |
+| 작업 일자     | 2026-06-05                                                                                                                                                       |
+| 작업 목적     | Express 서버를 MongoDB Atlas `cars` 컬렉션 기반 CRUD로 전환                                                                                                      |
+| 설치한 패키지 | `mongodb`, `dotenv`                                                                                                                                              |
+| 수정한 파일   | `server.js`, `frontend/src/App.jsx`, `.env.example`, `package.json`, `package-lock.json`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/progress.md` |
+| 생성한 파일   | `db.js`                                                                                                                                                          |
 
 ### 작업 내용
 
@@ -173,3 +173,38 @@
 1. 로컬 또는 Render 환경에 실제 `MONGODB_URI`를 등록한 뒤 서버 실행과 API 응답을 확인한다.
 2. 3단계에서 `GET /api/cars/search`를 차량명, 제조사, 가격, 연식 복합 검색 API로 고도화한다.
 3. 이후 사진 업로드 단계에서 `imageUrl`, 차종, 연료, 주행거리, 지역, 설명 필드를 확장한다.
+
+## 3단계 차량 검색 고도화
+
+| 항목        | 내용                                                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명 | 향후 개발 계획 3단계 차량 검색 고도화                                                                                                             |
+| 작업 일자   | 2026-06-05                                                                                                                                        |
+| 작업 목적   | 차량 검색 API를 `/api/cars/search` 하나로 통합하고 복합 검색 조건 지원                                                                            |
+| 수정한 파일 | `server.js`, `frontend/src/App.jsx`, `frontend/src/components/CarTable.jsx`, `docs/progress.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`     |
+| 생성한 파일 | `docs/plans/plan-03-car-search-advanced.md`, `docs/steps/2026-06-05-03-car-search-advanced.md`, `docs/pr/2026-06-05-03-car-search-advanced-pr.md` |
+
+### 작업 내용
+
+- `GET /api/cars/search`에서 `keyword`, `company`, `minPrice`, `maxPrice`, `minYear`, `maxYear` 복합 검색을 지원하도록 변경했다.
+- 차량명 검색은 MongoDB 정규식을 사용해 대소문자 구분 없는 부분 검색으로 처리했다.
+- 제조사 검색은 기존 등록 흐름과 맞춰 공백 제거 후 대문자로 검색한다.
+- 가격과 연식 조건은 공백, 탭, 줄바꿈을 제거한 뒤 숫자인지 검증하고, 숫자가 아니면 `400` 오류를 반환한다.
+- 기존 `/api/cars/filter` 가격 필터 라우트는 제거하고 프론트엔드 호출도 `/api/cars/search`로 통합했다.
+- 프론트엔드 검색 폼에 차량명, 제조사, 최소/최대 가격, 최소/최대 연식을 추가했다.
+- 검색 결과가 없을 때 등록 안내 대신 "검색 결과가 없습니다." 안내를 표시하도록 목록 컴포넌트를 보완했다.
+
+### 확인 결과
+
+- `node --check server.js` 성공
+- `npm.cmd run build` 성공
+- 코드 검색 결과 `filterByPrice`, `searchByCompany`, `/api/cars/filter`, `/cars/filter` 호출은 남아 있지 않다.
+- `npm.cmd start`는 실행 후 제한 시간 안에 종료되지 않아 실제 API 호출 검증은 완료하지 못했다.
+- 실제 MongoDB Atlas 접속과 `/api/cars/search` API 호출 검증은 실제 `MONGODB_URI` 등록 후 진행해야 한다.
+- 빌드 중 `frontend` 의존성 moderate 취약점 2건이 기존과 동일하게 보고된다.
+
+### 다음 단계
+
+1. 실제 `MONGODB_URI`가 등록된 환경에서 `/api/cars/search` 복합 검색 API를 직접 호출해 확인한다.
+2. 4단계에서 차량 등록 데이터 구조 확장과 사진 업로드를 진행한다.
+3. UI 개편 단계에서 제조사 입력을 select 형태로 개선할 수 있다.

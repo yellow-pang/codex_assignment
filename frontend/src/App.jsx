@@ -13,11 +13,19 @@ function App() {
   const [currentView, setCurrentView] = useState("list");
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
-  const [filters, setFilters] = useState({ company: "", minPrice: "", maxPrice: "" });
+  const [filters, setFilters] = useState({
+    keyword: "",
+    company: "",
+    minPrice: "",
+    maxPrice: "",
+    minYear: "",
+    maxYear: "",
+  });
+  const [isSearchMode, setIsSearchMode] = useState(false);
 
   const totalPrice = useMemo(
     () => cars.reduce((sum, car) => sum + Number(car.price || 0), 0),
-    [cars]
+    [cars],
   );
 
   useEffect(() => {
@@ -28,7 +36,18 @@ function App() {
     const response = await fetch(url, options);
 
     if (!response.ok) {
-      throw new Error("요청을 처리하지 못했습니다.");
+      let errorMessage = "요청을 처리하지 못했습니다.";
+
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (error) {
+        // JSON 오류 응답이 아닌 경우에는 기본 메시지를 사용합니다.
+      }
+
+      throw new Error(errorMessage);
     }
 
     return response.json();
@@ -45,6 +64,7 @@ function App() {
       const data = await requestApi("/api/cars");
       setCars(data);
       setCurrentView("list");
+      setIsSearchMode(false);
       if (successMessage) {
         setMessage({ type: "success", text: successMessage });
       }
@@ -55,20 +75,70 @@ function App() {
     }
   }
 
-  async function searchByCompany() {
-    const company = filters.company.trim().toUpperCase();
-    const url = company ? `/api/cars/search?company=${encodeURIComponent(company)}` : "/api/cars";
-
-    await loadFilteredCars(url, company ? "제조사 검색 결과입니다." : "전체 목록을 조회했습니다.");
+  function normalizeNumericFilter(value) {
+    return String(value || "").replace(/\s+/g, "");
   }
 
-  async function filterByPrice() {
-    const params = new URLSearchParams();
-    if (filters.minPrice) params.set("minPrice", filters.minPrice);
-    if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+  function validateNumericFilters() {
+    const numericFilterLabels = {
+      minPrice: "최소 가격",
+      maxPrice: "최대 가격",
+      minYear: "최소 연식",
+      maxYear: "최대 연식",
+    };
 
-    const url = params.toString() ? `/api/cars/filter?${params.toString()}` : "/api/cars/filter";
-    await loadFilteredCars(url, "가격 필터 결과입니다.");
+    for (const [fieldName, label] of Object.entries(numericFilterLabels)) {
+      const value = normalizeNumericFilter(filters[fieldName]);
+
+      if (value && !Number.isFinite(Number(value))) {
+        return `${label}은 숫자로 입력해주세요.`;
+      }
+    }
+
+    return "";
+  }
+
+  async function searchCars() {
+    const validationMessage = validateNumericFilters();
+
+    if (validationMessage) {
+      setMessage({ type: "error", text: validationMessage });
+      return;
+    }
+
+    const params = new URLSearchParams();
+    const keyword = filters.keyword.trim();
+    const company = filters.company.trim().toUpperCase();
+
+    if (keyword) params.set("keyword", keyword);
+    if (company) params.set("company", company);
+
+    ["minPrice", "maxPrice", "minYear", "maxYear"].forEach((fieldName) => {
+      const value = normalizeNumericFilter(filters[fieldName]);
+      if (value) params.set(fieldName, value);
+    });
+
+    if (!params.toString()) {
+      await loadCars("전체 목록을 조회했습니다.");
+      return;
+    }
+
+    await loadFilteredCars(
+      `/api/cars/search?${params.toString()}`,
+      "차량 검색 결과입니다.",
+    );
+  }
+
+  async function resetSearchFilters() {
+    setFilters({
+      keyword: "",
+      company: "",
+      minPrice: "",
+      maxPrice: "",
+      minYear: "",
+      maxYear: "",
+    });
+    await loadCars("검색 조건을 초기화했습니다.");
   }
 
   async function loadFilteredCars(url, successMessage) {
@@ -78,6 +148,7 @@ function App() {
       const data = await requestApi(url);
       setCars(data);
       setCurrentView("list");
+      setIsSearchMode(true);
       setMessage({ type: "success", text: successMessage });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
@@ -152,7 +223,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-base-200">
-      <Header currentView={currentView} onGoList={handleGoList} onGoCreate={() => setCurrentView("create")} />
+      <Header
+        currentView={currentView}
+        onGoList={handleGoList}
+        onGoCreate={() => setCurrentView("create")}
+      />
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
@@ -166,7 +241,9 @@ function App() {
           <div className="stats bg-base-100 shadow sm:col-span-2">
             <div className="stat">
               <div className="stat-title">총 가격</div>
-              <div className="stat-value text-2xl">{totalPrice.toLocaleString()}만원</div>
+              <div className="stat-value text-2xl">
+                {totalPrice.toLocaleString()}만원
+              </div>
               <div className="stat-desc">조회된 목록의 합계</div>
             </div>
           </div>
@@ -186,12 +263,22 @@ function App() {
                     자동차 REST API에서 조회한 데이터를 관리합니다.
                   </p>
                 </div>
-                <button className="btn btn-primary" onClick={() => setCurrentView("create")}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setCurrentView("create")}
+                >
                   등록하기
                 </button>
               </div>
 
-              <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto_1fr_auto]">
+              <div className="mt-4 grid gap-3 lg:grid-cols-6">
+                <input
+                  className="input input-bordered"
+                  name="keyword"
+                  value={filters.keyword}
+                  onChange={handleFilterChange}
+                  placeholder="차량명: Sonata"
+                />
                 <input
                   className="input input-bordered"
                   name="company"
@@ -199,30 +286,53 @@ function App() {
                   onChange={handleFilterChange}
                   placeholder="제조사 검색: HYUNDAI"
                 />
-                <button className="btn btn-outline" onClick={searchByCompany}>
-                  검색
-                </button>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <input
-                    className="input input-bordered"
-                    name="minPrice"
-                    type="number"
-                    value={filters.minPrice}
-                    onChange={handleFilterChange}
-                    placeholder="최소 가격"
-                  />
-                  <input
-                    className="input input-bordered"
-                    name="maxPrice"
-                    type="number"
-                    value={filters.maxPrice}
-                    onChange={handleFilterChange}
-                    placeholder="최대 가격"
-                  />
+                <input
+                  className="input input-bordered"
+                  name="minPrice"
+                  type="number"
+                  min="0"
+                  value={filters.minPrice}
+                  onChange={handleFilterChange}
+                  placeholder="최소 가격"
+                />
+                <input
+                  className="input input-bordered"
+                  name="maxPrice"
+                  type="number"
+                  min="0"
+                  value={filters.maxPrice}
+                  onChange={handleFilterChange}
+                  placeholder="최대 가격"
+                />
+                <input
+                  className="input input-bordered"
+                  name="minYear"
+                  type="number"
+                  min="1900"
+                  value={filters.minYear}
+                  onChange={handleFilterChange}
+                  placeholder="최소 연식"
+                />
+                <input
+                  className="input input-bordered"
+                  name="maxYear"
+                  type="number"
+                  min="1900"
+                  value={filters.maxYear}
+                  onChange={handleFilterChange}
+                  placeholder="최대 연식"
+                />
+                <div className="flex flex-col gap-3 sm:flex-row lg:col-span-6 lg:justify-end">
+                  <button className="btn btn-primary" onClick={searchCars}>
+                    검색
+                  </button>
+                  <button
+                    className="btn btn-outline"
+                    onClick={resetSearchFilters}
+                  >
+                    초기화
+                  </button>
                 </div>
-                <button className="btn btn-outline" onClick={filterByPrice}>
-                  필터
-                </button>
               </div>
 
               <div className="mt-4">
@@ -231,7 +341,22 @@ function App() {
                     <span className="loading loading-spinner loading-lg text-primary"></span>
                   </div>
                 ) : (
-                  <CarTable cars={cars} onView={handleViewCar} onEdit={handleEditCar} onDelete={setDeleteTarget} />
+                  <CarTable
+                    cars={cars}
+                    emptyMessage={
+                      isSearchMode
+                        ? "검색 결과가 없습니다."
+                        : "등록된 자동차가 없습니다."
+                    }
+                    emptyDescription={
+                      isSearchMode
+                        ? "검색 조건을 바꾸거나 초기화해 전체 목록을 다시 확인해보세요."
+                        : "등록 버튼을 눌러 첫 자동차를 추가해보세요."
+                    }
+                    onView={handleViewCar}
+                    onEdit={handleEditCar}
+                    onDelete={setDeleteTarget}
+                  />
                 )}
               </div>
             </div>
@@ -239,19 +364,37 @@ function App() {
         )}
 
         {currentView === "create" && (
-          <CarForm mode="create" onCancel={handleGoList} onSubmit={handleCreateCar} />
+          <CarForm
+            mode="create"
+            onCancel={handleGoList}
+            onSubmit={handleCreateCar}
+          />
         )}
 
         {currentView === "edit" && selectedCar && (
-          <CarForm mode="edit" initialCar={selectedCar} onCancel={handleGoList} onSubmit={handleUpdateCar} />
+          <CarForm
+            mode="edit"
+            initialCar={selectedCar}
+            onCancel={handleGoList}
+            onSubmit={handleUpdateCar}
+          />
         )}
 
         {currentView === "detail" && (
-          <CarDetail car={selectedCar} onBack={handleGoList} onEdit={handleEditCar} onDelete={setDeleteTarget} />
+          <CarDetail
+            car={selectedCar}
+            onBack={handleGoList}
+            onEdit={handleEditCar}
+            onDelete={setDeleteTarget}
+          />
         )}
       </main>
 
-      <DeleteConfirmModal car={deleteTarget} onCancel={() => setDeleteTarget(null)} onConfirm={handleDeleteCar} />
+      <DeleteConfirmModal
+        car={deleteTarget}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteCar}
+      />
     </div>
   );
 }
