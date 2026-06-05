@@ -53,6 +53,78 @@ function normalizeCarInput(input) {
   return car;
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeSearchText(value) {
+  return String(value || "").trim();
+}
+
+function normalizeNumericSearchValue(value) {
+  return String(value || "").replace(/\s+/g, "");
+}
+
+function parseSearchNumber(value, fieldName) {
+  const normalizedValue = normalizeNumericSearchValue(value);
+
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  const parsedValue = Number(normalizedValue);
+
+  if (!Number.isFinite(parsedValue)) {
+    const error = new Error(`${fieldName} 검색 조건은 숫자로 입력해야 합니다.`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return parsedValue;
+}
+
+function createCarSearchQuery(queryParams) {
+  const keyword = normalizeSearchText(queryParams.keyword);
+  const company = normalizeSearchText(queryParams.company).toUpperCase();
+  const minPrice = parseSearchNumber(queryParams.minPrice, "가격");
+  const maxPrice = parseSearchNumber(queryParams.maxPrice, "가격");
+  const minYear = parseSearchNumber(queryParams.minYear, "연식");
+  const maxYear = parseSearchNumber(queryParams.maxYear, "연식");
+  const query = {};
+
+  if (keyword) {
+    query.name = { $regex: escapeRegExp(keyword), $options: "i" };
+  }
+
+  if (company) {
+    query.company = company;
+  }
+
+  const priceQuery = {};
+  if (minPrice !== undefined) {
+    priceQuery.$gte = minPrice;
+  }
+  if (maxPrice !== undefined) {
+    priceQuery.$lte = maxPrice;
+  }
+  if (Object.keys(priceQuery).length > 0) {
+    query.price = priceQuery;
+  }
+
+  const yearQuery = {};
+  if (minYear !== undefined) {
+    yearQuery.$gte = minYear;
+  }
+  if (maxYear !== undefined) {
+    yearQuery.$lte = maxYear;
+  }
+  if (Object.keys(yearQuery).length > 0) {
+    query.year = yearQuery;
+  }
+
+  return query;
+}
+
 function getMongoDocument(result) {
   return result && result.value !== undefined ? result.value : result;
 }
@@ -60,7 +132,10 @@ function getMongoDocument(result) {
 // 전체 자동차 목록을 JSON으로 응답합니다.
 carsRouter.get("/", async (req, res) => {
   try {
-    const cars = await getCarsCollection().find({}).sort({ createdAt: -1, _id: -1 }).toArray();
+    const cars = await getCarsCollection()
+      .find({})
+      .sort({ createdAt: -1, _id: -1 })
+      .toArray();
     res.json(cars);
   } catch (error) {
     console.error("자동차 목록 조회 실패:", error.message);
@@ -68,52 +143,33 @@ carsRouter.get("/", async (req, res) => {
   }
 });
 
-// company 쿼리 값이 있으면 해당 회사 자동차만 검색하고, 없으면 전체 목록을 응답합니다.
+// 차량명, 제조사, 가격, 연식 조건을 함께 사용할 수 있는 복합 검색 API입니다.
 carsRouter.get("/search", async (req, res) => {
   try {
-    const { company } = req.query;
-    const query = {};
-
-    if (company) {
-      query.company = String(company).trim().toUpperCase();
-    }
-
-    const searchedCars = await getCarsCollection().find(query).sort({ createdAt: -1, _id: -1 }).toArray();
+    const query = createCarSearchQuery(req.query);
+    const searchedCars = await getCarsCollection()
+      .find(query)
+      .sort({ createdAt: -1, _id: -1 })
+      .toArray();
     res.json(searchedCars);
   } catch (error) {
     console.error("자동차 검색 실패:", error.message);
-    res.status(500).json({ message: "자동차를 검색하지 못했습니다." });
-  }
-});
-
-// minPrice와 maxPrice 쿼리 값으로 가격 범위에 맞는 자동차만 응답합니다.
-carsRouter.get("/filter", async (req, res) => {
-  try {
-    const minPrice = req.query.minPrice ? Number(req.query.minPrice) : undefined;
-    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : undefined;
-    const priceQuery = {};
-
-    if (minPrice !== undefined) {
-      priceQuery.$gte = minPrice;
-    }
-
-    if (maxPrice !== undefined) {
-      priceQuery.$lte = maxPrice;
-    }
-
-    const query = Object.keys(priceQuery).length > 0 ? { price: priceQuery } : {};
-    const filteredCars = await getCarsCollection().find(query).sort({ createdAt: -1, _id: -1 }).toArray();
-    res.json(filteredCars);
-  } catch (error) {
-    console.error("자동차 가격 필터 실패:", error.message);
-    res.status(500).json({ message: "자동차 가격 필터를 처리하지 못했습니다." });
+    res
+      .status(error.statusCode || 500)
+      .json({
+        message: error.statusCode
+          ? error.message
+          : "자동차를 검색하지 못했습니다.",
+      });
   }
 });
 
 // URL의 id와 일치하는 자동차 한 대를 조회합니다.
 carsRouter.get("/:id", async (req, res) => {
   try {
-    const car = await getCarsCollection().findOne(createCarFilterById(req.params.id));
+    const car = await getCarsCollection().findOne(
+      createCarFilterById(req.params.id),
+    );
 
     if (!car) {
       return res.status(404).json({ message: "자동차를 찾을 수 없습니다." });
@@ -122,7 +178,9 @@ carsRouter.get("/:id", async (req, res) => {
     res.json(car);
   } catch (error) {
     console.error("자동차 상세 조회 실패:", error.message);
-    res.status(500).json({ message: "자동차 상세 정보를 조회하지 못했습니다." });
+    res
+      .status(500)
+      .json({ message: "자동차 상세 정보를 조회하지 못했습니다." });
   }
 });
 
@@ -156,7 +214,9 @@ carsRouter.put("/:id", async (req, res) => {
       },
     };
 
-    const result = await getCarsCollection().findOneAndUpdate(filter, update, { returnDocument: "after" });
+    const result = await getCarsCollection().findOneAndUpdate(filter, update, {
+      returnDocument: "after",
+    });
     const updatedCar = getMongoDocument(result);
 
     if (!updatedCar) {
@@ -173,7 +233,9 @@ carsRouter.put("/:id", async (req, res) => {
 // URL의 id와 일치하는 자동차를 목록에서 삭제합니다.
 carsRouter.delete("/:id", async (req, res) => {
   try {
-    const result = await getCarsCollection().findOneAndDelete(createCarFilterById(req.params.id));
+    const result = await getCarsCollection().findOneAndDelete(
+      createCarFilterById(req.params.id),
+    );
     const deletedCar = getMongoDocument(result);
 
     if (!deletedCar) {
