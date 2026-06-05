@@ -161,8 +161,7 @@ function App() {
     try {
       await requestApi("/api/cars", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(carInput),
+        body: createCarFormData(carInput),
       });
 
       await loadCars("자동차가 등록되었습니다.");
@@ -177,8 +176,7 @@ function App() {
     try {
       const updatedCar = await requestApi(`/api/cars/${selectedCar._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(carInput),
+        body: createCarFormData(carInput),
       });
 
       setSelectedCar(updatedCar);
@@ -219,6 +217,23 @@ function App() {
   function handleFilterChange(event) {
     const { name, value } = event.target;
     setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
+  }
+
+  function createCarFormData(carInput) {
+    const formData = new FormData();
+
+    Object.entries(carInput).forEach(([key, value]) => {
+      if (key === "image") {
+        if (value) {
+          formData.append(key, value);
+        }
+        return;
+      }
+
+      formData.append(key, value ?? "");
+    });
+
+    return formData;
   }
 
   return (

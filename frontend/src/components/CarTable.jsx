@@ -6,6 +6,8 @@ function CarTable({
   onEdit,
   onDelete,
 }) {
+  const defaultCarImageUrl = "/uploads/default-car.png";
+
   if (cars.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-base-300 bg-base-100 p-8 text-center">
@@ -20,17 +22,27 @@ function CarTable({
       <table className="table table-zebra">
         <thead>
           <tr>
+            <th>사진</th>
             <th>ID</th>
             <th>이름</th>
             <th>제조사</th>
             <th>연식</th>
             <th>가격</th>
+            <th>주행거리</th>
+            <th>지역</th>
             <th className="text-right">관리</th>
           </tr>
         </thead>
         <tbody>
           {cars.map((car) => (
             <tr key={car._id}>
+              <td>
+                <img
+                  alt={`${car.name} 차량 사진`}
+                  className="h-14 w-20 rounded-md object-cover"
+                  src={car.imageUrl || defaultCarImageUrl}
+                />
+              </td>
               <td>{car._id}</td>
               <td className="font-semibold">{car.name}</td>
               <td>
@@ -40,6 +52,12 @@ function CarTable({
               </td>
               <td>{car.year}</td>
               <td>{Number(car.price).toLocaleString()}만원</td>
+              <td>
+                {car.mileage !== undefined
+                  ? `${Number(car.mileage).toLocaleString()}km`
+                  : "-"}
+              </td>
+              <td>{car.location || "-"}</td>
               <td>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
