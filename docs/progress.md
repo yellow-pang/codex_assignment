@@ -208,3 +208,42 @@
 1. 실제 `MONGODB_URI`가 등록된 환경에서 `/api/cars/search` 복합 검색 API를 직접 호출해 확인한다.
 2. 4단계에서 차량 등록 데이터 구조 확장과 사진 업로드를 진행한다.
 3. UI 개편 단계에서 제조사 입력을 select 형태로 개선할 수 있다.
+
+## 4단계 차량 등록과 사진 업로드
+
+| 항목          | 내용                                                                                                                                                                                                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명   | 향후 개발 계획 4단계 차량 등록과 사진 업로드                                                                                                                                                                                       |
+| 작업 일자     | 2026-06-05                                                                                                                                                                                                                         |
+| 작업 목적     | 차량 등록 데이터 구조를 확장하고 `multer` 기반 사진 업로드를 추가                                                                                                                                                                  |
+| 설치한 패키지 | `multer`                                                                                                                                                                                                                           |
+| 수정한 파일   | `server.js`, `frontend/src/App.jsx`, `frontend/src/components/CarForm.jsx`, `frontend/src/components/CarTable.jsx`, `frontend/src/components/CarDetail.jsx`, `.gitignore`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `package.json`, `package-lock.json`, `docs/progress.md` |
+| 생성한 파일   | `docs/plans/plan-04-car-photo-upload.md`, `docs/steps/2026-06-05-04-car-photo-upload.md`, `docs/pr/2026-06-05-04-car-photo-upload-pr.md`                                                                                           |
+
+### 작업 내용
+
+- `multer`를 추가하고 서버 시작 시 `uploads/` 폴더가 자동 생성되도록 했다.
+- Express에서 `/uploads` 정적 경로를 제공하도록 했다.
+- 차량 사진은 5MB 이하의 `jpg`, `jpeg`, `png`, `webp` 파일만 허용하도록 검증했다.
+- `POST /api/cars`와 `PUT /api/cars/:id`에서 `multipart/form-data` 요청을 처리하도록 변경했다.
+- 차량 수정 시 새 사진이 없으면 기존 `imageUrl`을 유지하고, 새 사진이 있으면 새 업로드 경로로 교체하도록 했다.
+- 차량 등록/수정 폼에 차종, 연료, 주행거리, 지역, 설명, 사진 입력을 추가했다.
+- 목록 화면에 차량 썸네일, 주행거리, 지역을 추가했다.
+- 상세 화면에 큰 차량 사진, 상세 스펙, 차량 설명을 추가했다.
+- 사진이 없는 차량은 `/uploads/default-car.png` 기본 이미지 경로를 사용하도록 했다.
+- README와 배포 문서에 Render 무료 환경의 업로드 파일 비영속성 주의사항을 추가했다.
+
+### 확인 결과
+
+- `cmd.exe /c node --check server.js` 성공
+- `npm.cmd run build` 성공
+- `npm.cmd start`는 MongoDB 연결까지 성공했지만 3000번 포트가 이미 사용 중이라 `EADDRINUSE`로 종료됨
+- 임시 포트 `3101`로 실행했을 때 제한 시간 안에 종료되지 않아 포트 충돌 없이 서버가 계속 실행되는 상태로 확인됨
+- 실제 사진 업로드 API 검증은 브라우저 또는 curl로 파일을 준비한 뒤 추가 확인이 필요하다.
+- 빌드 중 `frontend` 의존성 moderate 취약점 2건이 기존과 동일하게 보고된다.
+
+### 다음 단계
+
+1. 사진 샘플 파일을 준비해 `/api/cars` 등록과 `/api/cars/:id` 수정 업로드를 직접 확인한다.
+2. 기본 이미지 파일이 `uploads/default-car.png` 위치에 있는지 확인한다.
+3. 5단계에서 Firebase 인증과 딜러 권한 체크를 진행한다.

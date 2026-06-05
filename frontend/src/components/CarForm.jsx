@@ -5,6 +5,12 @@ const emptyForm = {
   company: "",
   year: "",
   price: "",
+  type: "",
+  fuel: "",
+  mileage: "",
+  location: "",
+  description: "",
+  image: null,
 };
 
 function CarForm({ mode, initialCar, onCancel, onSubmit }) {
@@ -15,10 +21,16 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
   useEffect(() => {
     if (initialCar) {
       setForm({
-        name: initialCar.name,
-        company: initialCar.company,
-        year: String(initialCar.year),
-        price: String(initialCar.price),
+        name: initialCar.name || "",
+        company: initialCar.company || "",
+        year: String(initialCar.year || ""),
+        price: String(initialCar.price || ""),
+        type: initialCar.type || "",
+        fuel: initialCar.fuel || "",
+        mileage: String(initialCar.mileage || ""),
+        location: initialCar.location || "",
+        description: initialCar.description || "",
+        image: null,
       });
       return;
     }
@@ -27,19 +39,28 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
   }, [initialCar]);
 
   function handleChange(event) {
-    const { name, value } = event.target;
-    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+    const { files, name, value } = event.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: files ? files[0] || null : value,
+    }));
   }
 
   function validateForm() {
     const currentYear = new Date().getFullYear();
     const year = Number(form.year);
     const price = Number(form.price);
+    const mileage = Number(form.mileage);
 
     if (!form.name.trim()) return "자동차 이름을 입력해주세요.";
     if (!form.company.trim()) return "제조사를 입력해주세요.";
     if (!Number.isInteger(year) || year < 1900 || year > currentYear) return "올바른 연식을 입력해주세요.";
     if (!Number.isFinite(price) || price <= 0) return "올바른 가격을 입력해주세요.";
+    if (!form.type.trim()) return "차종을 입력해주세요.";
+    if (!form.fuel.trim()) return "연료를 입력해주세요.";
+    if (!Number.isFinite(mileage) || mileage < 0) return "올바른 주행거리를 입력해주세요.";
+    if (!form.location.trim()) return "지역을 입력해주세요.";
+    if (!form.description.trim()) return "차량 설명을 입력해주세요.";
 
     return "";
   }
@@ -59,6 +80,12 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
       company: form.company.trim().toUpperCase(),
       year: Number(form.year),
       price: Number(form.price),
+      type: form.type.trim(),
+      fuel: form.fuel.trim(),
+      mileage: Number(form.mileage),
+      location: form.location.trim(),
+      description: form.description.trim(),
+      image: form.image,
     });
   }
 
@@ -136,6 +163,99 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
               />
             </label>
           </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="form-control">
+              <div className="label">
+                <span className="label-text font-semibold">차종 *</span>
+              </div>
+              <select className="select select-bordered" name="type" value={form.type} onChange={handleChange}>
+                <option value="">차종을 선택하세요</option>
+                <option value="sedan">sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="compact">compact</option>
+                <option value="hatchback">hatchback</option>
+                <option value="truck">truck</option>
+              </select>
+            </label>
+
+            <label className="form-control">
+              <div className="label">
+                <span className="label-text font-semibold">연료 *</span>
+              </div>
+              <select className="select select-bordered" name="fuel" value={form.fuel} onChange={handleChange}>
+                <option value="">연료를 선택하세요</option>
+                <option value="gasoline">gasoline</option>
+                <option value="diesel">diesel</option>
+                <option value="hybrid">hybrid</option>
+                <option value="electric">electric</option>
+                <option value="LPG">LPG</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="form-control">
+              <div className="label">
+                <span className="label-text font-semibold">주행거리 *</span>
+                <span className="label-text-alt">km</span>
+              </div>
+              <input
+                className="input input-bordered"
+                name="mileage"
+                type="number"
+                min="0"
+                value={form.mileage}
+                onChange={handleChange}
+                placeholder="예: 35000"
+              />
+            </label>
+
+            <label className="form-control">
+              <div className="label">
+                <span className="label-text font-semibold">지역 *</span>
+              </div>
+              <input
+                className="input input-bordered"
+                name="location"
+                value={form.location}
+                onChange={handleChange}
+                placeholder="예: 서울"
+              />
+            </label>
+          </div>
+
+          <label className="form-control">
+            <div className="label">
+              <span className="label-text font-semibold">차량 설명 *</span>
+            </div>
+            <textarea
+              className="textarea textarea-bordered min-h-28"
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="차량 특징과 관리 상태를 입력해주세요."
+            />
+          </label>
+
+          <label className="form-control">
+            <div className="label">
+              <span className="label-text font-semibold">차량 사진</span>
+              <span className="label-text-alt">jpg, jpeg, png, webp / 최대 5MB</span>
+            </div>
+            {isEditMode && initialCar?.imageUrl && (
+              <p className="mb-2 text-xs text-base-content/60">
+                새 파일을 선택하지 않으면 기존 사진을 유지합니다.
+              </p>
+            )}
+            <input
+              accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+              className="file-input file-input-bordered"
+              name="image"
+              type="file"
+              onChange={handleChange}
+            />
+          </label>
 
           <div className="card-actions mt-2 justify-end">
             <button className="btn btn-outline" type="button" onClick={onCancel}>

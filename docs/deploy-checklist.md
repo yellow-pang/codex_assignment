@@ -14,6 +14,7 @@
 
 - [x] Express 서버가 `process.env.PORT || 3000`을 사용한다.
 - [x] API 라우트가 React fallback보다 먼저 등록되어 있다.
+- [x] `/uploads` 정적 경로가 React fallback보다 먼저 등록되어 있다.
 - [x] Express가 `frontend/dist`를 정적 파일로 제공한다.
 - [x] React 새로고침 404 방지를 위한 fallback이 있다.
 - [x] CRUD 기능 로직은 변경하지 않았다.
@@ -26,6 +27,7 @@
 | 루트 `package.json` | `start` 스크립트 | `npm start`로 `node server.js` 실행 |
 | 루트 `package.json` | `build` 스크립트 | `frontend` devDependencies 포함 설치 및 Vite 빌드 실행 |
 | 루트 `package.json` | `engines` | Node.js `20.19` 이상 사용 |
+| 루트 `package.json` | `dependencies` | `multer` 포함 |
 | `frontend/package.json` | `build` 스크립트 | `vite build` 실행 |
 | `frontend/package.json` | `test` 스크립트 | 없음, CI에서 건너뜀 |
 
@@ -44,6 +46,7 @@
 | `.env.example` | `NODE_ENV`, `PORT`, MongoDB Atlas 환경변수 예시 작성 |
 | `.env` | 커밋 금지 |
 | `.gitignore` | `.env`, `.env.*`, `node_modules`, `dist`, 로그 파일 제외 |
+| `.gitignore` | `uploads/*` 런타임 업로드 파일 제외, `uploads/default-car.png` 기본 이미지는 커밋 가능 |
 | Render Environment | `NODE_ENV=production`, `MONGODB_URI`, `DB_NAME`, 컬렉션 이름 등록 필요. DNS 문제가 있으면 `MONGODB_DNS_SERVERS` 선택 등록 |
 | GitHub Secrets | `RENDER_DEPLOY_HOOK_URL` 필요 |
 
@@ -83,8 +86,12 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 - [ ] `GET /api/cars`가 자동차 목록 JSON을 반환한다.
 - [ ] Render Logs에 `MongoDB connected: car_market` 메시지가 보인다.
 - [ ] 자동차 등록 기능이 동작한다.
+- [ ] 차량 사진을 포함한 자동차 등록이 동작한다.
 - [ ] 자동차 수정 기능이 동작한다.
+- [ ] 차량 사진 교체가 동작한다.
 - [ ] 자동차 삭제 기능이 동작한다.
+- [ ] 사진 없는 차량에서 `/uploads/default-car.png` 기본 이미지가 보인다.
+- [ ] Render 무료 환경에서는 `uploads/` 파일이 영구 보관되지 않을 수 있음을 확인했다.
 - [ ] 새로고침해도 React 화면이 유지된다.
 - [ ] Render Logs에 포트 오류가 없다.
 - [ ] GitHub Actions 실행 결과가 성공이다.

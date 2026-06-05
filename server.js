@@ -2,6 +2,7 @@ require("dotenv").config({ quiet: true });
 
 const express = require("express");
 const fs = require("fs");
+const multer = require("multer");
 const { ObjectId } = require("mongodb");
 const path = require("path");
 const { connectDatabase, getCollection } = require("./db");
@@ -13,9 +14,49 @@ const app = express();
 const port = process.env.PORT || 3000;
 const frontendDistPath = path.join(__dirname, "frontend", "dist");
 const frontendIndexPath = path.join(frontendDistPath, "index.html");
+const uploadsPath = path.join(__dirname, "uploads");
+const maxUploadFileSize = 5 * 1024 * 1024;
+const allowedImageExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+const allowedImageMimeTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+fs.mkdirSync(uploadsPath, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: uploadsPath,
+    filename: (req, file, cb) => {
+      const extension = path.extname(file.originalname).toLowerCase();
+      const safeName = `${Date.now()}-${Math.round(
+        Math.random() * 1e9,
+      )}${extension}`;
+      cb(null, safeName);
+    },
+  }),
+  limits: { fileSize: maxUploadFileSize },
+  fileFilter: (req, file, cb) => {
+    const extension = path.extname(file.originalname).toLowerCase();
+
+    if (
+      allowedImageExtensions.has(extension) &&
+      allowedImageMimeTypes.has(file.mimetype)
+    ) {
+      cb(null, true);
+      return;
+    }
+
+    cb(new Error("차량 사진은 jpg, jpeg, png, webp 형식만 업로드할 수 있습니다."));
+  },
+});
 
 // JSON 형식의 요청 body를 req.body에서 사용할 수 있게 합니다.
 app.use(express.json());
+
+// 업로드한 차량 사진을 React 화면에서 바로 볼 수 있게 제공합니다.
+app.use("/uploads", express.static(uploadsPath));
 
 // React 빌드 결과물이 있으면 Express가 정적 파일로 제공합니다.
 app.use(express.static(frontendDistPath));
@@ -50,7 +91,43 @@ function normalizeCarInput(input) {
     car.year = Number(car.year);
   }
 
+  if (car.mileage !== undefined && car.mileage !== "") {
+    car.mileage = Number(car.mileage);
+  }
+
+  ["name", "type", "fuel", "location", "description", "imageUrl"].forEach(
+    (fieldName) => {
+      if (car[fieldName] !== undefined) {
+        car[fieldName] = String(car[fieldName]).trim();
+      }
+    },
+  );
+
   return car;
+}
+
+function createImageUrl(file) {
+  return file ? `/uploads/${file.filename}` : "";
+}
+
+function handleUploadError(error, res, fallbackMessage) {
+  if (error instanceof multer.MulterError) {
+    const message =
+      error.code === "LIMIT_FILE_SIZE"
+        ? "차량 사진은 5MB 이하로 업로드해주세요."
+        : "차량 사진 업로드를 처리하지 못했습니다.";
+
+    res.status(400).json({ message });
+    return;
+  }
+
+  if (error.message && error.message.includes("차량 사진은")) {
+    res.status(400).json({ message: error.message });
+    return;
+  }
+
+  console.error(fallbackMessage, error.message);
+  res.status(500).json({ message: fallbackMessage });
 }
 
 function escapeRegExp(value) {
@@ -154,13 +231,11 @@ carsRouter.get("/search", async (req, res) => {
     res.json(searchedCars);
   } catch (error) {
     console.error("자동차 검색 실패:", error.message);
-    res
-      .status(error.statusCode || 500)
-      .json({
-        message: error.statusCode
-          ? error.message
-          : "자동차를 검색하지 못했습니다.",
-      });
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode
+        ? error.message
+        : "자동차를 검색하지 못했습니다.",
+    });
   }
 });
 
@@ -184,12 +259,13 @@ carsRouter.get("/:id", async (req, res) => {
   }
 });
 
-// 요청 body로 받은 자동차 정보를 목록에 추가합니다.
-carsRouter.post("/", async (req, res) => {
+// 요청 body와 차량 사진 파일을 받아 자동차 정보를 목록에 추가합니다.
+carsRouter.post("/", upload.single("image"), async (req, res) => {
   try {
     const now = new Date();
     const newCar = {
       ...normalizeCarInput(req.body),
+      imageUrl: createImageUrl(req.file),
       createdAt: now,
       updatedAt: now,
     };
@@ -203,13 +279,19 @@ carsRouter.post("/", async (req, res) => {
   }
 });
 
-// URL의 id와 일치하는 자동차 정보를 요청 body의 값으로 수정합니다.
-carsRouter.put("/:id", async (req, res) => {
+// URL의 id와 일치하는 자동차 정보를 요청 body와 새 사진 파일의 값으로 수정합니다.
+carsRouter.put("/:id", upload.single("image"), async (req, res) => {
   try {
     const filter = createCarFilterById(req.params.id);
+    const carInput = normalizeCarInput(req.body);
+
+    if (req.file) {
+      carInput.imageUrl = createImageUrl(req.file);
+    }
+
     const update = {
       $set: {
-        ...normalizeCarInput(req.body),
+        ...carInput,
         updatedAt: new Date(),
       },
     };
@@ -253,6 +335,10 @@ app.use("/api/cars", carsRouter);
 
 // 기존 CRUD 앱의 /cars 호출은 다음 단계 전까지 호환용으로 유지합니다.
 app.use("/cars", carsRouter);
+
+app.use((error, req, res, next) => {
+  handleUploadError(error, res, "파일 업로드 중 오류가 발생했습니다.");
+});
 
 // 브라우저나 클라이언트가 GET / 요청을 보내면 React 화면 또는 기본 문구를 응답합니다.
 app.get("/", (req, res) => {

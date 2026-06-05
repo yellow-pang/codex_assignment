@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | Express API | `server.js` | 자동차 CRUD REST API 제공 |
 | MongoDB 연결 | `db.js` | MongoDB Atlas 연결과 컬렉션 준비 |
+| 차량 사진 업로드 | `uploads/` | `multer`가 저장한 차량 사진 제공 |
 | React 앱 | `frontend/` | 자동차 CRUD 화면 제공 |
 | React 빌드 결과 | `frontend/dist/` | Express가 정적 파일로 제공 |
 | CI/CD 설정 | `.github/workflows/deploy.yml` | 빌드 성공 후 Render Deploy Hook 호출 |
@@ -109,6 +110,15 @@ http://localhost:3000/api/cars
 `PORT`는 Render가 자동으로 제공하므로 직접 입력하지 않아도 된다.
 `MONGODB_URI`는 비밀값이므로 GitHub 저장소, 문서, 클라이언트 코드에 실제 값을 작성하지 않는다.
 
+### 차량 사진 업로드 주의사항
+
+차량 사진은 `multer`를 사용해 서버의 `uploads/` 폴더에 저장하고, Express가 `/uploads` 정적 경로로 제공한다.
+사진이 없는 차량은 `/uploads/default-car.png`를 기본 이미지 경로로 사용하므로, 기본 이미지를 표시하려면 해당 경로에 이미지 파일을 추가한다.
+
+Render 무료 환경에서는 배포된 Web Service의 파일 시스템이 영구 저장소가 아니다.
+재배포, 인스턴스 재시작, 환경 재생성 시 `uploads/`에 저장된 파일이 사라질 수 있다.
+이번 1차 구현은 과제 요구사항에 맞춰 Express 로컬 업로드를 사용하지만, 실제 운영에서는 S3, Cloudinary 같은 외부 이미지 스토리지를 검토한다.
+
 ## 8. Render Deploy Hook 생성 방법
 
 1. Render 서비스 상세 화면으로 이동한다.
@@ -159,6 +169,8 @@ Render 배포가 끝나면 Render에서 제공하는 URL로 접속한다.
 - React 자동차 관리 화면이 표시되는지 확인한다.
 - `https://배포주소/api/cars`에서 자동차 목록 JSON이 응답되는지 확인한다.
 - 자동차 등록, 수정, 삭제 버튼이 동작하는지 확인한다.
+- 차량 사진 업로드 후 목록과 상세 화면에 이미지가 보이는지 확인한다.
+- 사진 없는 차량에서 `/uploads/default-car.png` 기본 이미지가 보이는지 확인한다.
 - 브라우저 새로고침 후 화면이 유지되는지 확인한다.
 - Render Logs에 포트 또는 빌드 오류가 없는지 확인한다.
 
@@ -175,6 +187,8 @@ Render 배포가 끝나면 Render에서 제공하는 URL로 접속한다.
 | `MONGODB_URI 환경변수가 설정되지 않았습니다.` | 서버 실행 환경에 MongoDB 접속 문자열이 없음 | 로컬 `.env` 또는 Render Environment에 `MONGODB_URI` 등록 |
 | `querySrv ECONNREFUSED _mongodb._tcp...` | DNS 서버가 Atlas SRV 레코드 조회를 거부함 | `MONGODB_DNS_SERVERS=1.1.1.1,8.8.8.8` 설정 또는 PC DNS 변경 |
 | `MongoDB 연결 실패` | 접속 문자열, Atlas IP 허용, 사용자 권한 문제 | Atlas Network Access, Database User, 접속 문자열 확인 |
+| 차량 이미지 404 | `uploads` 파일이 없거나 기본 이미지가 없음 | `uploads/default-car.png` 또는 업로드된 파일 존재 여부 확인 |
+| 업로드 파일 사라짐 | Render 무료 환경의 파일 시스템 비영속성 | 외부 이미지 스토리지 도입 검토 |
 | Deploy Hook 실패 | Secret 이름이 다르거나 URL이 비어 있음 | `RENDER_DEPLOY_HOOK_URL` 이름 확인 |
 | `Cannot find module 'tailwindcss'` | Render 빌드에서 프론트엔드 devDependencies가 설치되지 않음 | 루트 `build` 스크립트에서 `npm install --include=dev --prefix frontend` 사용 |
 
