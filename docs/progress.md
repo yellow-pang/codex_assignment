@@ -1,5 +1,36 @@
 # 작업 진행 기록
 
+## Socket.io 실시간 상담과 딜러 온라인 상태
+
+| 항목             | 내용                                                                                                                                                                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | Socket.io 실시간 상담과 딜러 온라인 상태                                                                                                                                                            |
+| 작업 일자        | 2026-06-06                                                                                                                                                                                           |
+| 작업 내용        | ChatRoom 메시지 전송·수신을 Socket.io로 연결하고, 딜러 온라인 상태를 MongoDB 기반으로 표시                                                                                                           |
+| 설치한 패키지    | 루트 `socket.io`, 프론트엔드 `socket.io-client`                                                                                                                                                      |
+| 수정한 주요 파일 | `server.js`, `frontend/src/components/ChatRoom.jsx`, `package.json`, `package-lock.json`, `frontend/package.json`, `frontend/package-lock.json`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md` |
+| 추가한 주요 파일 | `docs/plans/plan-08-socketio-chat-presence.md`, `docs/steps/2026-06-06-08-socketio-chat-presence.md`, `docs/pr/2026-06-06-08-socketio-chat-presence-pr.md`                                           |
+| 확인한 명령어    | `node --check server.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                  |
+
+### 작업 내용
+
+- Express 서버를 `http.createServer(app)` 구조로 감싸고 같은 포트에서 Socket.io를 실행하도록 변경했다.
+- `join-room`, `send-message`, `receive-message`, `leave-room`, `dealer-online`, `dealer-offline` 이벤트를 구현했다.
+- `send-message` 수신 시 서버가 MongoDB `messages` 컬렉션에 메시지를 저장하고 같은 상담방에 `receive-message`를 전송한다.
+- 메시지 본문은 공백 제거 후 최대 1000자로 제한한다.
+- 상담 메시지 처리 로직을 `handleChatMessage` 함수로 분리해 이후 AI Agent 응답 처리 확장 지점을 마련했다.
+- 딜러 온라인 상태는 MongoDB `users` 문서의 `dealerOnline`, `dealerSocketIds`, `dealerConnectedAt`, `dealerLastSeenAt` 필드로 관리한다.
+- 서버 시작 시 이전 실행에서 남은 딜러 온라인 상태를 오프라인으로 정리한다.
+- `ChatRoom.jsx`에서 이전 메시지는 REST API로 조회하고, 신규 메시지는 Socket.io로 전송·수신한다.
+- `GET /api/chats/rooms/:roomId` 상담방 상세 API를 추가해 새로고침 또는 직접 URL 접근 시에도 차량명, 딜러명, 온라인 상태를 다시 조회한다.
+- `README.md`, 배포 가이드, 배포 체크리스트에 Socket.io 상담 검증 항목과 MongoDB 기반 온라인 상태 기준을 반영했다.
+
+### 남은 확인
+
+1. 실제 MongoDB Atlas와 Firebase 계정 2개로 구매자/딜러 브라우저를 각각 열어 실시간 메시지 송수신을 확인한다.
+2. 딜러 계정이 상담방에 입장하고 종료할 때 구매자 화면의 온라인 상태가 바뀌는지 확인한다.
+3. `.env`에 `NODE_ENV=production`이 있으면 Vite 빌드 경고가 계속 나오므로, 로컬 개발 환경에서는 제거하거나 Vite 설정 방식으로 옮길지 별도 판단한다.
+
 ## UI 전면 개선 — daisyUI 제거, 순수 Tailwind Modern Marketplace 적용
 
 | 항목             | 내용                                                                                                                                                                                                                             |

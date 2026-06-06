@@ -27,9 +27,9 @@
 | 루트 `package.json` | `start` 스크립트 | `npm start`로 `node server.js` 실행 |
 | 루트 `package.json` | `build` 스크립트 | `frontend` devDependencies 포함 설치 및 Vite 빌드 실행 |
 | 루트 `package.json` | `engines` | Node.js `20.19` 이상 사용 |
-| 루트 `package.json` | `dependencies` | `multer` 포함 |
+| 루트 `package.json` | `dependencies` | `multer`, `socket.io` 포함 |
 | `frontend/package.json` | `build` 스크립트 | `vite build` 실행 |
-| `frontend/package.json` | `dependencies` | 6단계 이후 `react-router-dom` 설치 필요 |
+| `frontend/package.json` | `dependencies` | `react-router-dom`, `socket.io-client` 포함 |
 | `frontend/package.json` | `test` 스크립트 | 없음, CI에서 건너뜀 |
 
 ## 3. API 경로 점검 항목
@@ -40,6 +40,9 @@
 - [x] 배포 환경에서는 Express가 `/api/cars`를 직접 제공한다.
 - [x] 차량 상세 URL은 `/cars/:id`를 사용하고 서버 fallback으로 새로고침을 지원한다.
 - [x] 상담방 생성 API는 `/api/chats/rooms`를 사용한다.
+- [x] 상담방 상세 API는 `/api/chats/rooms/:roomId`를 사용한다.
+- [x] 상담 메시지 조회 API는 `/api/chats/rooms/:roomId/messages`를 사용한다.
+- [x] Socket.io 이벤트 이름은 요구사항의 `join-room`, `send-message`, `receive-message`, `leave-room`, `dealer-online`, `dealer-offline`을 유지한다.
 - [x] 기존 Express API 경로인 `/cars`는 유지된다.
 
 ## 4. 환경변수 점검 항목
@@ -50,7 +53,7 @@
 | `.env` | 커밋 금지 |
 | `.gitignore` | `.env`, `.env.*`, `node_modules`, `dist`, 로그 파일 제외 |
 | `.gitignore` | `uploads/*` 런타임 업로드 파일 제외, `uploads/default-car.png` 기본 이미지는 커밋 가능 |
-| Render Environment | `NODE_ENV=production`, `MONGODB_URI`, `DB_NAME`, 컬렉션 이름, `INITIAL_ADMIN_EMAILS`, Firebase `VITE_FIREBASE_*` 값 등록 필요. DNS 문제가 있으면 `MONGODB_DNS_SERVERS` 선택 등록 |
+| Render Environment | `NODE_ENV=production`, `MONGODB_URI`, `DB_NAME`, 컬렉션 이름, `CLIENT_URL`, `INITIAL_ADMIN_EMAILS`, Firebase `VITE_FIREBASE_*` 값 등록 필요. DNS 문제가 있으면 `MONGODB_DNS_SERVERS` 선택 등록. 분리 배포가 아니면 `VITE_API_BASE_URL`은 비워둘 수 있음 |
 | GitHub Secrets | `RENDER_DEPLOY_HOOK_URL` 필요 |
 
 ## 5. GitHub Actions 점검 항목
@@ -108,6 +111,12 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 - [ ] 잘못된 차량 ID 접근 시 오류 안내가 표시된다.
 - [ ] 상세 화면의 `딜러와 상담하기` 버튼으로 `/chats/:roomId` 준비 화면에 이동한다.
 - [ ] MongoDB `chat_rooms` 컬렉션에 상담방 문서가 저장된다.
+- [ ] `/chats/:roomId`에서 이전 메시지 목록이 조회된다.
+- [ ] `/chats/:roomId`에서 메시지 전송 시 MongoDB `messages` 컬렉션에 저장된다.
+- [ ] 브라우저 2개 또는 탭 2개에서 같은 상담방 메시지가 실시간으로 송수신된다.
+- [ ] 딜러 접속 시 구매자 화면에 온라인 상태가 표시된다.
+- [ ] 딜러 접속 종료 시 구매자 화면에 오프라인 상태가 표시된다.
+- [ ] MongoDB `users` 문서의 딜러 온라인 상태 필드가 접속 상태에 따라 갱신된다.
 - [ ] 자기 자신과 상담방을 만드는 요청은 차단된다.
 - [ ] Render 무료 환경에서는 `uploads/` 파일이 영구 보관되지 않을 수 있음을 확인했다.
 - [ ] 새로고침해도 React 화면이 유지된다.

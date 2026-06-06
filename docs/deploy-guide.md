@@ -112,8 +112,9 @@ http://localhost:3000/api/cars
 | `COLLECTION_USERS` | `users` | 사용자 추가 정보 컬렉션 |
 | `COLLECTION_CHAT_ROOMS` | `chat_rooms` | 상담방 컬렉션 |
 | `COLLECTION_MESSAGES` | `messages` | 상담 메시지 컬렉션 |
-| `CLIENT_URL` | 로컬 또는 배포된 React 주소 | 이후 CORS와 Socket.io 설정에 사용할 클라이언트 주소 |
+| `CLIENT_URL` | 로컬 또는 배포된 React 주소 | Socket.io CORS 설정에 사용할 클라이언트 주소 |
 | `INITIAL_ADMIN_EMAILS` | 최초 관리자 이메일 | 쉼표로 여러 이메일 등록 가능, 서버에서만 사용 |
+| `VITE_API_BASE_URL` | 비워둠 또는 API 서버 주소 | 같은 origin 배포가 아닐 때 Socket.io 클라이언트가 사용할 서버 주소 |
 | `VITE_FIREBASE_API_KEY` | Firebase Web API key | React Firebase Authentication 설정 |
 | `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain | 예: `프로젝트ID.firebaseapp.com` |
 | `VITE_FIREBASE_PROJECT_ID` | Firebase Project ID | Firebase 프로젝트 ID |
@@ -216,6 +217,10 @@ Render 배포가 끝나면 Render에서 제공하는 URL로 접속한다.
 - 로그인 후 `/cars/:id` 상세 URL에 직접 접근하고 새로고침해도 상세 정보가 유지되는지 확인한다.
 - 차량 상세 화면에서 `딜러와 상담하기`를 눌렀을 때 `/chats/:roomId` 준비 화면으로 이동하는지 확인한다.
 - MongoDB `chat_rooms` 컬렉션에 상담방 문서가 생성 또는 갱신되는지 확인한다.
+- `/chats/:roomId`에서 메시지를 전송하면 MongoDB `messages` 컬렉션에 저장되고 같은 상담방 화면에 실시간으로 표시되는지 확인한다.
+- 딜러 계정으로 상담방에 접속하면 구매자 화면에 `dealer-online`, 접속 종료 시 `dealer-offline` 상태가 표시되는지 확인한다.
+- MongoDB `users` 문서의 `dealerOnline`, `dealerSocketIds`, `dealerConnectedAt`, `dealerLastSeenAt` 필드가 접속 상태에 따라 갱신되는지 확인한다.
+- 서버 재시작 후 이전 Socket.io 연결 흔적이 오프라인 상태로 정리되는지 확인한다.
 - 차량 등록자 본인이 자기 차량으로 상담방을 만들면 서버가 차단하는지 확인한다.
 - 브라우저 새로고침 후 화면이 유지되는지 확인한다.
 - Render Logs에 포트 또는 빌드 오류가 없는지 확인한다.
