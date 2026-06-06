@@ -1,13 +1,22 @@
-require("dotenv").config({ quiet: true });
-
 const express = require("express");
 const fs = require("fs");
 const http = require("http");
-const multer = require("multer");
 const { ObjectId } = require("mongodb");
 const path = require("path");
 const { Server } = require("socket.io");
+const {
+  frontendDistPath,
+  frontendIndexPath,
+  uploadsPath,
+} = require("./config/paths");
+const {
+  createImageUrl,
+  handleUploadError,
+  upload,
+} = require("./config/upload");
 const { connectDatabase, getCollection } = require("./db");
+
+require("dotenv").config({ path: path.join(__dirname, "..", ".env"), quiet: true });
 
 // Express 애플리케이션을 생성합니다.
 const app = express();
@@ -20,49 +29,6 @@ const io = new Server(server, {
 
 // Render 같은 배포 환경에서는 process.env.PORT를 사용하고, 로컬에서는 3000번을 사용합니다.
 const port = process.env.PORT || 3000;
-const frontendDistPath = path.join(__dirname, "frontend", "dist");
-const frontendIndexPath = path.join(frontendDistPath, "index.html");
-const uploadsPath = path.join(__dirname, "uploads");
-const maxUploadFileSize = 5 * 1024 * 1024;
-const allowedImageExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
-const allowedImageMimeTypes = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
-
-fs.mkdirSync(uploadsPath, { recursive: true });
-
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: uploadsPath,
-    filename: (req, file, cb) => {
-      const extension = path.extname(file.originalname).toLowerCase();
-      const safeName = `${Date.now()}-${Math.round(
-        Math.random() * 1e9,
-      )}${extension}`;
-      cb(null, safeName);
-    },
-  }),
-  limits: { fileSize: maxUploadFileSize },
-  fileFilter: (req, file, cb) => {
-    const extension = path.extname(file.originalname).toLowerCase();
-
-    if (
-      allowedImageExtensions.has(extension) &&
-      allowedImageMimeTypes.has(file.mimetype)
-    ) {
-      cb(null, true);
-      return;
-    }
-
-    cb(
-      new Error(
-        "차량 사진은 jpg, jpeg, png, webp 형식만 업로드할 수 있습니다.",
-      ),
-    );
-  },
-});
 
 // JSON 형식의 요청 body를 req.body에서 사용할 수 있게 합니다.
 app.use(express.json());
@@ -204,30 +170,6 @@ function validateUserInput(user) {
   if (!user.displayName) return "사용자 이름이 필요합니다.";
 
   return "";
-}
-
-function createImageUrl(file) {
-  return file ? `/uploads/${file.filename}` : "";
-}
-
-function handleUploadError(error, res, fallbackMessage) {
-  if (error instanceof multer.MulterError) {
-    const message =
-      error.code === "LIMIT_FILE_SIZE"
-        ? "차량 사진은 5MB 이하로 업로드해주세요."
-        : "차량 사진 업로드를 처리하지 못했습니다.";
-
-    res.status(400).json({ message });
-    return;
-  }
-
-  if (error.message && error.message.includes("차량 사진은")) {
-    res.status(400).json({ message: error.message });
-    return;
-  }
-
-  console.error(fallbackMessage, error.message);
-  res.status(500).json({ message: fallbackMessage });
 }
 
 function createChatError(message) {
