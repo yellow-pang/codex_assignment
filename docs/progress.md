@@ -1,5 +1,38 @@
 # 작업 진행 기록
 
+## 핵심 보안 강화
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 핵심 보안 강화 |
+| 작업 일자 | 2026-06-07 |
+| 작업 내용 | Firebase ID Token 서버 검증, 인증/권한 미들웨어, 보호 API Authorization 헤더, 상담 참여자 검증, Socket.io 인증 보강 |
+| 설치한 패키지 | 루트 `firebase-admin` |
+| 수정한 주요 파일 | `backend/server.js`, `backend/routes/cars.routes.js`, `backend/routes/users.routes.js`, `backend/routes/chats.routes.js`, `backend/services/cars.service.js`, `backend/services/users.service.js`, `backend/services/chats.service.js`, `backend/sockets/chat.socket.js`, `frontend/src/App.jsx`, `frontend/src/contexts/AuthContext.jsx`, `frontend/src/components/AdminUserPanel.jsx`, `frontend/src/components/ChatRoom.jsx`, `frontend/src/components/ChatRoomList.jsx`, `.env.example`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md` |
+| 추가한 주요 파일 | `backend/config/firebaseAdmin.js`, `backend/middleware/auth.js`, `backend/middleware/errors.js`, `frontend/src/api/authenticatedFetch.js`, `docs/plans/plan-15-core-security-hardening.md`, `docs/steps/2026-06-07-15-core-security-hardening.md`, `docs/pr/2026-06-07-15-core-security-hardening-pr.md` |
+| 확인한 명령어 | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+
+### 작업 내용
+
+- Firebase Admin SDK를 추가하고 `FIREBASE_SERVICE_ACCOUNT_JSON` 기반 ID Token 검증 모듈을 만들었다.
+- `requireAuth`, `requireAdmin`, `requireDealer`, `requireUserProfile` 미들웨어를 추가했다.
+- 차량 등록, 수정, 삭제 권한을 클라이언트 전달 `dealerId`가 아니라 인증된 승인 딜러 기준으로 재검증하도록 변경했다.
+- 사용자 목록 조회, 역할 변경, 딜러 신청을 인증 사용자 기준으로 변경하고 `requesterUid` 의존을 제거했다.
+- 상담방 생성, 목록, 상세, 메시지 조회에서 인증 사용자와 상담방 참여자 검증을 적용했다.
+- Socket.io 연결 시 Firebase ID Token을 검증하고, 메시지 전송자는 payload의 `senderId`가 아니라 인증 사용자 프로필로 저장하도록 변경했다.
+- 프론트엔드에 `authenticatedFetch` helper를 추가해 보호 API 요청에 `Authorization: Bearer` 헤더를 붙였다.
+- `express.json({ limit: "1mb" })`를 적용하고 Socket.io CORS 기본값을 점검했다.
+- 공통 에러 응답 helper를 추가하고 기존 `{ message }` 응답 형식을 유지했다.
+- 초보자가 따라할 수 있도록 Firebase Admin 서비스 계정 설정 방법을 Step 문서에 상세히 작성했다.
+
+### 남은 확인
+
+1. 로컬 `.env`와 Render Environment에 `FIREBASE_SERVICE_ACCOUNT_JSON`을 등록한다.
+2. 실제 Firebase/MongoDB 환경에서 로그인 후 `/api/users/me`와 보호 API가 정상 동작하는지 확인한다.
+3. 인증 토큰 없는 보호 API가 `401`, 권한 없는 요청이 `403`으로 차단되는지 확인한다.
+4. 구매자/딜러 브라우저 2개로 Socket.io 상담 메시지가 인증 사용자 기준으로 저장되는지 확인한다.
+5. `npm audit fix --force`는 breaking change 가능성이 있어 이번 단계에서 실행하지 않았으므로 필요 시 별도 의존성 점검 단계로 다룬다.
+
 ## 백엔드 라우터와 서비스 세분화
 
 | 항목 | 내용 |

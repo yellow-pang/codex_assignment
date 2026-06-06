@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { authenticatedFetch } from "../api/authenticatedFetch.js";
 
 function ChatRoomList({ onGoList, userProfile }) {
   const [rooms, setRooms] = useState([]);
@@ -15,9 +16,7 @@ function ChatRoomList({ onGoList, userProfile }) {
       setError("");
 
       try {
-        const res = await fetch(
-          `/api/chats/rooms?uid=${encodeURIComponent(userProfile.uid)}`,
-        );
+        const res = await authenticatedFetch("/api/chats/rooms");
         if (!res.ok) throw new Error("상담방 목록을 불러오지 못했습니다.");
         const data = await res.json();
         setRooms(data);

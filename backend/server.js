@@ -13,6 +13,7 @@ const {
 } = require("./config/paths");
 const { handleUploadError } = require("./config/upload");
 const { connectDatabase } = require("./db");
+const { sendErrorResponse } = require("./middleware/errors");
 const { createCarsRouter } = require("./routes/cars.routes");
 const { createChatsRouter } = require("./routes/chats.routes");
 const { createUsersRouter } = require("./routes/users.routes");
@@ -21,14 +22,20 @@ const { setupChatSocketHandlers } = require("./sockets/chat.socket");
 
 const app = express();
 const server = http.createServer(app);
+function createSocketCorsOptions() {
+  if (process.env.CLIENT_URL) {
+    return { origin: process.env.CLIENT_URL };
+  }
+
+  return process.env.NODE_ENV === "production" ? undefined : { origin: true };
+}
+
 const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || true,
-  },
+  cors: createSocketCorsOptions(),
 });
 const port = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 app.use("/uploads", express.static(uploadsPath));
 app.use(express.static(frontendDistPath));
 
@@ -40,7 +47,12 @@ app.use("/api/chats", createChatsRouter());
 app.use("/cars", carsRouter);
 
 app.use((error, req, res, next) => {
-  handleUploadError(error, res, "파일 업로드 중 오류가 발생했습니다.");
+  handleUploadError(
+    error,
+    res,
+    "파일 업로드 중 오류가 발생했습니다.",
+    next,
+  );
 });
 
 app.get("/", (req, res) => {
@@ -58,6 +70,8 @@ app.get("*", (req, res) => {
 
   res.status(404).json({ message: "페이지를 찾을 수 없습니다." });
 });
+
+app.use(sendErrorResponse);
 
 async function startServer() {
   try {

@@ -48,7 +48,7 @@ function createImageUrl(file) {
   return file ? `/uploads/${file.filename}` : "";
 }
 
-function handleUploadError(error, res, fallbackMessage) {
+function handleUploadError(error, res, fallbackMessage, next) {
   if (error instanceof multer.MulterError) {
     const message =
       error.code === "LIMIT_FILE_SIZE"
@@ -61,6 +61,11 @@ function handleUploadError(error, res, fallbackMessage) {
 
   if (error.message && error.message.includes("차량 사진은")) {
     res.status(400).json({ message: error.message });
+    return;
+  }
+
+  if (next) {
+    next(error);
     return;
   }
 

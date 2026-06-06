@@ -113,9 +113,7 @@ async function listDealers() {
   return dealers.map(normalizeUserDocument);
 }
 
-async function listUsers(requesterUid) {
-  await requireAdminProfile(requesterUid);
-
+async function listUsers() {
   const users = await getUsersCollection()
     .find({})
     .sort({ createdAt: -1, email: 1 })
@@ -158,14 +156,8 @@ async function requireDealerProfile(dealerId) {
   return dealer;
 }
 
-async function requestDealerApproval(requesterUid) {
-  if (!requesterUid) {
-    const error = new Error("사용자 UID가 필요합니다.");
-    error.statusCode = 400;
-    throw error;
-  }
-
-  const user = await findUserByUid(requesterUid);
+async function requestDealerApproval(userProfile) {
+  const user = userProfile;
 
   if (!user) {
     const error = new Error("사용자 정보를 찾을 수 없습니다.");
@@ -187,7 +179,7 @@ async function requestDealerApproval(requesterUid) {
 
   const now = new Date();
   const result = await getUsersCollection().findOneAndUpdate(
-    { uid: requesterUid },
+    { uid: user.uid },
     {
       $set: {
         role: "buyer",
@@ -204,9 +196,13 @@ async function requestDealerApproval(requesterUid) {
   return normalizeUserDocument(getMongoDocument(result));
 }
 
-async function saveUserProfile(input) {
+async function saveUserProfile(input, authUser = {}) {
   const now = new Date();
-  const userInput = normalizeUserInput(input);
+  const userInput = normalizeUserInput({
+    ...input,
+    uid: authUser.uid || input.uid,
+    email: authUser.email || input.email,
+  });
   const validationMessage = validateUserInput(userInput);
 
   if (validationMessage) {
@@ -250,10 +246,16 @@ async function saveUserProfile(input) {
   return normalizeUserDocument(getMongoDocument(result));
 }
 
-async function updateUserRole({ targetUid, requesterUid, role, dealerStatus }) {
-  const admin = await requireAdminProfile(requesterUid);
+async function updateUserRole({ targetUid, adminProfile, role, dealerStatus }) {
+  const admin = adminProfile;
   const nextRole = String(role || "").trim();
   const nextDealerStatus = normalizeDealerStatus(dealerStatus);
+
+  if (!admin || admin.role !== "admin") {
+    const error = new Error("관리자 권한이 필요합니다.");
+    error.statusCode = 403;
+    throw error;
+  }
 
   if (!targetUid) {
     const error = new Error("대상 사용자 UID가 필요합니다.");

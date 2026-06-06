@@ -5,9 +5,9 @@ const { createCarSearchQuery } = require("../utils/search");
 const { getCarsCollection } = require("./collections");
 const { assertCarOwner, requireDealerProfile } = require("./users.service");
 
-async function createCar(input, file) {
+async function createCar(input, file, dealerProfile) {
   const now = new Date();
-  const dealer = await requireDealerProfile(input.dealerId);
+  const dealer = await requireDealerProfile(dealerProfile?.uid);
   const newCar = {
     ...normalizeCarInput(input),
     imageUrl: createImageUrl(file),
@@ -22,8 +22,8 @@ async function createCar(input, file) {
   return { _id: result.insertedId, ...newCar };
 }
 
-async function deleteCar(id, dealerId) {
-  const dealer = await requireDealerProfile(dealerId);
+async function deleteCar(id, dealerProfile) {
+  const dealer = await requireDealerProfile(dealerProfile?.uid);
   const filter = createCarFilterById(id);
   const existingCar = await getCarsCollection().findOne(filter);
 
@@ -75,9 +75,9 @@ async function searchCars(queryParams) {
     .toArray();
 }
 
-async function updateCar(id, input, file) {
+async function updateCar(id, input, file, dealerProfile) {
   const filter = createCarFilterById(id);
-  const dealer = await requireDealerProfile(input.dealerId);
+  const dealer = await requireDealerProfile(dealerProfile?.uid);
   const existingCar = await getCarsCollection().findOne(filter);
 
   if (!existingCar) {

@@ -13,9 +13,17 @@ function createChatError(message) {
   return { message };
 }
 
-async function createChatRoom({ buyerId: rawBuyerId, carId: rawCarId }) {
+function assertChatRoomParticipant(room, userId) {
+  if (userId !== room.buyerId && userId !== room.dealerId) {
+    const error = new Error("상담방 참여자만 접근할 수 있습니다.");
+    error.statusCode = 403;
+    throw error;
+  }
+}
+
+async function createChatRoom({ buyerProfile, carId: rawCarId }) {
   const carId = String(rawCarId || "").trim();
-  const buyerId = normalizeUid(rawBuyerId);
+  const buyerId = normalizeUid(buyerProfile?.uid);
 
   if (!carId) {
     const error = new Error("차량 ID가 필요합니다.");
@@ -29,7 +37,7 @@ async function createChatRoom({ buyerId: rawBuyerId, carId: rawCarId }) {
     throw error;
   }
 
-  const buyer = await findUserByUid(buyerId);
+  const buyer = buyerProfile || (await findUserByUid(buyerId));
 
   if (!buyer) {
     const error = new Error("사용자 정보를 찾을 수 없습니다.");
@@ -91,7 +99,7 @@ async function findChatRoomById(roomId) {
   return getChatRoomsCollection().findOne({ roomId });
 }
 
-async function getChatRoomDetail(roomId) {
+async function getChatRoomDetail(roomId, userId) {
   if (!roomId) {
     const error = new Error("상담방 ID가 필요합니다.");
     error.statusCode = 400;
@@ -106,6 +114,8 @@ async function getChatRoomDetail(roomId) {
     throw error;
   }
 
+  assertChatRoomParticipant(room, normalizeUid(userId));
+
   const dealerPresence = await getDealerPresence(room.dealerId);
 
   return {
@@ -115,10 +125,11 @@ async function getChatRoomDetail(roomId) {
   };
 }
 
-async function handleChatMessage(payload) {
+async function handleChatMessage(payload, senderProfile) {
   const roomId = String(payload?.roomId || "").trim();
-  const senderId = normalizeUid(payload?.senderId);
-  const senderName = String(payload?.senderName || "사용자").trim() || "사용자";
+  const senderId = normalizeUid(senderProfile?.uid);
+  const senderName =
+    String(senderProfile?.displayName || "사용자").trim() || "사용자";
   const text = normalizeChatMessageText(payload?.text);
 
   if (!roomId) {
@@ -139,9 +150,7 @@ async function handleChatMessage(payload) {
     throw new Error("상담방을 찾을 수 없습니다.");
   }
 
-  if (senderId !== room.buyerId && senderId !== room.dealerId) {
-    throw new Error("상담방 참여자만 메시지를 보낼 수 있습니다.");
-  }
+  assertChatRoomParticipant(room, senderId);
 
   const now = new Date();
   const message = {
@@ -179,12 +188,22 @@ async function handleChatMessage(payload) {
   };
 }
 
-async function listChatRoomMessages(roomId) {
+async function listChatRoomMessages(roomId, userId) {
   if (!roomId) {
     const error = new Error("상담방 ID가 필요합니다.");
     error.statusCode = 400;
     throw error;
   }
+
+  const room = await findChatRoomById(roomId);
+
+  if (!room) {
+    const error = new Error("상담방을 찾을 수 없습니다.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  assertChatRoomParticipant(room, normalizeUid(userId));
 
   return getMessagesCollection()
     .find({ roomId })
@@ -192,8 +211,8 @@ async function listChatRoomMessages(roomId) {
     .toArray();
 }
 
-async function listChatRooms(uid) {
-  const userId = normalizeUid(uid);
+async function listChatRooms(userProfile) {
+  const userId = normalizeUid(userProfile?.uid);
 
   if (!userId) {
     const error = new Error("사용자 UID가 필요합니다.");
@@ -208,6 +227,7 @@ async function listChatRooms(uid) {
 }
 
 module.exports = {
+  assertChatRoomParticipant,
   createChatError,
   createChatRoom,
   findChatRoomById,

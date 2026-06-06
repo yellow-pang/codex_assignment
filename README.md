@@ -20,6 +20,7 @@ https://codex-assignment.onrender.com/
 - 승인된 딜러의 차량 등록, 수정, 삭제
 - `multer` 기반 차량 사진 업로드와 `/uploads` 정적 제공
 - Firebase 이메일/비밀번호 회원가입, 로그인, 로그아웃
+- Firebase ID Token 서버 검증과 보호 API 인증
 - MongoDB `users` 컬렉션 기반 사용자 프로필 저장
 - `buyer`, `dealer`, `admin` 역할 관리
 - 일반 사용자의 딜러 신청과 admin의 승인/거절
@@ -97,6 +98,7 @@ COLLECTION_CHAT_ROOMS=chat_rooms
 COLLECTION_MESSAGES=messages
 CLIENT_URL=http://localhost:5173
 INITIAL_ADMIN_EMAILS=admin@example.com
+FIREBASE_SERVICE_ACCOUNT_JSON=Firebase Admin 서비스 계정 JSON 문자열
 VITE_API_BASE_URL=
 VITE_FIREBASE_API_KEY=Firebase Web API key
 VITE_FIREBASE_AUTH_DOMAIN=프로젝트ID.firebaseapp.com
@@ -112,6 +114,8 @@ VITE_FIREBASE_APP_ID=Firebase 웹 앱 ID
 - `VITE_API_BASE_URL`은 프론트엔드와 API가 분리 배포된 경우에만 사용합니다. 현재 Render 단일 Web Service에서는 비워둘 수 있습니다.
 - Firebase Web config 값은 공개 식별 정보이지만, 실제 값은 `.env` 또는 Render Environment에만 등록합니다.
 - Firebase 콘솔에서 Authentication 이메일/비밀번호 제공자를 활성화해야 합니다.
+- `FIREBASE_SERVICE_ACCOUNT_JSON`은 서버가 Firebase 로그인 토큰을 검증하기 위한 비밀값입니다. Firebase 콘솔의 Service accounts에서 새 private key를 만든 뒤 JSON 내용을 한 줄 문자열로 등록합니다.
+- `FIREBASE_SERVICE_ACCOUNT_JSON`은 절대 프론트엔드 코드, GitHub 저장소, README 실제 값에 작성하지 않습니다.
 
 ## Render 배포와 GitHub Actions
 
@@ -154,14 +158,17 @@ curl "https://codex-assignment.onrender.com/api/cars/search?keyword=sonata&compa
 ```bash
 curl -X POST https://codex-assignment.onrender.com/api/chats/rooms \
   -H "Content-Type: application/json" \
-  -d "{\"carId\":\"차량 ObjectId\",\"buyerId\":\"Firebase 사용자 UID\"}"
+  -H "Authorization: Bearer Firebase_ID_TOKEN" \
+  -d "{\"carId\":\"차량 ObjectId\"}"
 ```
 
 상담방 상세와 이전 메시지 조회:
 
 ```bash
-curl https://codex-assignment.onrender.com/api/chats/rooms/상담방ID
-curl https://codex-assignment.onrender.com/api/chats/rooms/상담방ID/messages
+curl -H "Authorization: Bearer Firebase_ID_TOKEN" \
+  https://codex-assignment.onrender.com/api/chats/rooms/상담방ID
+curl -H "Authorization: Bearer Firebase_ID_TOKEN" \
+  https://codex-assignment.onrender.com/api/chats/rooms/상담방ID/messages
 ```
 
 ## Socket.io 이벤트
@@ -175,7 +182,7 @@ curl https://codex-assignment.onrender.com/api/chats/rooms/상담방ID/messages
 | `dealer-online` | 딜러 온라인 상태 알림 |
 | `dealer-offline` | 딜러 오프라인 상태 알림 |
 
-메시지는 서버에서 검증 후 MongoDB `messages` 컬렉션에 저장됩니다.
+Socket.io 연결 시에도 Firebase ID Token을 전달하며, 메시지는 서버에서 인증 사용자와 상담방 참여자를 검증한 뒤 MongoDB `messages` 컬렉션에 저장됩니다.
 딜러 온라인 상태는 MongoDB `users` 문서의 `dealerOnline`, `dealerSocketIds`, `dealerConnectedAt`, `dealerLastSeenAt` 필드로 관리합니다.
 서버가 재시작되면 기존 Socket.io 연결은 유효하지 않으므로 시작 과정에서 딜러 온라인 상태를 오프라인으로 정리합니다.
 
@@ -216,7 +223,7 @@ Render 실동작 확인은 사용자 확인 기준입니다.
 
 - `.env` 파일은 커밋하지 않습니다.
 - Render Secret, GitHub Secret, MongoDB 접속 문자열은 문서에 작성하지 않습니다.
-- Firebase Admin SDK 기반 서버 토큰 검증은 아직 도입하지 않았습니다.
+- Firebase Admin SDK 기반 서버 토큰 검증을 사용하므로 Render Environment에 `FIREBASE_SERVICE_ACCOUNT_JSON`을 등록해야 보호 API가 동작합니다.
 - 차량 사진은 `multer`로 서버의 `uploads/` 폴더에 저장합니다.
 - Render 무료 환경에서는 재배포, 인스턴스 재시작, 환경 재생성 시 `uploads/` 파일이 유지되지 않을 수 있습니다.
 - 장기 운영이 필요하면 S3, Cloudinary 같은 외부 이미지 스토리지 도입을 검토해야 합니다.
