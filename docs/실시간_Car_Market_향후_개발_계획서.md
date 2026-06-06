@@ -190,6 +190,12 @@ Render 배포는 사용자 확인 기준 완료되었으며, 배포 URL은 `http
 - 실제 AI 호출 없이 `generateAgentReply` placeholder 함수를 둔다.
 - 딜러 오프라인 시 AI Agent 자동 응답으로 확장 가능한 주석과 문서를 남긴다.
 
+보정 기록:
+
+- 8단계 Socket.io 작업에서 `handleChatMessage` 함수 분리는 먼저 완료되었다.
+- 9단계 AI Agent 확장 구조 정리에서는 기존 함수를 다시 활용해 차량 정보, 최근 메시지, 사용자 질문, 딜러 온라인 상태를 묶는 context helper를 추가한다.
+- 실제 OpenAI 또는 외부 AI API는 연결하지 않고, `generateAgentReply` placeholder는 기본적으로 `null`을 반환한다.
+
 ### 9.10 9단계: Render 및 GitHub Actions 문서 업데이트
 
 - `.env.example`에 MongoDB, Firebase, Socket.io 관련 환경 변수를 추가한다.
