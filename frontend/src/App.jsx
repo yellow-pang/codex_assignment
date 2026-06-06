@@ -90,11 +90,19 @@ function App() {
   useEffect(() => {
     if (previousPathRef.current !== location.pathname) {
       previousPathRef.current = location.pathname;
-      setMessage((prevMessage) =>
-        prevMessage.type === "error" ? { type: "", text: "" } : prevMessage,
-      );
+      setMessage({ type: "", text: "" });
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!message.text || message.type === "error") return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setMessage({ type: "", text: "" });
+    }, 4000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [message.text, message.type]);
 
   async function requestApi(url, options) {
     const response = await fetch(url, options);
@@ -501,9 +509,9 @@ function App() {
                 딜러와 바로 상담하세요.
               </p>
               <div className="mt-6 grid max-w-md grid-cols-3 gap-3">
-                <HeroMetric label="등록 매물" value={cars.length} />
-                <HeroMetric label="상담 상태" value="LIVE" />
-                <HeroMetric label="검증 흐름" value="OK" />
+                <HeroMetric label="추천 매물" value={cars.length} />
+                <HeroMetric label="실시간 상담" value="LIVE" />
+                <HeroMetric label="간편 검색" value="FAST" />
               </div>
             </div>
 
@@ -511,16 +519,16 @@ function App() {
               <div className="absolute inset-x-10 bottom-2 h-10 rounded-full bg-blue-950/20 blur-2xl" />
               <div className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/70 p-3 shadow-2xl shadow-blue-200/60 backdrop-blur">
                 <img
-                  alt="차량 등록 대기 중 placeholder"
+                  alt="Car Market 대표 차량 이미지"
                   className="h-64 w-full rounded-[1.2rem] object-cover sm:h-80"
                   src="/uploads/pre-default-car.png"
                 />
                 <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur">
                   <p className="text-sm font-black text-slate-950">
-                    차량 등록 대기 중
+                    조건에 맞는 차량을 빠르게 비교하세요
                   </p>
                   <p className="mt-1 text-xs text-slate-500">
-                    곧 차량 정보가 등록됩니다
+                    검색부터 딜러 상담까지 한 화면에서 이어집니다
                   </p>
                 </div>
               </div>
@@ -627,7 +635,7 @@ function App() {
                 <span className="text-blue-600">{cars.length}</span>
               </h2>
               <p className="c-section-desc">
-                이미지가 없는 차량은 등록 대기 placeholder로 표시됩니다.
+                조건에 맞는 매물을 비교하고 딜러와 바로 상담해보세요.
               </p>
             </div>
             {isDealer && (

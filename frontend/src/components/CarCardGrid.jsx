@@ -19,7 +19,7 @@ function CarCardGrid({
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {cars.map((car) => (
         <article
           key={car._id}
@@ -37,7 +37,7 @@ function CarCardGrid({
               {car.company}
             </span>
             <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
-              상담 가능
+              딜러 상담
             </span>
           </div>
 
