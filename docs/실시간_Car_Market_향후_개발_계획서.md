@@ -17,7 +17,7 @@
 | 진행 기록      | `docs/progress.md`                                                           |
 | 배포 문서      | `docs/deploy-guide.md`, `docs/deploy-checklist.md`                           |
 | GitHub Actions | `.github/workflows/deploy.yml`                                               |
-| 백엔드         | `server.js`, `package.json`                                                  |
+| 백엔드         | `backend/server.js`, `backend/db.js`, `package.json`                         |
 | 프론트엔드     | `frontend/src/App.jsx`, `frontend/src/components/*`, `frontend/package.json` |
 
 ## 3. 현재 구현 상태 요약
