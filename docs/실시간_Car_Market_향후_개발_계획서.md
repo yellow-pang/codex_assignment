@@ -4,9 +4,9 @@
 
 이 문서는 `실시간 Car Market 서비스 요구사항 정의서`와 현재 프로젝트 구현 상태를 비교한 뒤, 앞으로 어떤 순서로 개발을 진행할지 정리하기 위해 작성한다.
 
-현재 프로젝트는 기존 자동차 CRUD 앱을 실시간 Car Market 구조로 확장한 상태다.
-초기 작성 당시에는 Firebase Authentication, MongoDB Atlas, 차량 사진 업로드, Socket.io 상담, AI Agent 확장 준비가 본격 구현 전 단계였으나, 이후 단계별 구현을 거쳐 Firebase 인증, MongoDB Atlas, 차량 사진 업로드, Socket.io 상담, MongoDB 기반 딜러 온라인 상태까지 구현되었다.
-이 문서는 기존 판단을 삭제하지 않고, 실제 구현 기준으로 보정 기록을 남기며 다음 확장 방향을 정리한다.
+초기 작성 당시에는 기존 자동차 CRUD 앱을 Render 단일 Web Service로 배포할 수 있도록 구성한 상태였고, Firebase Authentication, MongoDB Atlas, 차량 사진 업로드, Socket.io 상담, AI Agent 확장 준비는 본격 구현 전 단계로 판단했다.
+이후 단계별 구현을 통해 MongoDB Atlas, Firebase Authentication, 차량 사진 업로드, Socket.io 실시간 상담, MongoDB 기반 딜러 온라인 상태까지 구현되었다.
+현재 문서는 초기 판단을 삭제하지 않고, 실제 구현과 배포 기준으로 보정 기록을 남기기 위해 갱신한다.
 
 ## 2. 기준 문서 및 확인한 파일
 
@@ -24,9 +24,9 @@
 
 | 영역                    | 현재 상태                                   | 판단                 |
 | ----------------------- | ------------------------------------------- | -------------------- |
-| Express 서버            | `server.js`에서 자동차 CRUD API 제공        | 부분 구현            |
-| React 프론트엔드        | 목록, 등록, 수정, 상세, 삭제 화면 제공      | 부분 구현            |
-| Tailwind CSS / daisyUI  | 적용 완료                                   | 구현                 |
+| Express 서버            | `/api/cars`, `/api/users`, `/api/chats` 중심 API 제공 | 구현                 |
+| React 프론트엔드        | 차량 목록, 검색, 상세, 인증, 딜러/관리자, 상담 화면 제공 | 구현                 |
+| Tailwind CSS / daisyUI  | 순수 Tailwind CSS 기반 UI로 전환, daisyUI 제거 | 구현                 |
 | 차량 데이터 저장        | MongoDB Atlas `cars` 컬렉션 사용            | 구현                 |
 | MongoDB Atlas           | `MongoClient` 기반 연결과 기본 컬렉션 준비 구현 | 구현                 |
 | Firebase Authentication | Firebase 이메일/비밀번호 인증 화면과 상태 관리 구현 | 구현                 |
@@ -34,19 +34,19 @@
 | 차량 검색               | 키워드, 제조사, 가격, 연식 조건 검색 구현   | 구현                 |
 | 차량 상세               | `/cars/:id` URL 기반 상세 조회와 새로고침 유지 구현 | 구현                 |
 | 사진 업로드             | `multer`, `/uploads` 정적 제공, 등록/수정 사진 처리 | 구현                 |
-| Socket.io 상담          | 상담방 생성, 이전 메시지 조회, 실시간 메시지 송수신, MongoDB 저장 구현 | 구현                 |
-| AI Agent 확장 구조      | `handleChatMessage` 분리 완료, `generateAgentReply` placeholder와 context 구조 정리 단계 | 진행 중              |
-| Render 배포             | 단일 Web Service 배포 문서와 빌드 구조 있음 | 구현                 |
+| Socket.io 상담          | 상담방 생성, 목록, 상세, 이전 메시지 조회, 실시간 메시지 송수신 구현 | 구현                 |
+| AI Agent 확장 구조      | `handleChatMessage` 분리 완료, 실제 AI API는 미연동 | 부분 구현            |
+| Render 배포             | 단일 Web Service 배포 완료, URL 문서화      | 구현                 |
 | GitHub Actions CI/CD    | 빌드 후 Render Deploy Hook 호출             | 구현                 |
 
 ## 4. 현재 API 상태
 
-현재 서버는 React 배포 환경에서 `/api` 접두사를 제거해 기존 Express API로 연결한다.
+현재 서버는 React 배포 환경에서 `/api/*` 기준 API와 기존 호환 라우트를 함께 제공한다.
 
 | 기능           | 현재 Express API                | 신규 요구사항 API                   | 상태                      |
 | -------------- | ------------------------------- | ----------------------------------- | ------------------------- |
-| 차량 목록 조회 | `GET /cars`                     | `GET /api/cars`                     | 배포 미들웨어로 연결 가능 |
-| 차량 상세 조회 | `GET /cars/:id`                 | `GET /api/cars/:id`                 | 배포 미들웨어로 연결 가능 |
+| 차량 목록 조회 | `GET /api/cars`                 | `GET /api/cars`                     | 구현                      |
+| 차량 상세 조회 | `GET /api/cars/:id`             | `GET /api/cars/:id`                 | 구현                      |
 | 차량 등록      | `POST /api/cars`                | `POST /api/cars`                    | 사진 업로드와 딜러 권한 확인 구현 |
 | 차량 수정      | `PUT /api/cars/:id`             | `PUT /api/cars/:id`                 | 사진 교체와 등록 딜러 권한 확인 구현 |
 | 차량 삭제      | `DELETE /cars/:id`              | `DELETE /api/cars/:id`              | 기본 CRUD 가능            |
@@ -76,8 +76,8 @@
 | Vite production build | 성공                                       |
 | 확인된 이슈           | 프론트엔드 의존성 moderate 취약점 2건 보고 |
 
-현재 빌드는 Firebase, MongoDB, 사진 업로드, Socket.io 상담 코드가 포함된 기준으로 성공했다.
-실제 Firebase 계정 2개와 MongoDB Atlas를 사용하는 실시간 상담 실동작 검증은 배포 또는 로컬 실행 환경에서 추가 확인이 필요하다.
+현재 빌드는 MongoDB, Firebase, 사진 업로드, Socket.io 상담 코드가 포함된 기준으로 성공했다.
+Render 배포는 사용자 확인 기준 완료되었으며, 배포 URL은 `https://codex-assignment.onrender.com/`이다.
 
 ## 7. 사용자 확인 사항 처리 결과
 
@@ -92,7 +92,7 @@
 | 차량 등록 권한          | 요구사항에 맞춰 딜러만 등록/수정 가능                                  |
 | 차량 사진 저장          | 추천 방식인 Express `/uploads`와 `multer` 사용                         |
 | 상담 화면 범위          | 상담방 목록 화면까지 포함                                              |
-| 딜러 온라인 상태        | MongoDB `users` 문서 기반으로 구현하고 서버 재시작 시 오프라인 정리    |
+| 딜러 온라인 상태        | MongoDB `users` 문서 기반으로 구현하고 서버 시작 시 오프라인 정리      |
 | UI 개편 범위            | 별도 UI 확정 방향 반영                                                 |
 | 관리자 기능             | 관리자 화면과 상담 현황까지 포함                                       |
 
@@ -203,11 +203,23 @@
 - GitHub Actions에서 빌드 실패 가능성이 있는 의존성 설치 순서를 재검토한다.
 - 배포 후 확인 항목에 로그인, 검색, 사진, 상담 기능을 추가한다.
 
+보정 기록:
+
+- `.env.example`의 환경변수 이름은 사용자가 실제 Render Environment에도 반영했다.
+- 현재 Render 배포 URL은 `https://codex-assignment.onrender.com/`이다.
+- `.github/workflows/deploy.yml`은 `main` 브랜치 push 또는 수동 실행 시 빌드 후 Render Deploy Hook을 호출하는 현재 배포 방식과 일치하므로 수정하지 않는다.
+- 배포 문서는 현재 구현된 MongoDB, Firebase, 사진 업로드, Socket.io 상담, 딜러 온라인 상태 기준으로 정리한다.
+
 ### 9.11 10단계: README 제출용 정리
 
 - 프로젝트 소개를 실시간 Car Market 서비스 기준으로 수정한다.
 - 주요 기능, 실행 방법, 환경 변수, MongoDB Atlas 설정, Firebase 설정, Socket.io 이벤트 목록을 작성한다.
 - Render 배포 주소와 AI Agent 확장 아이디어 항목을 추가한다.
+
+보정 기록:
+
+- README는 제출자가 바로 확인할 수 있도록 프로젝트 소개, 배포 URL, 주요 기능, 기술 스택, 실행 방법, 환경변수, 배포/CI/CD, API, Socket.io 이벤트, AI Agent 확장 아이디어, 검증 결과, 주의사항 순서로 정리한다.
+- AI Agent는 실제 API 연동이 아니라 `handleChatMessage` 분리 기반의 향후 확장 아이디어로 기록한다.
 
 ## 10. 개발 우선순위
 
@@ -234,7 +246,7 @@
 | 차량 등록 권한    | 승인된 딜러만 차량 등록, 수정, 삭제가 가능하도록 구현한다.                                                                                                                                   |
 | 차량 사진 저장    | 1차 구현은 추천 방식인 Express `/uploads`와 `multer`를 사용한다. Render 파일 비영속성은 README와 배포 문서에 명시한다.                                                                      |
 | 상담 화면         | 상담방 목록 화면까지 포함한다.                                                                                                                                                              |
-| 딜러 온라인 상태  | Socket.io 접속 상태를 기반으로 구현하되, 향후 확장 가능한 온라인 상태 저장 예시를 문서와 코드 구조에 남긴다.                                                                                |
+| 딜러 온라인 상태  | MongoDB `users` 문서 기반으로 접속 상태를 저장하고, 서버 시작 시 이전 연결 흔적을 오프라인으로 정리한다.                                                                                   |
 | UI 개편           | 차량 목록 중심 첫 화면, 사용자 카드형 목록, 딜러/관리자 테이블형 관리 화면, 다크 모드 미포함, 기본 placeholder 이미지 사용, 사이드바 우선 관리자 UX, daisyUI 패키지 제거 방향으로 진행한다. |
 | 관리자 기능       | 관리자 화면과 상담 현황까지 포함한다.                                                                                                                                                       |
 
@@ -292,8 +304,8 @@ const onlineDealers = new Map();
 // value: { socketId, connectedAt, lastSeenAt }
 ```
 
-이후 구현 단계에서 사용자가 MongoDB 기반 관리 가능성을 확인했고, 실제 구현은 별도 컬렉션 없이 기존 MongoDB `users` 문서에 온라인 상태 필드를 보강하는 방식으로 확정했다.
-이 방식은 현재 단일 Render Web Service 구조에서 추가 인프라 없이 접속 상태를 추적할 수 있고, 관리자나 상담 화면에서 사용자 문서만 조회해도 딜러 상태를 확인할 수 있다는 장점이 있어 선택했다.
+이후 구현 단계에서 MongoDB 기반 관리 가능성을 확인했고, 실제 구현은 별도 컬렉션 없이 기존 MongoDB `users` 문서에 온라인 상태 필드를 보강하는 방식으로 확정했다.
+이 방식은 현재 단일 Render Web Service 구조에서 추가 인프라 없이 접속 상태를 추적할 수 있고, 사용자 문서만 조회해도 딜러 상태를 확인할 수 있다는 장점이 있어 선택했다.
 
 현재 구현 필드:
 
@@ -312,7 +324,7 @@ const onlineDealers = new Map();
 
 ## 16. 다음 액션
 
-1. 확정된 순서대로 MongoDB, 차량 검색, 사진 업로드, Firebase 인증, Socket.io 상담, 관리자/상담 현황을 구현한다.
-2. UI 구현 단계에서는 확정된 UI 방향에 따라 daisyUI class와 패키지를 제거한다.
-3. 매 단계마다 `npm run build`와 핵심 API 호출을 검증한다.
-4. 최종적으로 README와 배포 문서를 제출 기준으로 업데이트한다.
+1. README와 배포 문서를 제출 기준으로 정리한다.
+2. Render 배포 URL과 환경변수 반영 상태를 문서에 남기되, 실제 Secret 값은 작성하지 않는다.
+3. `npm.cmd --prefix frontend run build`, `npm.cmd run build`로 제출 전 빌드를 확인한다.
+4. 제출 전 실제 Render URL에서 로그인, 차량 검색, 사진 업로드, 상담 기능을 가능한 범위에서 최종 확인한다.

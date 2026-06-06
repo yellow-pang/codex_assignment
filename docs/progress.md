@@ -1,30 +1,29 @@
 # 작업 진행 기록
 
-## AI Agent 확장 구조 정리
+## Render/GitHub Actions 문서 업데이트와 README 제출용 정리
 
-| 항목             | 내용                                                                                                                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 작업 단계명      | AI Agent 확장 구조 정리                                                                                                                                 |
-| 작업 일자        | 2026-06-06                                                                                                                                              |
-| 작업 내용        | 실제 AI API 호출 없이 상담 메시지 처리 흐름에 AI Agent context와 `generateAgentReply` placeholder를 추가                                                |
-| 수정한 주요 파일 | `server.js`, `README.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md`                                                              |
-| 추가한 주요 파일 | `docs/plans/plan-09-ai-agent-ready-chat.md`, `docs/steps/2026-06-06-09-ai-agent-ready-chat.md`, `docs/pr/2026-06-06-09-ai-agent-ready-chat-pr.md`        |
-| 확인한 명령어    | `node --check server.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                     |
+| 항목             | 내용                                                                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | Render/GitHub Actions 문서 업데이트와 README 제출용 정리                                                                                 |
+| 작업 일자        | 2026-06-06                                                                                                                                |
+| 작업 내용        | 실제 Render 배포 URL, 환경변수 반영 상태, CI/CD 흐름, 제출용 README 구조를 현재 구현 기준으로 정리                                        |
+| 수정한 주요 파일 | `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md`         |
+| 추가한 주요 파일 | `docs/plans/plan-10-render-readme-submission.md`, `docs/steps/2026-06-06-10-render-readme-submission.md`, `docs/pr/2026-06-06-10-render-readme-submission-pr.md` |
+| 확인한 명령어    | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                      |
 
 ### 작업 내용
 
-- `getRecentRoomMessages(roomId, limit)` 함수를 추가해 AI Agent가 참고할 최근 상담 메시지를 최대 20개까지 조회할 수 있게 했다.
-- `buildAgentContext({ room, userMessage })` 함수를 추가해 상담방, 차량 정보, 최근 메시지, 딜러 온라인 상태, 사용자 질문을 하나의 context로 묶었다.
-- `generateAgentReply(context)` placeholder 함수를 추가했다. 현재는 `null`을 반환하므로 실제 자동 응답은 생성하지 않는다.
-- `handleChatMessage`는 기존처럼 사용자 메시지를 저장하고, 추가로 AI Agent context를 만든 뒤 placeholder를 호출한다.
-- 딜러가 오프라인이고 `generateAgentReply`가 응답을 반환하면 이후 단계에서 AI 메시지를 저장하고 `receive-message`로 전송할 수 있는 확장 위치를 남겼다.
-- `docs/실시간_Car_Market_향후_개발_계획서.md`는 기존 판단을 삭제하지 않고, 실제 구현 기준으로 왜 보정했는지 알 수 있는 기록 형식으로 갱신했다.
+- README를 제출용 구조로 재작성했다.
+- 실제 Render 배포 URL `https://codex-assignment.onrender.com/`을 README와 배포 문서에 반영했다.
+- `.env.example`의 환경변수 이름이 Render Environment에 반영된 상태라는 사용자 확인을 문서에 남겼다.
+- GitHub Actions workflow는 현재 문서와 실제가 일치하므로 수정하지 않았다.
+- 배포 체크리스트에 사용자 확인 기준 완료 항목과 기능별 확인 항목을 분리했다.
+- 향후 개발 계획서의 Render/GitHub Actions 문서 업데이트와 README 제출용 정리 단계에 보정 기록을 추가했다.
 
 ### 남은 확인
 
-1. 실제 AI API 연동은 이번 단계에 포함하지 않았다.
-2. AI 자동 응답 저장과 전송은 `generateAgentReply`가 실제 응답을 반환하는 다음 단계에서 활성화한다.
-3. Firebase Admin SDK 기반 서버 토큰 검증은 아직 도입하지 않았다.
+1. 제출 전 실제 Render URL에서 로그인, 차량 검색, 사진 업로드, 상담 기능을 가능한 범위에서 최종 확인한다.
+2. Render 무료 환경에서는 `uploads/` 파일이 재배포 또는 재시작 후 사라질 수 있음을 계속 안내한다.
 
 ## Socket.io 실시간 상담과 딜러 온라인 상태
 

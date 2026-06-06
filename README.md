@@ -1,141 +1,221 @@
 # 실시간 Car Market
 
-React + Vite 프론트엔드와 Node.js + Express 백엔드로 구성한 실시간 Car Market 과제 프로젝트입니다.
-차량 데이터는 MongoDB Atlas에 저장하고, Render Web Service 단일 배포 구조를 기준으로 개발합니다.
+React + Vite 프론트엔드와 Node.js + Express 백엔드로 구성한 중고차 마켓 과제 프로젝트입니다.
+차량 데이터와 상담 데이터는 MongoDB Atlas에 저장하고, Firebase Authentication으로 로그인 사용자를 식별합니다.
+배포는 Render Web Service 단일 배포 구조를 사용합니다.
+
+## 배포 URL
+
+```text
+https://codex-assignment.onrender.com/
+```
+
+현재 `.env.example`에 정리된 환경변수 이름은 실제 Render Environment에도 반영되어 있으며, 현재 배포된 상태입니다.
+단, README와 문서에는 실제 Secret 값을 작성하지 않습니다.
+
+## 주요 기능
+
+- 차량 목록 조회와 복합 검색
+- 차량 상세 URL 접근과 새로고침 유지
+- 승인된 딜러의 차량 등록, 수정, 삭제
+- `multer` 기반 차량 사진 업로드와 `/uploads` 정적 제공
+- Firebase 이메일/비밀번호 회원가입, 로그인, 로그아웃
+- MongoDB `users` 컬렉션 기반 사용자 프로필 저장
+- `buyer`, `dealer`, `admin` 역할 관리
+- 일반 사용자의 딜러 신청과 admin의 승인/거절
+- 차량 상세 화면에서 딜러와 상담방 생성
+- Socket.io 기반 실시간 메시지 송수신
+- MongoDB `chat_rooms`, `messages` 컬렉션 기반 상담방과 메시지 저장
+- MongoDB `users` 문서 기반 딜러 온라인 상태 표시
+- AI Agent 자동 응답으로 확장할 수 있도록 상담 메시지 처리 함수 분리
+
+## 기술 스택
+
+| 영역 | 기술 |
+| --- | --- |
+| Frontend | React, Vite, React Router, Tailwind CSS |
+| Backend | Node.js, Express |
+| Database | MongoDB Atlas, MongoClient |
+| Authentication | Firebase Authentication |
+| Realtime | Socket.io |
+| Upload | multer, Express `/uploads` static |
+| Deploy | Render Web Service |
+| CI/CD | GitHub Actions + Render Deploy Hook |
 
 ## 실행 방법
+
+루트 의존성 설치:
+
+```bash
+npm install
+```
+
+프론트엔드 의존성 설치:
+
+```bash
+npm.cmd --prefix frontend install
+```
 
 서버 실행:
 
 ```bash
-npm install
-npm start
+npm.cmd start
 ```
 
-React 프론트엔드 개발 서버 실행:
+프론트엔드 개발 서버 실행:
 
 ```bash
-cd frontend
-npm install
-npm run dev
+npm.cmd --prefix frontend run dev
 ```
 
-React 코드는 `/api/*` 상대 경로로 요청하고, Vite 개발 서버에서는 프록시가 Express 서버로 요청을 전달합니다.
-
-6단계 차량 상세 URL 기능부터는 React Router가 필요합니다. 권한 문제로 의존성 설치를 직접 진행할 때는 루트 폴더에서 아래 명령어를 실행합니다.
+빌드:
 
 ```bash
-npm.cmd --prefix frontend install react-router-dom
+npm.cmd run build
 ```
+
+프론트엔드 개발 서버는 `/api/*` 요청을 Express 서버로 프록시합니다.
+배포 환경에서는 Express가 React 빌드 결과와 API, Socket.io를 같은 origin에서 제공합니다.
 
 ## 환경 변수
 
-루트 `.env` 또는 Render Environment에 MongoDB와 Firebase 값을 등록합니다.
+루트 `.env` 또는 Render Environment에 아래 값을 등록합니다.
+`.env.example`의 환경변수 이름은 현재 Render Environment에 반영된 기준이며, 실제 Secret 값은 커밋하지 않습니다.
 
 ```text
+NODE_ENV=production
+PORT=3000
 MONGODB_URI=MongoDB Atlas 접속 문자열
+MONGODB_DNS_SERVERS=1.1.1.1,8.8.8.8
 DB_NAME=car_market
 COLLECTION_CARS=cars
 COLLECTION_USERS=users
 COLLECTION_CHAT_ROOMS=chat_rooms
 COLLECTION_MESSAGES=messages
+CLIENT_URL=http://localhost:5173
 INITIAL_ADMIN_EMAILS=admin@example.com
+VITE_API_BASE_URL=
 VITE_FIREBASE_API_KEY=Firebase Web API key
 VITE_FIREBASE_AUTH_DOMAIN=프로젝트ID.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=Firebase 프로젝트 ID
 VITE_FIREBASE_APP_ID=Firebase 웹 앱 ID
-VITE_API_BASE_URL=별도 API 서버 주소가 필요할 때만 입력
 ```
 
-Firebase 콘솔에서는 Authentication의 이메일/비밀번호 제공자를 활성화해야 합니다.
+환경변수 메모:
 
-## 인증과 권한
+- `PORT`는 Render가 자동으로 제공합니다.
+- `MONGODB_URI`는 서버 Secret이므로 클라이언트 코드나 문서에 실제 값을 쓰지 않습니다.
+- `CLIENT_URL`은 Socket.io CORS 기준으로 사용합니다.
+- `VITE_API_BASE_URL`은 프론트엔드와 API가 분리 배포된 경우에만 사용합니다. 현재 Render 단일 Web Service에서는 비워둘 수 있습니다.
+- Firebase Web config 값은 공개 식별 정보이지만, 실제 값은 `.env` 또는 Render Environment에만 등록합니다.
+- Firebase 콘솔에서 Authentication 이메일/비밀번호 제공자를 활성화해야 합니다.
 
-- 회원가입과 로그인은 Firebase Authentication을 사용합니다.
-- 회원가입한 사용자는 기본적으로 `buyer`로 생성됩니다.
-- 추가 사용자 정보는 MongoDB `users` 컬렉션에 저장합니다.
-- 차량 목록은 비로그인 사용자도 볼 수 있습니다.
-- 차량 상세, 등록, 수정, 삭제는 로그인 후 사용할 수 있습니다.
-- 차량 상세는 `/cars/:id` URL로 접근하며, 새로고침해도 `GET /api/cars/:id`로 상세 정보를 다시 조회합니다.
-- 딜러 권한은 일반 사용자가 신청하고 admin이 승인합니다.
-- 차량 등록은 승인된 딜러만 가능하고, 수정과 삭제는 차량을 등록한 딜러 본인만 가능합니다.
-- 최초 admin 계정은 `INITIAL_ADMIN_EMAILS`에 등록한 이메일로 회원가입하면 자동 지정됩니다.
-- MongoDB 사용자 프로필 저장이 실패하면 방금 생성한 Firebase 계정 삭제 보정을 시도합니다.
-- 차량 상세 화면의 `딜러와 상담하기` 버튼은 `POST /api/chats/rooms`로 상담방을 만들고 `/chats/:roomId` 준비 화면으로 이동합니다.
-- 자기 자신과 상담방을 만드는 요청은 서버에서 차단합니다.
-- `/chats/:roomId`에서는 Socket.io로 메시지를 전송하고, 서버는 MongoDB `messages` 컬렉션에 저장한 뒤 같은 상담방에 실시간으로 전달합니다.
-- 딜러 온라인 상태는 MongoDB `users` 문서의 `dealerOnline`, `dealerSocketIds`, `dealerConnectedAt`, `dealerLastSeenAt` 필드로 관리합니다.
-- 서버 재시작 시 이전 Socket.io 연결은 유효하지 않으므로 시작 과정에서 딜러 온라인 상태를 오프라인으로 정리합니다.
-- AI Agent는 아직 실제 외부 API와 연결하지 않습니다. 서버는 이후 확장을 위해 상담방, 차량 정보, 최근 메시지, 사용자 질문, 딜러 온라인 상태를 묶는 context 구조와 `generateAgentReply` placeholder만 준비합니다.
+## Render 배포와 GitHub Actions
 
-## 자동차 API 사용 예시
+이 프로젝트는 Render Web Service 하나로 배포합니다.
 
-전체 자동차 목록 조회:
+| 항목 | 값 |
+| --- | --- |
+| Service Type | Web Service |
+| Runtime | Node |
+| Node Version | `20.19` 이상 |
+| Build Command | `npm install && npm run build` |
+| Start Command | `npm start` |
+| Publish Directory | 사용하지 않음 |
+
+GitHub Actions workflow:
+
+- 파일: `.github/workflows/deploy.yml`
+- 실행 조건: `main` 브랜치 push 또는 수동 실행
+- 흐름: 루트 의존성 설치, 프론트엔드 의존성 설치, 선택적 테스트, 빌드, Render Deploy Hook 호출
+- Secret: `RENDER_DEPLOY_HOOK_URL`
+
+현재 workflow와 문서의 배포 방식은 일치하므로, 이번 정리 단계에서는 workflow 파일을 수정하지 않았습니다.
+
+## 주요 API
+
+차량 목록:
 
 ```bash
-curl http://localhost:3000/api/cars
+curl https://codex-assignment.onrender.com/api/cars
 ```
 
 복합 검색:
 
 ```bash
-curl "http://localhost:3000/api/cars/search?keyword=sonata&company=HYUNDAI&minPrice=1000&maxPrice=3000&minYear=2020"
+curl "https://codex-assignment.onrender.com/api/cars/search?keyword=sonata&company=HYUNDAI&minPrice=1000&maxPrice=3000&minYear=2020"
 ```
-
-차량 등록과 사진 업로드:
-
-```bash
-curl -X POST http://localhost:3000/api/cars \
-  -F "name=Sonata Hybrid" \
-  -F "company=HYUNDAI" \
-  -F "year=2023" \
-  -F "price=2800" \
-  -F "type=sedan" \
-  -F "fuel=hybrid" \
-  -F "mileage=35000" \
-  -F "location=서울" \
-  -F "description=출퇴근용으로 적합한 하이브리드 세단" \
-  -F "dealerId=Firebase 딜러 UID" \
-  -F "image=@./sample-car.jpg"
-```
-
-사진 없이도 차량 등록은 가능합니다. 사진이 없는 차량은 `/uploads/default-car.png`를 기본 이미지 경로로 사용합니다.
-기본 이미지를 사용하려면 `uploads/default-car.png` 위치에 이미지 파일을 추가하면 됩니다.
 
 상담방 생성:
 
 ```bash
-curl -X POST http://localhost:3000/api/chats/rooms \
+curl -X POST https://codex-assignment.onrender.com/api/chats/rooms \
   -H "Content-Type: application/json" \
   -d "{\"carId\":\"차량 ObjectId\",\"buyerId\":\"Firebase 사용자 UID\"}"
 ```
 
-상담방 상세과 이전 메시지 조회:
+상담방 상세와 이전 메시지 조회:
 
 ```bash
-curl http://localhost:3000/api/chats/rooms/상담방ID
-curl http://localhost:3000/api/chats/rooms/상담방ID/messages
+curl https://codex-assignment.onrender.com/api/chats/rooms/상담방ID
+curl https://codex-assignment.onrender.com/api/chats/rooms/상담방ID/messages
 ```
 
-실시간 메시지 송수신은 브라우저의 `/chats/:roomId` 화면에서 Socket.io 이벤트 `join-room`, `send-message`, `receive-message`, `leave-room`, `dealer-online`, `dealer-offline`으로 동작합니다.
+## Socket.io 이벤트
 
-AI Agent 확장 준비:
+| 이벤트 | 설명 |
+| --- | --- |
+| `join-room` | 상담방 입장 |
+| `send-message` | 메시지 전송 |
+| `receive-message` | 저장된 메시지 수신 |
+| `leave-room` | 상담방 나가기 |
+| `dealer-online` | 딜러 온라인 상태 알림 |
+| `dealer-offline` | 딜러 오프라인 상태 알림 |
 
-- `handleChatMessage`는 사용자 메시지를 저장한 뒤 AI Agent가 참고할 상담 context를 만들 수 있는 구조를 갖습니다.
-- context에는 차량 정보, 최근 상담 메시지 20개, 사용자 질문, 딜러 온라인 상태만 포함합니다.
-- `generateAgentReply`는 현재 `null`을 반환하므로 기존 상담 동작을 바꾸지 않습니다.
-- 이후 실제 AI API를 붙일 때는 `generateAgentReply` 내부를 교체하고, 응답 저장/전송 흐름을 활성화하면 됩니다.
+메시지는 서버에서 검증 후 MongoDB `messages` 컬렉션에 저장됩니다.
+딜러 온라인 상태는 MongoDB `users` 문서의 `dealerOnline`, `dealerSocketIds`, `dealerConnectedAt`, `dealerLastSeenAt` 필드로 관리합니다.
+서버가 재시작되면 기존 Socket.io 연결은 유효하지 않으므로 시작 과정에서 딜러 온라인 상태를 오프라인으로 정리합니다.
 
-## 사진 업로드 주의사항
+## AI Agent 확장 준비
 
-- 차량 사진은 `multer`로 처리하고 서버의 `uploads/` 폴더에 저장합니다.
-- 허용 형식은 `jpg`, `jpeg`, `png`, `webp`입니다.
-- 파일 크기는 최대 5MB입니다.
-- Render 무료 환경에서는 서버 파일 시스템에 저장된 업로드 파일이 재배포 또는 인스턴스 재시작 후 유지되지 않을 수 있습니다.
+이번 과제에서는 실제 AI API를 연동하지 않습니다.
+다만 상담 메시지 처리 로직을 `handleChatMessage` 함수로 분리해 이후 AI Agent 자동 응답으로 확장할 수 있게 했습니다.
+
+향후 확장 방향:
+
+1. 사용자가 차량에 대해 질문합니다.
+2. 서버가 상담방, 차량 정보, 최근 메시지, 딜러 온라인 상태를 조회합니다.
+3. 딜러가 온라인이면 기존처럼 딜러에게 메시지를 전달합니다.
+4. 딜러가 오프라인이면 이후 단계에서 AI Agent 응답을 생성할 수 있습니다.
+5. AI Agent 응답은 `messages` 컬렉션에 저장하고 `receive-message`로 전송할 수 있습니다.
+
+## 검증 결과
+
+로컬 검증:
+
+| 명령 | 결과 |
+| --- | --- |
+| `npm.cmd --prefix frontend run build` | 성공 |
+| `npm.cmd run build` | 성공 |
+
+Render 상태:
+
+| 항목 | 상태 |
+| --- | --- |
+| Render 배포 | 사용자 확인 기준 배포 완료 |
+| Render URL | `https://codex-assignment.onrender.com/` |
+| Render Environment | `.env.example` 기준으로 반영 완료 |
+
+Render 실동작 확인은 사용자 확인 기준입니다.
+이 문서 정리 과정에서는 배포 설정이나 Secret을 직접 변경하지 않았습니다.
+
+## 주의사항과 한계
+
+- `.env` 파일은 커밋하지 않습니다.
+- Render Secret, GitHub Secret, MongoDB 접속 문자열은 문서에 작성하지 않습니다.
+- Firebase Admin SDK 기반 서버 토큰 검증은 아직 도입하지 않았습니다.
+- 차량 사진은 `multer`로 서버의 `uploads/` 폴더에 저장합니다.
+- Render 무료 환경에서는 재배포, 인스턴스 재시작, 환경 재생성 시 `uploads/` 파일이 유지되지 않을 수 있습니다.
 - 장기 운영이 필요하면 S3, Cloudinary 같은 외부 이미지 스토리지 도입을 검토해야 합니다.
+- 실제 AI Agent API 연동은 향후 확장 작업입니다.
 
-## 빌드
-
-```bash
-npm run build
-```
