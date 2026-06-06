@@ -1,5 +1,35 @@
 # 작업 진행 기록
 
+## 상담·관리자·모바일 UI 고도화
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 상담·관리자·모바일 UI 고도화 |
+| 작업 일자 | 2026-06-06 |
+| 작업 내용 | 상담방 목록, 채팅 화면, 딜러 내 차량 관리, 관리자 대시보드, 모바일 하단 내비게이션을 12단계 범위로 고도화 |
+| 수정한 주요 파일 | `frontend/src/App.jsx`, `Header.jsx`, `ChatRoomList.jsx`, `ChatRoom.jsx`, `AdminUserPanel.jsx` |
+| 추가한 주요 파일 | `frontend/src/components/DealerDashboard.jsx`, `frontend/src/components/MobileBottomNav.jsx`, `docs/plans/plan-12-consultation-admin-mobile-ui.md`, `docs/steps/2026-06-06-12-consultation-admin-mobile-ui.md`, `docs/pr/2026-06-06-12-consultation-admin-mobile-ui-pr.md` |
+| 확인한 명령어 | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+
+### 작업 내용
+
+- 2차 구현에서도 1차 디자인 색상 체계인 Clean Blue Trust를 유지했다.
+- 사용자 화면은 `white`, `slate-50`, `blue-600`, sky/cyan light gradient 중심을 유지했다.
+- 딜러/관리자 화면은 `slate-950` 사이드바, `blue-600` active menu, white content card 조합으로 구성했다.
+- 상담방 목록에 Hero, 상담 수 요약, 검색 입력, 최근 메시지 중심 상담 카드를 추가했다.
+- 채팅 화면은 차량 정보 패널, 연결 상태 안내, `blue-600` 내 메시지, `slate-100` 상대 메시지 구조로 개선했다.
+- `/dealer` 라우트와 `DealerDashboard`를 추가해 승인된 딜러가 본인 차량만 관리할 수 있는 화면을 제공했다.
+- 관리자 화면은 slate/navy 사이드바 기반 대시보드로 재구성하고 기존 사용자 승인/권한 변경 기능을 유지했다.
+- 모바일 전용 `MobileBottomNav`를 추가해 차량 검색, 내 상담, 내 차량, 관리자 화면 접근성을 높였다.
+- 새 패키지는 추가하지 않고 inline SVG와 Tailwind CSS만 사용했다.
+
+### 남은 확인
+
+1. 실제 Firebase와 MongoDB 환경에서 구매자/딜러 계정으로 상담방 목록과 실시간 채팅을 확인한다.
+2. 승인된 딜러 계정으로 `/dealer` 내 차량 관리 화면의 상세, 수정, 삭제 이동을 확인한다.
+3. admin 계정으로 `/admin` 사용자 승인/거절과 권한 변경 버튼을 확인한다.
+4. 모바일 375px 환경에서 하단 내비게이션과 채팅 입력창이 겹치지 않는지 브라우저로 확인한다.
+
 ## Modern UI 재설계 — 핵심 사용자 화면 고도화
 
 | 항목             | 내용                                                                                                                                                                       |

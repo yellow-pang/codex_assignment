@@ -14,9 +14,11 @@ import CarDetail from "./components/CarDetail.jsx";
 import CarForm from "./components/CarForm.jsx";
 import ChatRoom from "./components/ChatRoom.jsx";
 import ChatRoomList from "./components/ChatRoomList.jsx";
+import DealerDashboard from "./components/DealerDashboard.jsx";
 import DeleteConfirmModal from "./components/DeleteConfirmModal.jsx";
 import Header from "./components/Header.jsx";
 import LoginForm from "./components/LoginForm.jsx";
+import MobileBottomNav from "./components/MobileBottomNav.jsx";
 import RegisterForm from "./components/RegisterForm.jsx";
 import { useAuth } from "./contexts/AuthContext.jsx";
 
@@ -69,6 +71,9 @@ function App() {
     }
     if (location.pathname === "/admin") {
       return "admin";
+    }
+    if (location.pathname === "/dealer") {
+      return "dealer";
     }
     return currentView;
   }, [currentView, location.pathname]);
@@ -368,6 +373,16 @@ function App() {
 
     setCurrentView("list");
     navigate("/admin");
+  }
+
+  function handleGoDealer() {
+    if (!isDealer) {
+      setMessage({ type: "error", text: "승인된 딜러만 접근할 수 있습니다." });
+      return;
+    }
+
+    setCurrentView("list");
+    navigate("/dealer");
   }
 
   async function handleRequestDealer() {
@@ -728,6 +743,7 @@ function App() {
         isAdmin={isAdmin}
         isDealer={isDealer}
         onGoAdmin={handleGoAdmin}
+        onGoDealer={handleGoDealer}
         onGoList={handleGoList}
         onGoCreate={handleGoCreate}
         onGoLogin={() => navigate("/login")}
@@ -738,7 +754,7 @@ function App() {
         userProfile={userProfile}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 pb-28 pt-6 sm:px-6 md:pb-6 lg:px-8">
         {displayMessage.text && (
           <div className="mb-5">
             <AlertMessage
@@ -779,7 +795,7 @@ function App() {
             path="/chats"
             element={
               userProfile ? (
-                <ChatRoomList userProfile={userProfile} />
+                <ChatRoomList onGoList={handleGoList} userProfile={userProfile} />
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -845,6 +861,36 @@ function App() {
             }
           />
           <Route
+            path="/dealer"
+            element={
+              isDealer ? (
+                <DealerDashboard
+                  cars={cars}
+                  onBack={handleGoList}
+                  onCreate={handleGoCreate}
+                  onDelete={setDeleteTarget}
+                  onEdit={handleEditCar}
+                  onView={handleViewCar}
+                  userProfile={userProfile}
+                />
+              ) : (
+                <div className="c-card p-8">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    접근할 수 없습니다
+                  </h1>
+                  <p className="mt-2 text-sm text-gray-500">
+                    승인된 딜러만 접근할 수 있는 화면입니다.
+                  </p>
+                  <div className="mt-5 flex justify-end">
+                    <button className="c-btn-primary" onClick={handleGoList}>
+                      목록으로
+                    </button>
+                  </div>
+                </div>
+              )
+            }
+          />
+          <Route
             path="*"
             element={
               <div className="c-card p-8">
@@ -869,6 +915,16 @@ function App() {
         car={deleteTarget}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={handleDeleteCar}
+      />
+      <MobileBottomNav
+        currentView={activeView}
+        isAdmin={isAdmin}
+        isDealer={isDealer}
+        onGoAdmin={handleGoAdmin}
+        onGoChats={handleGoChats}
+        onGoDealer={handleGoDealer}
+        onGoList={handleGoList}
+        userProfile={userProfile}
       />
     </div>
   );

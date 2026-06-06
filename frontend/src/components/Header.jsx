@@ -5,6 +5,7 @@ function Header({
   isAdmin,
   isDealer,
   onGoAdmin,
+  onGoDealer,
   onGoList,
   onGoCreate,
   onGoLogin,
@@ -81,6 +82,14 @@ function Header({
               onClick={onGoChats}
             >
               내 상담
+            </button>
+          )}
+          {isDealer && (
+            <button
+              className={navLinkClass(currentView === "dealer")}
+              onClick={onGoDealer}
+            >
+              내 차량
             </button>
           )}
           {isDealer && (
@@ -201,6 +210,14 @@ function Header({
                 onClick={() => handleMobileNav(onGoChats)}
               >
                 내 상담
+              </button>
+            )}
+            {isDealer && (
+              <button
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                onClick={() => handleMobileNav(onGoDealer)}
+              >
+                내 차량 관리
               </button>
             )}
             {isDealer && (
