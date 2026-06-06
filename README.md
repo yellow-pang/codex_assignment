@@ -62,6 +62,9 @@ npm.cmd --prefix frontend install
 npm.cmd start
 ```
 
+현재 서버 진입 파일은 `backend/server.js`이며, 루트 `npm start`가 이 파일을 실행합니다.
+React 빌드 결과는 계속 `frontend/dist`에 생성되고, Express가 같은 Render Web Service에서 정적 파일로 제공합니다.
+
 프론트엔드 개발 서버 실행:
 
 ```bash

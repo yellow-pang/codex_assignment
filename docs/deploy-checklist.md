@@ -4,11 +4,13 @@
 
 | 항목 | 결과 |
 | --- | --- |
-| 구조 유형 | 루트 Express + `frontend` React 구조 |
+| 구조 유형 | `backend` Express + `frontend` React + 루트 통합 package 구조 |
 | 추천 배포 방식 | Render Web Service 단일 배포 |
-| Express 진입 파일 | `server.js` |
+| Express 진입 파일 | `backend/server.js` |
+| MongoDB 연결 파일 | `backend/db.js` |
 | React 프로젝트 | `frontend/` |
 | React 빌드 출력 | `frontend/dist/` |
+| 업로드 경로 | 루트 `uploads/` 유지 |
 | 현재 배포 URL | `https://codex-assignment.onrender.com/` |
 
 사용자 확인 기준으로 `.env.example`에 정리된 환경변수 이름은 Render Environment에 반영되어 있으며, 현재 Render 배포가 완료된 상태다.
@@ -20,6 +22,8 @@
 - [x] API 라우트가 React fallback보다 먼저 등록되어 있다.
 - [x] `/uploads` 정적 경로가 React fallback보다 먼저 등록되어 있다.
 - [x] Express가 `frontend/dist`를 정적 파일로 제공한다.
+- [x] 백엔드 파일은 `backend/` 아래에 있고, 루트 `npm start`가 `backend/server.js`를 실행한다.
+- [x] 업로드 설정은 `backend/config/upload.js`로 분리되어 있고 루트 `uploads/`를 유지한다.
 - [x] React 새로고침 404 방지를 위한 fallback이 있다.
 - [x] CRUD 기능 로직은 변경하지 않았다.
 - [x] UI 디자인은 이번 단계에서 변경하지 않았다.
@@ -28,7 +32,7 @@
 
 | 위치 | 항목 | 상태 |
 | --- | --- | --- |
-| 루트 `package.json` | `start` 스크립트 | `npm start`로 `node server.js` 실행 |
+| 루트 `package.json` | `start` 스크립트 | `npm start`로 `node backend/server.js` 실행 |
 | 루트 `package.json` | `build` 스크립트 | `frontend` devDependencies 포함 설치 및 Vite 빌드 실행 |
 | 루트 `package.json` | `engines` | Node.js `20.19` 이상 사용 |
 | 루트 `package.json` | `dependencies` | `multer`, `socket.io` 포함 |
@@ -151,7 +155,10 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 | 명령어 | 결과 |
 | --- | --- |
 | `npm run build` | 성공 |
-| `PORT=3100 node server.js` | 성공 |
+| `node --check backend/server.js` | 성공 |
+| `node --check backend/db.js` | 성공 |
+| `node --check backend/config/paths.js` | 성공 |
+| `node --check backend/config/upload.js` | 성공 |
 | `GET /` | `200` 응답 |
 | `GET /api/cars` | 자동차 목록 JSON 응답 |
 

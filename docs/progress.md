@@ -1,5 +1,34 @@
 # 작업 진행 기록
 
+## 백엔드 구조 분리와 보안 기반 리팩토링
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 백엔드 구조 분리와 보안 기반 리팩토링 |
+| 작업 일자 | 2026-06-07 |
+| 작업 내용 | Render 단일 배포 구조를 유지하면서 루트 서버 파일을 `backend/` 아래로 이동하고 경로/업로드 설정을 분리 |
+| 수정한 주요 파일 | `package.json`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md` |
+| 이동한 주요 파일 | `server.js` → `backend/server.js`, `db.js` → `backend/db.js` |
+| 추가한 주요 파일 | `backend/config/paths.js`, `backend/config/upload.js`, `docs/plans/plan-13-backend-structure-secure-foundation.md`, `docs/steps/2026-06-07-13-backend-structure-secure-foundation.md`, `docs/pr/2026-06-07-13-backend-structure-secure-foundation-pr.md` |
+| 확인한 명령어 | `node --check backend/server.js` 성공, `node --check backend/db.js` 성공, `node --check backend/config/paths.js` 성공, `node --check backend/config/upload.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+
+### 작업 내용
+
+- 루트 `server.js`를 `backend/server.js`로 이동했다.
+- 루트 `db.js`를 `backend/db.js`로 이동했다.
+- 루트 `package.json`의 `main`, `start`를 `backend/server.js` 기준으로 변경했다.
+- `backend/config/paths.js`를 추가해 루트, `frontend/dist`, `uploads/` 경로 계산을 분리했다.
+- `backend/config/upload.js`를 추가해 `multer` 설정, 이미지 URL 생성, 업로드 에러 처리를 분리했다.
+- React 빌드 결과는 기존처럼 `frontend/dist`에서 제공하고, 업로드 저장 위치는 루트 `uploads/`를 유지했다.
+- Render Web Service 단일 배포, `/api/*` 경로, Socket.io 이벤트 이름, MongoDB 컬렉션 구조는 변경하지 않았다.
+- README와 배포 문서를 새 백엔드 폴더 구조 기준으로 보정했다.
+
+### 남은 확인
+
+1. 실제 `MONGODB_URI`가 설정된 환경에서 `npm.cmd start` 서버 기동을 확인한다.
+2. Render 배포 후 `/`, `/api/cars`, `/uploads/default-car.png` 접근을 확인한다.
+3. 다음 단계에서 Firebase ID Token 서버 검증과 권한 미들웨어를 도입한다.
+
 ## 상담·관리자·모바일 UI 고도화
 
 | 항목 | 내용 |
