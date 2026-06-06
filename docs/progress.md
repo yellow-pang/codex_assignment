@@ -1,5 +1,30 @@
 # 작업 진행 기록
 
+## Render/GitHub Actions 문서 업데이트와 README 제출용 정리
+
+| 항목             | 내용                                                                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | Render/GitHub Actions 문서 업데이트와 README 제출용 정리                                                                                 |
+| 작업 일자        | 2026-06-06                                                                                                                                |
+| 작업 내용        | 실제 Render 배포 URL, 환경변수 반영 상태, CI/CD 흐름, 제출용 README 구조를 현재 구현 기준으로 정리                                        |
+| 수정한 주요 파일 | `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md`         |
+| 추가한 주요 파일 | `docs/plans/plan-10-render-readme-submission.md`, `docs/steps/2026-06-06-10-render-readme-submission.md`, `docs/pr/2026-06-06-10-render-readme-submission-pr.md` |
+| 확인한 명령어    | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                      |
+
+### 작업 내용
+
+- README를 제출용 구조로 재작성했다.
+- 실제 Render 배포 URL `https://codex-assignment.onrender.com/`을 README와 배포 문서에 반영했다.
+- `.env.example`의 환경변수 이름이 Render Environment에 반영된 상태라는 사용자 확인을 문서에 남겼다.
+- GitHub Actions workflow는 현재 문서와 실제가 일치하므로 수정하지 않았다.
+- 배포 체크리스트에 사용자 확인 기준 완료 항목과 기능별 확인 항목을 분리했다.
+- 향후 개발 계획서의 Render/GitHub Actions 문서 업데이트와 README 제출용 정리 단계에 보정 기록을 추가했다.
+
+### 남은 확인
+
+1. 제출 전 실제 Render URL에서 로그인, 차량 검색, 사진 업로드, 상담 기능을 가능한 범위에서 최종 확인한다.
+2. Render 무료 환경에서는 `uploads/` 파일이 재배포 또는 재시작 후 사라질 수 있음을 계속 안내한다.
+
 ## Socket.io 실시간 상담과 딜러 온라인 상태
 
 | 항목             | 내용                                                                                                                                                                                                 |

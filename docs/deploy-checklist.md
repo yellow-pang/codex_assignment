@@ -9,6 +9,10 @@
 | Express 진입 파일 | `server.js` |
 | React 프로젝트 | `frontend/` |
 | React 빌드 출력 | `frontend/dist/` |
+| 현재 배포 URL | `https://codex-assignment.onrender.com/` |
+
+사용자 확인 기준으로 `.env.example`에 정리된 환경변수 이름은 Render Environment에 반영되어 있으며, 현재 Render 배포가 완료된 상태다.
+실제 Secret 값은 문서에 작성하지 않는다.
 
 ## 1. 코드 점검 항목
 
@@ -49,11 +53,11 @@
 
 | 파일 또는 위치 | 상태 |
 | --- | --- |
-| `.env.example` | `NODE_ENV`, `PORT`, MongoDB Atlas, Firebase, 최초 admin 환경변수 예시 작성 |
+| `.env.example` | `NODE_ENV`, `PORT`, MongoDB Atlas, Firebase, 최초 admin, Socket.io 관련 환경변수 예시 작성 |
 | `.env` | 커밋 금지 |
 | `.gitignore` | `.env`, `.env.*`, `node_modules`, `dist`, 로그 파일 제외 |
 | `.gitignore` | `uploads/*` 런타임 업로드 파일 제외, `uploads/default-car.png` 기본 이미지는 커밋 가능 |
-| Render Environment | `NODE_ENV=production`, `MONGODB_URI`, `DB_NAME`, 컬렉션 이름, `CLIENT_URL`, `INITIAL_ADMIN_EMAILS`, Firebase `VITE_FIREBASE_*` 값 등록 필요. DNS 문제가 있으면 `MONGODB_DNS_SERVERS` 선택 등록. 분리 배포가 아니면 `VITE_API_BASE_URL`은 비워둘 수 있음 |
+| Render Environment | `.env.example` 기준 환경변수 이름 반영 완료. 실제 Secret 값은 Render에만 등록. 분리 배포가 아니면 `VITE_API_BASE_URL`은 비워둘 수 있음 |
 | GitHub Secrets | `RENDER_DEPLOY_HOOK_URL` 필요 |
 
 ## 5. GitHub Actions 점검 항목
@@ -87,6 +91,14 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 이 프로젝트에서는 GitHub Actions 빌드 성공 후 Deploy Hook을 호출하는 방식을 권장한다.
 
 ## 7. 배포 후 테스트 항목
+
+### 사용자 확인 기준 완료
+
+- [x] Render Web Service 배포가 완료되었다.
+- [x] `.env.example` 변경 사항을 Render Environment에 반영했다.
+- [x] 배포 URL은 `https://codex-assignment.onrender.com/`이다.
+
+### 기능별 확인 항목
 
 - [ ] Render URL 접속 시 React 화면이 보인다.
 - [ ] `GET /api/cars`가 자동차 목록 JSON을 반환한다.
