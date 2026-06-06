@@ -84,221 +84,339 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
   }
 
   return (
-    <div className="space-y-5">
-      {/* 페이지 헤더 */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">관리자 화면</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            사용자 역할과 딜러 승인 상태를 관리합니다.
-          </p>
-        </div>
-        <button className="c-btn-outline" onClick={onBack}>
-          목록으로
-        </button>
-      </div>
-
-      {/* 상태 메시지 */}
-      {message.text && (
-        <div
-          className={
-            message.type === "error" ? "c-alert-error" : "c-alert-success"
-          }
+    <div className="grid gap-5 lg:grid-cols-[17rem_1fr]">
+      <aside className="rounded-3xl bg-slate-950 p-5 text-white shadow-xl shadow-slate-300/40">
+        <button
+          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white"
+          onClick={onBack}
         >
-          <span>{message.text}</span>
-        </div>
-      )}
+          <span aria-hidden="true">←</span>
+          차량 검색으로
+        </button>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-300">
+          Admin Console
+        </p>
+        <h1 className="mt-3 text-2xl font-black tracking-tight">
+          관리자 대시보드
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-slate-300">
+          사용자 역할과 딜러 승인 상태를 관리하고, 이후 차량과 상담 현황
+          확장을 이어갈 수 있는 업무 화면입니다.
+        </p>
 
-      {/* 요약 카드 */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        <SummaryCard label="전체 사용자" value={summary.total} color="blue" />
-        <SummaryCard label="승인 대기" value={summary.pending} color="yellow" />
-        <SummaryCard label="딜러" value={summary.dealers} color="green" />
-        <SummaryCard label="관리자" value={summary.admins} color="gray" />
-      </div>
-
-      {/* 탭 */}
-      <div className="border-b border-gray-200">
-        <nav className="flex gap-4">
-          <TabButton
+        <nav className="mt-7 space-y-2">
+          <SideNavButton
             label="사용자 관리"
             isActive={activeTab === "users"}
             onClick={() => setActiveTab("users")}
           />
-          <TabButton
+          <SideNavButton
             label="차량 관리"
             isActive={activeTab === "cars"}
             onClick={() => setActiveTab("cars")}
-            disabled
           />
-          <TabButton
+          <SideNavButton
             label="상담 현황"
             isActive={activeTab === "chats"}
             onClick={() => setActiveTab("chats")}
-            disabled
           />
         </nav>
+
+        <div className="mt-7 rounded-2xl bg-white/10 p-4 ring-1 ring-white/10">
+          <p className="text-xs text-slate-400">현재 관리자</p>
+          <p className="mt-1 truncate text-sm font-bold">
+            {currentUserProfile.displayName}
+          </p>
+          <p className="mt-1 truncate text-xs text-slate-400">
+            {currentUserProfile.email}
+          </p>
+        </div>
+      </aside>
+
+      <section className="space-y-5">
+        {message.text && (
+          <div
+            className={
+              message.type === "error" ? "c-alert-error" : "c-alert-success"
+            }
+          >
+            <span>{message.text}</span>
+          </div>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <SummaryCard label="전체 사용자" value={summary.total} tone="blue" />
+          <SummaryCard label="승인 대기" value={summary.pending} tone="amber" />
+          <SummaryCard label="딜러" value={summary.dealers} tone="emerald" />
+          <SummaryCard label="관리자" value={summary.admins} tone="slate" />
+        </div>
+
+        {activeTab === "users" && (
+          <div className="c-card overflow-hidden">
+            <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-lg font-black text-slate-950">
+                  사용자 관리
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  딜러 신청 승인, 역할 변경, 관리자 권한을 처리합니다.
+                </p>
+              </div>
+              <span className="c-badge-blue">{users.length}명</span>
+            </div>
+            {renderUsersTable()}
+          </div>
+        )}
+
+        {activeTab === "cars" && (
+          <PreparedPanel
+            title="차량 관리"
+            description="전체 차량 관리 기능은 별도 관리자 API가 필요할 수 있어 이번 단계에서는 준비 중 영역으로 표시합니다."
+            points={[
+              "현재 차량 등록, 수정, 삭제는 승인된 딜러 본인 기준으로 제한됩니다.",
+              "관리자 전체 차량 삭제나 강제 수정은 권한 정책 확정 후 별도 구현합니다.",
+            ]}
+          />
+        )}
+
+        {activeTab === "chats" && (
+          <PreparedPanel
+            title="상담 현황"
+            description="상담방 데이터는 이미 저장되고 있으나, 전체 상담 통계와 관리자 조회 범위는 추가 API 확정 후 연결합니다."
+            points={[
+              "사용자별 상담 목록과 실시간 채팅은 기존 화면에서 동작합니다.",
+              "관리자 전체 상담 조회는 개인정보와 권한 범위를 정한 뒤 확장합니다.",
+            ]}
+          />
+        )}
+      </section>
+    </div>
+  );
+
+  function renderUsersTable() {
+    if (isLoading) {
+      return (
+        <div className="flex min-h-56 items-center justify-center">
+          <svg
+            className="h-8 w-8 animate-spin text-blue-600"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8H4z"
+            />
+          </svg>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="hidden overflow-x-auto lg:block">
+          <table className="min-w-full divide-y divide-slate-100 bg-white">
+            <thead className="bg-slate-50">
+              <tr>
+                {["사용자", "역할", "딜러 상태", "가입일", "관리"].map(
+                  (header, index) => (
+                    <th
+                      key={header}
+                      className={`px-5 py-3 text-xs font-bold uppercase tracking-wide text-slate-500 ${
+                        index === 4 ? "text-right" : "text-left"
+                      }`}
+                    >
+                      {header}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {users.map((user) => renderUserRow(user))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="divide-y divide-slate-100 lg:hidden">
+          {users.map((user) => (
+            <UserMobileCard
+              key={user.uid}
+              currentUserProfile={currentUserProfile}
+              onUpdateRole={updateUserRole}
+              user={user}
+            />
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  function renderUserRow(user) {
+    const isSelf = user.uid === currentUserProfile.uid;
+
+    return (
+      <tr key={user.uid} className="hover:bg-blue-50/40">
+        <td className="px-5 py-4">
+          <div>
+            <p className="font-bold text-slate-950">{user.displayName}</p>
+            <p className="mt-1 text-xs text-slate-500">{user.email}</p>
+          </div>
+        </td>
+        <td className="px-5 py-4">
+          <RoleBadge role={user.role} />
+        </td>
+        <td className="px-5 py-4 text-sm font-semibold text-slate-600">
+          {formatDealerStatus(user.dealerStatus)}
+        </td>
+        <td className="px-5 py-4 text-sm text-slate-500">
+          {formatDate(user.createdAt)}
+        </td>
+        <td className="px-5 py-4">
+          <UserActions
+            isSelf={isSelf}
+            onUpdateRole={updateUserRole}
+            user={user}
+          />
+        </td>
+      </tr>
+    );
+  }
+}
+
+function UserMobileCard({ currentUserProfile, onUpdateRole, user }) {
+  const isSelf = user.uid === currentUserProfile.uid;
+
+  return (
+    <div className="p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate font-black text-slate-950">{user.displayName}</p>
+          <p className="mt-1 truncate text-xs text-slate-500">{user.email}</p>
+        </div>
+        <RoleBadge role={user.role} />
       </div>
+      <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
+        <span className="rounded-full bg-slate-100 px-2.5 py-1">
+          {formatDealerStatus(user.dealerStatus)}
+        </span>
+        <span className="rounded-full bg-slate-100 px-2.5 py-1">
+          {formatDate(user.createdAt)}
+        </span>
+      </div>
+      <div className="mt-3">
+        <UserActions isSelf={isSelf} onUpdateRole={onUpdateRole} user={user} />
+      </div>
+    </div>
+  );
+}
 
-      {/* 사용자 관리 테이블 */}
-      {activeTab === "users" && (
+function UserActions({ isSelf, onUpdateRole, user }) {
+  const isApprovedDealer =
+    user.role === "dealer" && user.dealerStatus === "approved";
+
+  if (isSelf) {
+    return (
+      <div className="flex justify-end">
+        <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-400">
+          본인 권한 보호
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap justify-end gap-2">
+      {user.dealerStatus === "pending" && (
         <>
-          {isLoading ? (
-            <div className="flex min-h-40 items-center justify-center">
-              <svg
-                className="h-8 w-8 animate-spin text-blue-600"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                />
-              </svg>
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200 bg-white">
-                <thead className="bg-gray-50">
-                  <tr>
-                    {["이메일", "이름", "역할", "딜러 상태", "관리"].map(
-                      (h, i) => (
-                        <th
-                          key={h}
-                          className={`px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500 ${i === 4 ? "text-right" : "text-left"}`}
-                        >
-                          {h}
-                        </th>
-                      ),
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {users.map((user) => {
-                    const isSelf = user.uid === currentUserProfile.uid;
-                    const isApprovedDealer =
-                      user.role === "dealer" &&
-                      user.dealerStatus === "approved";
-
-                    return (
-                      <tr key={user.uid} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {user.email}
-                        </td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                          {user.displayName}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="c-badge-blue">{user.role}</span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {formatDealerStatus(user.dealerStatus)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap justify-end gap-2">
-                            {user.dealerStatus === "pending" && (
-                              <>
-                                <button
-                                  className="c-btn-primary px-2.5 py-1 text-xs"
-                                  onClick={() =>
-                                    updateUserRole(user, "dealer", "approved")
-                                  }
-                                >
-                                  승인
-                                </button>
-                                <button
-                                  className="c-btn-outline px-2.5 py-1 text-xs"
-                                  onClick={() =>
-                                    updateUserRole(user, "buyer", "rejected")
-                                  }
-                                >
-                                  거절
-                                </button>
-                              </>
-                            )}
-                            {isApprovedDealer && (
-                              <button
-                                className="c-btn-warning px-2.5 py-1 text-xs"
-                                onClick={() =>
-                                  updateUserRole(user, "buyer", "none")
-                                }
-                              >
-                                딜러 회수
-                              </button>
-                            )}
-                            {user.role === "buyer" &&
-                              user.dealerStatus !== "pending" && (
-                                <button
-                                  className="c-btn-outline px-2.5 py-1 text-xs"
-                                  onClick={() =>
-                                    updateUserRole(user, "dealer", "approved")
-                                  }
-                                >
-                                  딜러 지정
-                                </button>
-                              )}
-                            {user.role !== "admin" && (
-                              <button
-                                className="c-btn-outline px-2.5 py-1 text-xs"
-                                onClick={() =>
-                                  updateUserRole(user, "admin", "none")
-                                }
-                              >
-                                admin 지정
-                              </button>
-                            )}
-                            {user.role === "admin" && !isSelf && (
-                              <button
-                                className="c-btn-danger px-2.5 py-1 text-xs"
-                                onClick={() =>
-                                  updateUserRole(user, "buyer", "none")
-                                }
-                              >
-                                admin 해제
-                              </button>
-                            )}
-                            {isSelf && (
-                              <span className="text-xs text-gray-400">
-                                본인 권한 보호
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <button
+            className="c-btn-primary px-2.5 py-1.5 text-xs"
+            onClick={() => onUpdateRole(user, "dealer", "approved")}
+          >
+            승인
+          </button>
+          <button
+            className="c-btn-outline px-2.5 py-1.5 text-xs"
+            onClick={() => onUpdateRole(user, "buyer", "rejected")}
+          >
+            거절
+          </button>
         </>
+      )}
+      {isApprovedDealer && (
+        <button
+          className="c-btn-warning px-2.5 py-1.5 text-xs"
+          onClick={() => onUpdateRole(user, "buyer", "none")}
+        >
+          딜러 회수
+        </button>
+      )}
+      {user.role === "buyer" && user.dealerStatus !== "pending" && (
+        <button
+          className="c-btn-outline px-2.5 py-1.5 text-xs"
+          onClick={() => onUpdateRole(user, "dealer", "approved")}
+        >
+          딜러 지정
+        </button>
+      )}
+      {user.role !== "admin" && (
+        <button
+          className="c-btn-outline px-2.5 py-1.5 text-xs"
+          onClick={() => onUpdateRole(user, "admin", "none")}
+        >
+          admin 지정
+        </button>
+      )}
+      {user.role === "admin" && (
+        <button
+          className="c-btn-danger px-2.5 py-1.5 text-xs"
+          onClick={() => onUpdateRole(user, "buyer", "none")}
+        >
+          admin 해제
+        </button>
       )}
     </div>
   );
 }
 
-function SummaryCard({ label, value, color }) {
-  const colorMap = {
-    blue: "bg-blue-50 text-blue-700",
-    yellow: "bg-yellow-50 text-yellow-700",
-    green: "bg-green-50 text-green-700",
-    gray: "bg-gray-100 text-gray-700",
+function SideNavButton({ isActive, label, onClick }) {
+  return (
+    <button
+      className={`w-full rounded-2xl px-4 py-3 text-left text-sm font-bold transition-colors ${
+        isActive
+          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+          : "text-slate-300 hover:bg-white/10 hover:text-white"
+      }`}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+function SummaryCard({ label, value, tone }) {
+  const toneMap = {
+    blue: "bg-blue-50 text-blue-700 ring-blue-100",
+    amber: "bg-amber-50 text-amber-700 ring-amber-100",
+    emerald: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+    slate: "bg-slate-100 text-slate-700 ring-slate-200",
   };
 
   return (
-    <div className="c-card p-4">
-      <p className="text-sm text-gray-500">{label}</p>
+    <div className="c-card p-5">
+      <p className="text-sm font-semibold text-slate-500">{label}</p>
       <p
-        className={`mt-2 inline-flex h-10 w-10 items-center justify-center rounded-lg text-xl font-bold ${colorMap[color] || colorMap.gray}`}
+        className={`mt-3 inline-flex h-12 min-w-12 items-center justify-center rounded-2xl px-3 text-2xl font-black ring-1 ${
+          toneMap[tone] || toneMap.slate
+        }`}
       >
         {value}
       </p>
@@ -306,20 +424,32 @@ function SummaryCard({ label, value, color }) {
   );
 }
 
-function TabButton({ label, isActive, onClick, disabled = false }) {
+function PreparedPanel({ description, points, title }) {
   return (
-    <button
-      className={`pb-3 text-sm font-medium transition-colors ${
-        isActive
-          ? "border-b-2 border-blue-600 text-blue-600"
-          : "text-gray-500 hover:text-gray-700"
-      } ${disabled ? "cursor-not-allowed opacity-40" : ""}`}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {label}
-    </button>
+    <div className="c-card p-8">
+      <span className="c-badge-blue">준비 중</span>
+      <h2 className="mt-4 text-2xl font-black text-slate-950">{title}</h2>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
+        {description}
+      </p>
+      <div className="mt-6 grid gap-3 md:grid-cols-2">
+        {points.map((point) => (
+          <div
+            key={point}
+            className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold leading-6 text-slate-600"
+          >
+            {point}
+          </div>
+        ))}
+      </div>
+    </div>
   );
+}
+
+function RoleBadge({ role }) {
+  if (role === "admin") return <span className="c-badge-blue">admin</span>;
+  if (role === "dealer") return <span className="c-badge-green">dealer</span>;
+  return <span className="c-badge-gray">buyer</span>;
 }
 
 function formatDealerStatus(status) {
@@ -331,6 +461,14 @@ function formatDealerStatus(status) {
   };
 
   return labels[status] || "신청 없음";
+}
+
+function formatDate(dateString) {
+  if (!dateString) return "-";
+  return new Date(dateString).toLocaleDateString("ko-KR", {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export default AdminUserPanel;
