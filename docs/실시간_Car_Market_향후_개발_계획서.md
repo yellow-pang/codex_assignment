@@ -4,7 +4,9 @@
 
 이 문서는 `실시간 Car Market 서비스 요구사항 정의서`와 현재 프로젝트 구현 상태를 비교한 뒤, 앞으로 어떤 순서로 개발을 진행할지 정리하기 위해 작성한다.
 
-현재 프로젝트는 기존 자동차 CRUD 앱을 Render 단일 Web Service로 배포할 수 있도록 구성한 상태이며, 새 요구사항인 Firebase Authentication, MongoDB Atlas, 차량 사진 업로드, Socket.io 상담, AI Agent 확장 준비는 아직 본격 구현 전 단계로 판단한다.
+현재 프로젝트는 기존 자동차 CRUD 앱을 실시간 Car Market 구조로 확장한 상태다.
+초기 작성 당시에는 Firebase Authentication, MongoDB Atlas, 차량 사진 업로드, Socket.io 상담, AI Agent 확장 준비가 본격 구현 전 단계였으나, 이후 단계별 구현을 거쳐 Firebase 인증, MongoDB Atlas, 차량 사진 업로드, Socket.io 상담, MongoDB 기반 딜러 온라인 상태까지 구현되었다.
+이 문서는 기존 판단을 삭제하지 않고, 실제 구현 기준으로 보정 기록을 남기며 다음 확장 방향을 정리한다.
 
 ## 2. 기준 문서 및 확인한 파일
 
@@ -25,15 +27,15 @@
 | Express 서버            | `server.js`에서 자동차 CRUD API 제공        | 부분 구현            |
 | React 프론트엔드        | 목록, 등록, 수정, 상세, 삭제 화면 제공      | 부분 구현            |
 | Tailwind CSS / daisyUI  | 적용 완료                                   | 구현                 |
-| 차량 데이터 저장        | 서버 메모리 배열 사용                       | 신규 요구사항 미충족 |
-| MongoDB Atlas           | 패키지와 연결 코드 없음                     | 미구현               |
+| 차량 데이터 저장        | MongoDB Atlas `cars` 컬렉션 사용            | 구현                 |
+| MongoDB Atlas           | `MongoClient` 기반 연결과 기본 컬렉션 준비 구현 | 구현                 |
 | Firebase Authentication | Firebase 이메일/비밀번호 인증 화면과 상태 관리 구현 | 구현                 |
 | 사용자 역할             | `buyer`, `dealer`, `admin` 역할과 딜러 승인 흐름 구현 | 구현                 |
-| 차량 검색               | 제조사 검색, 가격 필터만 분리 구현          | 부분 구현            |
+| 차량 검색               | 키워드, 제조사, 가격, 연식 조건 검색 구현   | 구현                 |
 | 차량 상세               | `/cars/:id` URL 기반 상세 조회와 새로고침 유지 구현 | 구현                 |
 | 사진 업로드             | `multer`, `/uploads` 정적 제공, 등록/수정 사진 처리 | 구현                 |
-| Socket.io 상담          | 상담방 생성 API와 `/chats/:roomId` 준비 화면 구현, 실시간 메시지는 미구현 | 부분 구현            |
-| AI Agent 확장 구조      | 상담 처리 함수 분리 구조 없음               | 미구현               |
+| Socket.io 상담          | 상담방 생성, 이전 메시지 조회, 실시간 메시지 송수신, MongoDB 저장 구현 | 구현                 |
+| AI Agent 확장 구조      | `handleChatMessage` 분리 완료, `generateAgentReply` placeholder와 context 구조 정리 단계 | 진행 중              |
 | Render 배포             | 단일 Web Service 배포 문서와 빌드 구조 있음 | 구현                 |
 | GitHub Actions CI/CD    | 빌드 후 Render Deploy Hook 호출             | 구현                 |
 
@@ -45,13 +47,13 @@
 | -------------- | ------------------------------- | ----------------------------------- | ------------------------- |
 | 차량 목록 조회 | `GET /cars`                     | `GET /api/cars`                     | 배포 미들웨어로 연결 가능 |
 | 차량 상세 조회 | `GET /cars/:id`                 | `GET /api/cars/:id`                 | 배포 미들웨어로 연결 가능 |
-| 차량 등록      | `POST /cars`                    | `POST /api/cars`                    | JSON 등록만 가능          |
-| 차량 수정      | `PUT /cars/:id`                 | `PUT /api/cars/:id`                 | 기본 CRUD 가능            |
+| 차량 등록      | `POST /api/cars`                | `POST /api/cars`                    | 사진 업로드와 딜러 권한 확인 구현 |
+| 차량 수정      | `PUT /api/cars/:id`             | `PUT /api/cars/:id`                 | 사진 교체와 등록 딜러 권한 확인 구현 |
 | 차량 삭제      | `DELETE /cars/:id`              | `DELETE /api/cars/:id`              | 기본 CRUD 가능            |
-| 제조사 검색    | `GET /cars/search?company=...`  | `GET /api/cars/search?...`          | 일부 가능                 |
-| 가격 검색      | `GET /cars/filter?minPrice=...` | `GET /api/cars/search?minPrice=...` | API 통합 필요             |
+| 제조사 검색    | `GET /api/cars/search?company=...` | `GET /api/cars/search?...`       | 구현                      |
+| 가격 검색      | `GET /api/cars/search?minPrice=...` | `GET /api/cars/search?minPrice=...` | 구현                    |
 | 사용자 API     | `/api/users`, `/api/users/me`, `/api/users/dealers` | `/api/users/*`                      | 구현                      |
-| 상담 API       | `POST /api/chats/rooms`         | `/api/chats/*`                      | 상담방 생성 구현          |
+| 상담 API       | `/api/chats/*`                  | `/api/chats/*`                      | 상담방 생성, 목록, 상세, 이전 메시지 조회 구현 |
 
 ## 5. CI/CD 및 Render 배포 상태
 
@@ -74,7 +76,8 @@
 | Vite production build | 성공                                       |
 | 확인된 이슈           | 프론트엔드 의존성 moderate 취약점 2건 보고 |
 
-현재 빌드 성공은 기존 CRUD 앱 기준이다. MongoDB, Firebase, Socket.io 기능은 아직 없으므로 해당 기능 검증은 진행하지 않았다.
+현재 빌드는 Firebase, MongoDB, 사진 업로드, Socket.io 상담 코드가 포함된 기준으로 성공했다.
+실제 Firebase 계정 2개와 MongoDB Atlas를 사용하는 실시간 상담 실동작 검증은 배포 또는 로컬 실행 환경에서 추가 확인이 필요하다.
 
 ## 7. 사용자 확인 사항 처리 결과
 
@@ -89,7 +92,7 @@
 | 차량 등록 권한          | 요구사항에 맞춰 딜러만 등록/수정 가능                                  |
 | 차량 사진 저장          | 추천 방식인 Express `/uploads`와 `multer` 사용                         |
 | 상담 화면 범위          | 상담방 목록 화면까지 포함                                              |
-| 딜러 온라인 상태        | Socket.io 접속 상태 기반으로 구현하고 확장 예시 추가                   |
+| 딜러 온라인 상태        | MongoDB `users` 문서 기반으로 구현하고 서버 재시작 시 오프라인 정리    |
 | UI 개편 범위            | 별도 UI 확정 방향 반영                                                 |
 | 관리자 기능             | 관리자 화면과 상담 현황까지 포함                                       |
 
@@ -187,6 +190,12 @@
 - 실제 AI 호출 없이 `generateAgentReply` placeholder 함수를 둔다.
 - 딜러 오프라인 시 AI Agent 자동 응답으로 확장 가능한 주석과 문서를 남긴다.
 
+보정 기록:
+
+- 8단계 Socket.io 작업에서 `handleChatMessage` 함수 분리는 먼저 완료되었다.
+- 9단계 AI Agent 확장 구조 정리에서는 기존 함수를 다시 활용해 차량 정보, 최근 메시지, 사용자 질문, 딜러 온라인 상태를 묶는 context helper를 추가한다.
+- 실제 OpenAI 또는 외부 AI API는 연결하지 않고, `generateAgentReply` placeholder는 기본적으로 `null`을 반환한다.
+
 ### 9.10 9단계: Render 및 GitHub Actions 문서 업데이트
 
 - `.env.example`에 MongoDB, Firebase, Socket.io 관련 환경 변수를 추가한다.
@@ -273,9 +282,9 @@ UI 개선은 별도 구현 단계에서 진행하되, 다음 방향은 확정한
 
 daisyUI 제거는 UI 대체가 끝난 뒤 진행한다. `frontend/tailwind.config.js`의 plugin 설정, `frontend/package.json`의 `daisyui` 의존성, `frontend/package-lock.json`을 함께 정리하고 `npm run build`로 검증한다.
 
-## 15. 딜러 온라인 상태 확장 예시
+## 15. 딜러 온라인 상태 구현 보정 기록
 
-1차 구현에서는 Socket.io 접속 상태를 메모리 기반으로 관리한다.
+초기 계획에서는 1차 구현을 Socket.io 접속 상태 기반 메모리 관리로 예상했다.
 
 ```js
 const onlineDealers = new Map();
@@ -283,19 +292,23 @@ const onlineDealers = new Map();
 // value: { socketId, connectedAt, lastSeenAt }
 ```
 
-향후 확장 시에는 MongoDB `dealer_presence` 컬렉션 또는 Redis 같은 외부 저장소를 사용할 수 있다.
+이후 구현 단계에서 사용자가 MongoDB 기반 관리 가능성을 확인했고, 실제 구현은 별도 컬렉션 없이 기존 MongoDB `users` 문서에 온라인 상태 필드를 보강하는 방식으로 확정했다.
+이 방식은 현재 단일 Render Web Service 구조에서 추가 인프라 없이 접속 상태를 추적할 수 있고, 관리자나 상담 화면에서 사용자 문서만 조회해도 딜러 상태를 확인할 수 있다는 장점이 있어 선택했다.
+
+현재 구현 필드:
 
 ```json
 {
-  "dealerId": "firebase-user-uid",
-  "status": "online",
-  "socketId": "socket-id",
-  "lastSeenAt": "2026-06-05T10:00:00.000Z",
-  "updatedAt": "2026-06-05T10:00:00.000Z"
+  "uid": "firebase-user-uid",
+  "dealerOnline": true,
+  "dealerSocketIds": ["socket-id"],
+  "dealerConnectedAt": "2026-06-05T10:00:00.000Z",
+  "dealerLastSeenAt": "2026-06-05T10:00:00.000Z"
 }
 ```
 
-Render 인스턴스가 하나인 1차 과제 범위에서는 메모리 기반 상태로 충분하다. 여러 인스턴스나 장기 운영으로 확장할 경우 외부 저장소를 사용한다.
+서버가 재시작되면 기존 Socket.io 연결은 유효하지 않으므로, 서버 시작 시 `dealerOnline: true`인 사용자를 오프라인으로 정리한다.
+여러 Render 인스턴스나 장기 운영으로 확장할 경우에는 Socket.io adapter, Redis, 또는 별도 `dealer_presence` 컬렉션과 TTL 정책을 검토한다.
 
 ## 16. 다음 액션
 

@@ -79,6 +79,7 @@ const usersRouter = express.Router();
 const userRoles = new Set(["buyer", "dealer", "admin"]);
 const dealerStatuses = new Set(["none", "pending", "approved", "rejected"]);
 const maxMessageLength = 1000;
+const agentContextMessageLimit = 20;
 const initialAdminEmails = new Set(
   String(process.env.INITIAL_ADMIN_EMAILS || "")
     .split(",")
@@ -349,6 +350,79 @@ async function resetDealerPresenceOnStartup() {
   );
 }
 
+async function getRecentRoomMessages(roomId, limit = agentContextMessageLimit) {
+  const safeLimit = Math.max(1, Math.min(Number(limit) || 1, 50));
+  const messages = await getMessagesCollection()
+    .find(
+      { roomId },
+      {
+        projection: {
+          _id: 0,
+          senderId: 1,
+          senderName: 1,
+          text: 1,
+          createdAt: 1,
+        },
+      },
+    )
+    .sort({ createdAt: -1 })
+    .limit(safeLimit)
+    .toArray();
+
+  return messages.reverse();
+}
+
+function createAgentCarContext(car) {
+  if (!car) {
+    return null;
+  }
+
+  return {
+    id: String(car._id || ""),
+    name: car.name || "",
+    company: car.company || "",
+    price: car.price ?? null,
+    year: car.year ?? null,
+    mileage: car.mileage ?? null,
+    location: car.location || "",
+    fuel: car.fuel || "",
+    type: car.type || "",
+    description: car.description || "",
+  };
+}
+
+async function buildAgentContext({ room, userMessage }) {
+  const [car, messages, dealerPresence] = await Promise.all([
+    getCarsCollection().findOne(createCarFilterById(room.carId)),
+    getRecentRoomMessages(room.roomId),
+    getDealerPresence(room.dealerId),
+  ]);
+
+  return {
+    room: {
+      roomId: room.roomId,
+      buyerId: room.buyerId,
+      dealerId: room.dealerId,
+      carId: room.carId,
+    },
+    car: createAgentCarContext(car),
+    messages,
+    dealerPresence,
+    userMessage: {
+      senderId: userMessage.senderId,
+      senderName: userMessage.senderName,
+      text: userMessage.text,
+      createdAt: userMessage.createdAt,
+    },
+  };
+}
+
+async function generateAgentReply(context) {
+  // 실제 AI API 연동은 이후 단계에서 이 함수 내부만 교체해 확장한다.
+  // 현재 단계에서는 상담 동작을 바꾸지 않기 위해 자동 응답을 만들지 않는다.
+  return null;
+}
+
 async function handleChatMessage(payload) {
   const roomId = String(payload?.roomId || "").trim();
   const senderId = normalizeUid(payload?.senderId);
@@ -399,7 +473,18 @@ async function handleChatMessage(payload) {
     },
   );
 
-  return savedMessage;
+  const agentContext = await buildAgentContext({
+    room,
+    userMessage: savedMessage,
+  });
+  const agentReply = await generateAgentReply(agentContext);
+
+  // 딜러가 오프라인이고 agentReply가 있으면 이후 단계에서 AI 메시지를
+  // messages 컬렉션에 저장하고 receive-message로 전송할 수 있다.
+  return {
+    message: savedMessage,
+    agentReply,
+  };
 }
 
 async function emitDealerPresenceToRooms(dealerId, presence) {
@@ -1186,7 +1271,7 @@ function setupSocketHandlers() {
 
     socket.on("send-message", async (payload = {}) => {
       try {
-        const message = await handleChatMessage(payload);
+        const { message } = await handleChatMessage(payload);
         io.to(message.roomId).emit("receive-message", message);
       } catch (error) {
         socket.emit("chat-error", createChatError(error.message));
