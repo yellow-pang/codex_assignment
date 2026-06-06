@@ -2,13 +2,21 @@ require("dotenv").config({ quiet: true });
 
 const express = require("express");
 const fs = require("fs");
+const http = require("http");
 const multer = require("multer");
 const { ObjectId } = require("mongodb");
 const path = require("path");
+const { Server } = require("socket.io");
 const { connectDatabase, getCollection } = require("./db");
 
 // Express 애플리케이션을 생성합니다.
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || true,
+  },
+});
 
 // Render 같은 배포 환경에서는 process.env.PORT를 사용하고, 로컬에서는 3000번을 사용합니다.
 const port = process.env.PORT || 3000;
@@ -70,6 +78,7 @@ const chatsRouter = express.Router();
 const usersRouter = express.Router();
 const userRoles = new Set(["buyer", "dealer", "admin"]);
 const dealerStatuses = new Set(["none", "pending", "approved", "rejected"]);
+const maxMessageLength = 1000;
 const initialAdminEmails = new Set(
   String(process.env.INITIAL_ADMIN_EMAILS || "")
     .split(",")
@@ -176,6 +185,9 @@ function normalizeUserDocument(user) {
     dealerRequestedAt: user.dealerRequestedAt || null,
     dealerApprovedAt: user.dealerApprovedAt || null,
     dealerApprovedBy: user.dealerApprovedBy || null,
+    dealerOnline: Boolean(user.dealerOnline),
+    dealerConnectedAt: user.dealerConnectedAt || null,
+    dealerLastSeenAt: user.dealerLastSeenAt || null,
   };
 }
 
@@ -215,6 +227,190 @@ function handleUploadError(error, res, fallbackMessage) {
 
   console.error(fallbackMessage, error.message);
   res.status(500).json({ message: fallbackMessage });
+}
+
+function createChatError(message) {
+  return { message };
+}
+
+function normalizeChatMessageText(value) {
+  return String(value || "").trim().slice(0, maxMessageLength);
+}
+
+async function findChatRoomById(roomId) {
+  return getChatRoomsCollection().findOne({ roomId });
+}
+
+async function getDealerPresence(dealerId) {
+  const dealer = await getUsersCollection().findOne(
+    { uid: dealerId },
+    {
+      projection: {
+        uid: 1,
+        dealerOnline: 1,
+        dealerConnectedAt: 1,
+        dealerLastSeenAt: 1,
+      },
+    },
+  );
+
+  return {
+    dealerId,
+    isOnline: Boolean(dealer?.dealerOnline),
+    connectedAt: dealer?.dealerConnectedAt || null,
+    lastSeenAt: dealer?.dealerLastSeenAt || null,
+  };
+}
+
+async function markDealerOnline(dealerId, socketId) {
+  const now = new Date();
+  const result = await getUsersCollection().findOneAndUpdate(
+    { uid: dealerId },
+    {
+      $set: {
+        dealerOnline: true,
+        dealerConnectedAt: now,
+        dealerLastSeenAt: now,
+        updatedAt: now,
+      },
+      $addToSet: { dealerSocketIds: socketId },
+    },
+    { returnDocument: "after" },
+  );
+
+  const dealer = getMongoDocument(result);
+  return {
+    dealerId,
+    isOnline: Boolean(dealer?.dealerOnline),
+    connectedAt: dealer?.dealerConnectedAt || now,
+    lastSeenAt: dealer?.dealerLastSeenAt || now,
+  };
+}
+
+async function markDealerOffline(dealerId, socketId) {
+  const now = new Date();
+  const result = await getUsersCollection().findOneAndUpdate(
+    { uid: dealerId },
+    {
+      $pull: { dealerSocketIds: socketId },
+      $set: { dealerLastSeenAt: now, updatedAt: now },
+    },
+    { returnDocument: "after" },
+  );
+  const dealer = getMongoDocument(result);
+  const remainingSocketIds = Array.isArray(dealer?.dealerSocketIds)
+    ? dealer.dealerSocketIds
+    : [];
+
+  if (remainingSocketIds.length > 0) {
+    return {
+      dealerId,
+      isOnline: true,
+      connectedAt: dealer.dealerConnectedAt || null,
+      lastSeenAt: dealer.dealerLastSeenAt || now,
+    };
+  }
+
+  await getUsersCollection().updateOne(
+    { uid: dealerId },
+    {
+      $set: {
+        dealerOnline: false,
+        dealerLastSeenAt: now,
+        updatedAt: now,
+      },
+      $unset: { dealerConnectedAt: "" },
+    },
+  );
+
+  return {
+    dealerId,
+    isOnline: false,
+    connectedAt: null,
+    lastSeenAt: now,
+  };
+}
+
+async function resetDealerPresenceOnStartup() {
+  const now = new Date();
+  await getUsersCollection().updateMany(
+    { dealerOnline: true },
+    {
+      $set: {
+        dealerOnline: false,
+        dealerLastSeenAt: now,
+        updatedAt: now,
+      },
+      $unset: {
+        dealerConnectedAt: "",
+        dealerSocketIds: "",
+      },
+    },
+  );
+}
+
+async function handleChatMessage(payload) {
+  const roomId = String(payload?.roomId || "").trim();
+  const senderId = normalizeUid(payload?.senderId);
+  const senderName = String(payload?.senderName || "사용자").trim() || "사용자";
+  const text = normalizeChatMessageText(payload?.text);
+
+  if (!roomId) {
+    throw new Error("상담방 ID가 필요합니다.");
+  }
+
+  if (!senderId) {
+    throw new Error("보낸 사람 UID가 필요합니다.");
+  }
+
+  if (!text) {
+    throw new Error("메시지를 입력해주세요.");
+  }
+
+  const room = await findChatRoomById(roomId);
+
+  if (!room) {
+    throw new Error("상담방을 찾을 수 없습니다.");
+  }
+
+  if (senderId !== room.buyerId && senderId !== room.dealerId) {
+    throw new Error("상담방 참여자만 메시지를 보낼 수 있습니다.");
+  }
+
+  const now = new Date();
+  const message = {
+    roomId,
+    senderId,
+    senderName,
+    text,
+    createdAt: now,
+  };
+  const result = await getMessagesCollection().insertOne(message);
+  const savedMessage = { _id: String(result.insertedId), ...message };
+
+  await getChatRoomsCollection().updateOne(
+    { roomId },
+    {
+      $set: {
+        lastMessage: text,
+        lastMessageAt: now,
+        updatedAt: now,
+      },
+    },
+  );
+
+  return savedMessage;
+}
+
+async function emitDealerPresenceToRooms(dealerId, presence) {
+  const eventName = presence.isOnline ? "dealer-online" : "dealer-offline";
+  const rooms = await getChatRoomsCollection()
+    .find({ dealerId }, { projection: { roomId: 1 } })
+    .toArray();
+
+  rooms.forEach((room) => {
+    io.to(room.roomId).emit(eventName, presence);
+  });
 }
 
 function escapeRegExp(value) {
@@ -885,6 +1081,34 @@ chatsRouter.get("/rooms", async (req, res) => {
   }
 });
 
+// GET /api/chats/rooms/:roomId - 상담방 상세 조회
+chatsRouter.get("/rooms/:roomId", async (req, res) => {
+  try {
+    const roomId = String(req.params.roomId || "").trim();
+
+    if (!roomId) {
+      return res.status(400).json({ message: "상담방 ID가 필요합니다." });
+    }
+
+    const room = await findChatRoomById(roomId);
+
+    if (!room) {
+      return res.status(404).json({ message: "상담방을 찾을 수 없습니다." });
+    }
+
+    const dealerPresence = await getDealerPresence(room.dealerId);
+
+    res.json({
+      ...room,
+      dealerOnline: dealerPresence.isOnline,
+      dealerLastSeenAt: dealerPresence.lastSeenAt,
+    });
+  } catch (error) {
+    console.error("상담방 상세 조회 실패:", error.message);
+    res.status(500).json({ message: "상담방 정보를 조회하지 못했습니다." });
+  }
+});
+
 // GET /api/chats/rooms/:roomId/messages - 이전 메시지 조회
 chatsRouter.get("/rooms/:roomId/messages", async (req, res) => {
   try {
@@ -905,6 +1129,97 @@ chatsRouter.get("/rooms/:roomId/messages", async (req, res) => {
     res.status(500).json({ message: "메시지를 조회하지 못했습니다." });
   }
 });
+
+function setupSocketHandlers() {
+  io.on("connection", (socket) => {
+    socket.data.joinedRooms = new Set();
+
+    socket.on("join-room", async (payload = {}) => {
+      try {
+        const roomId = String(payload.roomId || "").trim();
+        const userId = normalizeUid(payload.userId);
+
+        if (!roomId || !userId) {
+          socket.emit(
+            "chat-error",
+            createChatError("상담방 ID와 사용자 UID가 필요합니다."),
+          );
+          return;
+        }
+
+        const room = await findChatRoomById(roomId);
+
+        if (!room) {
+          socket.emit("chat-error", createChatError("상담방을 찾을 수 없습니다."));
+          return;
+        }
+
+        if (userId !== room.buyerId && userId !== room.dealerId) {
+          socket.emit(
+            "chat-error",
+            createChatError("상담방 참여자만 입장할 수 있습니다."),
+          );
+          return;
+        }
+
+        socket.join(roomId);
+        socket.data.joinedRooms.add(roomId);
+        socket.data.userId = userId;
+
+        if (userId === room.dealerId) {
+          socket.data.dealerId = room.dealerId;
+          const presence = await markDealerOnline(room.dealerId, socket.id);
+          await emitDealerPresenceToRooms(room.dealerId, presence);
+          return;
+        }
+
+        const presence = await getDealerPresence(room.dealerId);
+        socket.emit(
+          presence.isOnline ? "dealer-online" : "dealer-offline",
+          presence,
+        );
+      } catch (error) {
+        console.error("상담방 입장 처리 실패:", error.message);
+        socket.emit("chat-error", createChatError("상담방에 입장하지 못했습니다."));
+      }
+    });
+
+    socket.on("send-message", async (payload = {}) => {
+      try {
+        const message = await handleChatMessage(payload);
+        io.to(message.roomId).emit("receive-message", message);
+      } catch (error) {
+        socket.emit("chat-error", createChatError(error.message));
+      }
+    });
+
+    socket.on("leave-room", (payload = {}) => {
+      const roomId = String(payload.roomId || "").trim();
+
+      if (!roomId) {
+        return;
+      }
+
+      socket.leave(roomId);
+      socket.data.joinedRooms.delete(roomId);
+    });
+
+    socket.on("disconnect", async () => {
+      const dealerId = socket.data.dealerId;
+
+      if (!dealerId) {
+        return;
+      }
+
+      try {
+        const presence = await markDealerOffline(dealerId, socket.id);
+        await emitDealerPresenceToRooms(dealerId, presence);
+      } catch (error) {
+        console.error("딜러 오프라인 처리 실패:", error.message);
+      }
+    });
+  });
+}
 
 app.use("/api/users", usersRouter);
 app.use("/api/cars", carsRouter);
@@ -936,8 +1251,10 @@ app.get("*", (req, res) => {
 async function startServer() {
   try {
     await connectDatabase();
+    await resetDealerPresenceOnStartup();
+    setupSocketHandlers();
 
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);
     });
   } catch (error) {
