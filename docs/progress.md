@@ -1,5 +1,35 @@
 # 작업 진행 기록
 
+## 백엔드 라우터와 서비스 세분화
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 백엔드 라우터와 서비스 세분화 |
+| 작업 일자 | 2026-06-07 |
+| 작업 내용 | `backend/server.js`에 남아 있던 REST API, 서비스성 함수, Socket.io 이벤트, 정규화 helper를 routes/services/sockets/utils로 분리 |
+| 수정한 주요 파일 | `backend/server.js` |
+| 추가한 주요 파일 | `backend/routes/cars.routes.js`, `backend/routes/users.routes.js`, `backend/routes/chats.routes.js`, `backend/services/agent.service.js`, `backend/services/cars.service.js`, `backend/services/chats.service.js`, `backend/services/collections.js`, `backend/services/dealerPresence.service.js`, `backend/services/users.service.js`, `backend/sockets/chat.socket.js`, `backend/utils/ids.js`, `backend/utils/normalizers.js`, `backend/utils/search.js`, `docs/plans/plan-14-backend-routes-services.md`, `docs/steps/2026-06-07-14-backend-routes-services.md`, `docs/pr/2026-06-07-14-backend-routes-services-pr.md` |
+| 확인한 명령어 | `node --check backend/server.js` 성공, `node --check backend/routes/*.js` 성공, `node --check backend/services/*.js` 성공, `node --check backend/sockets/chat.socket.js` 성공, `node --check backend/utils/*.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+
+### 작업 내용
+
+- `backend/server.js`를 Express/Socket.io 생성, middleware, 라우터 등록, React fallback, 서버 시작만 담당하도록 축소했다.
+- 차량 API를 `backend/routes/cars.routes.js`와 `backend/services/cars.service.js`로 분리했다.
+- 사용자 API와 관리자/딜러 권한 helper를 `backend/routes/users.routes.js`와 `backend/services/users.service.js`로 분리했다.
+- 상담 API와 메시지 저장 흐름을 `backend/routes/chats.routes.js`와 `backend/services/chats.service.js`로 분리했다.
+- 딜러 온라인 상태 처리를 `backend/services/dealerPresence.service.js`로 분리했다.
+- AI Agent 확장용 context helper와 placeholder를 `backend/services/agent.service.js`로 분리했다.
+- Socket.io 상담 이벤트 처리를 `backend/sockets/chat.socket.js`로 분리했다.
+- ID, UID, 정규화, 검색 helper를 `backend/utils/` 아래로 분리했다.
+- API 경로, Socket.io 이벤트 이름, MongoDB 컬렉션, Render 단일 배포 구조는 변경하지 않았다.
+
+### 남은 확인
+
+1. 실제 MongoDB/Firebase 환경에서 회원가입, 로그인, 딜러 신청, admin 역할 변경을 확인한다.
+2. 승인된 딜러 기준 차량 등록, 수정, 삭제가 기존처럼 동작하는지 확인한다.
+3. 구매자/딜러 브라우저 2개로 상담방 생성, 이전 메시지 조회, 실시간 메시지 송수신을 확인한다.
+4. 다음 단계에서 Firebase ID Token 서버 검증과 권한 미들웨어를 도입한다.
+
 ## 백엔드 구조 분리와 보안 기반 리팩토링
 
 | 항목 | 내용 |
