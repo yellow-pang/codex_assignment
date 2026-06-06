@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Navigate,
   Route,
@@ -33,12 +33,14 @@ function App() {
   } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const previousPathRef = useRef(location.pathname);
   const [cars, setCars] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [currentView, setCurrentView] = useState("list");
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [isAuthErrorDismissed, setIsAuthErrorDismissed] = useState(false);
   const [filters, setFilters] = useState({
     keyword: "",
     company: "",
@@ -73,13 +75,34 @@ function App() {
 
   const displayMessage = message.text
     ? message
-    : authError
+    : authError && !isAuthErrorDismissed
       ? { type: "error", text: authError }
       : message;
 
   useEffect(() => {
     loadCars();
   }, []);
+
+  useEffect(() => {
+    setIsAuthErrorDismissed(false);
+  }, [authError]);
+
+  useEffect(() => {
+    if (previousPathRef.current !== location.pathname) {
+      previousPathRef.current = location.pathname;
+      setMessage({ type: "", text: "" });
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!message.text || message.type === "error") return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setMessage({ type: "", text: "" });
+    }, 4000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [message.text, message.type]);
 
   async function requestApi(url, options) {
     const response = await fetch(url, options);
@@ -467,97 +490,157 @@ function App() {
     }
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Hero 섹션 */}
-        <section className="rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 px-6 py-10 text-white">
-          <h1 className="text-2xl font-extrabold sm:text-3xl">
-            내 조건에 맞는 중고차를 찾아보세요
-          </h1>
-          <p className="mt-2 text-blue-100">
-            검색하고, 비교하고, 마음에 드는 딜러와 바로 상담하세요
-          </p>
+        <section className="relative overflow-hidden rounded-[2rem] border border-blue-100 bg-gradient-to-br from-white via-sky-50 to-blue-100 px-5 py-6 shadow-2xl shadow-blue-100/60 sm:px-8 sm:py-10">
+          <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-sky-200/40 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-blue-200/40 blur-3xl" />
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+            <div>
+              <p className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
+                실시간 상담이 가능한 중고차 마켓
+              </p>
+              <h1 className="mt-5 max-w-xl text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
+                내 조건에 맞는
+                <span className="block text-blue-600">중고차를 찾아보세요</span>
+              </h1>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-slate-600 sm:text-base">
+                예산, 연식, 제조사 조건으로 빠르게 비교하고 마음에 드는
+                딜러와 바로 상담하세요.
+              </p>
+              <div className="mt-6 grid max-w-md grid-cols-3 gap-3">
+                <HeroMetric label="추천 매물" value={cars.length} />
+                <HeroMetric label="실시간 상담" value="LIVE" />
+                <HeroMetric label="간편 검색" value="FAST" />
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-x-10 bottom-2 h-10 rounded-full bg-blue-950/20 blur-2xl" />
+              <div className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/70 p-3 shadow-2xl shadow-blue-200/60 backdrop-blur">
+                <img
+                  alt="Car Market 대표 차량 이미지"
+                  className="h-64 w-full rounded-[1.2rem] object-cover sm:h-80"
+                  src="/uploads/pre-default-car.png"
+                />
+                <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur">
+                  <p className="text-sm font-black text-slate-950">
+                    조건에 맞는 차량을 빠르게 비교하세요
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    검색부터 딜러 상담까지 한 화면에서 이어집니다
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* 검색 패널 */}
-        <div className="c-card p-5">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <input
-              className="c-input"
-              name="keyword"
-              value={filters.keyword}
-              onChange={handleFilterChange}
-              placeholder="차량명: Sonata"
-            />
-            <select
-              className="c-select"
-              name="company"
-              value={filters.company}
-              onChange={handleFilterChange}
-            >
-              <option value="">제조사 전체</option>
-              <option value="HYUNDAI">HYUNDAI</option>
-              <option value="KIA">KIA</option>
-              <option value="RENAULT">RENAULT</option>
-              <option value="GENESIS">GENESIS</option>
-              <option value="CHEVROLET">CHEVROLET</option>
-            </select>
-            <input
-              className="c-input"
-              name="minPrice"
-              type="number"
-              min="0"
-              value={filters.minPrice}
-              onChange={handleFilterChange}
-              placeholder="최소 가격 (만원)"
-            />
-            <input
-              className="c-input"
-              name="maxPrice"
-              type="number"
-              min="0"
-              value={filters.maxPrice}
-              onChange={handleFilterChange}
-              placeholder="최대 가격 (만원)"
-            />
-            <input
-              className="c-input"
-              name="minYear"
-              type="number"
-              min="1900"
-              value={filters.minYear}
-              onChange={handleFilterChange}
-              placeholder="최소 연식"
-            />
-            <input
-              className="c-input"
-              name="maxYear"
-              type="number"
-              min="1900"
-              value={filters.maxYear}
-              onChange={handleFilterChange}
-              placeholder="최대 연식"
-            />
+        <section className="c-surface -mt-12 p-4 sm:p-5">
+          <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-lg font-black text-slate-950">차량 검색</h2>
+              <p className="text-sm text-slate-500">
+                원하는 조건을 입력하고 추천 매물을 확인하세요.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2 sm:pt-0">
+              <button className="c-btn-outline px-4 py-2" onClick={resetSearchFilters}>
+                초기화
+              </button>
+              <button className="c-btn-primary px-5 py-2" onClick={searchCars}>
+                검색하기
+              </button>
+            </div>
           </div>
-          <div className="mt-3 flex justify-end gap-2">
-            <button className="c-btn-outline" onClick={resetSearchFilters}>
-              초기화
-            </button>
-            <button className="c-btn-primary" onClick={searchCars}>
-              검색하기
-            </button>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+            <SearchField label="차량명" className="lg:col-span-2">
+              <input
+                className="c-input"
+                name="keyword"
+                value={filters.keyword}
+                onChange={handleFilterChange}
+                placeholder="차량명을 입력하세요"
+              />
+            </SearchField>
+            <SearchField label="제조사">
+              <select
+                className="c-select"
+                name="company"
+                value={filters.company}
+                onChange={handleFilterChange}
+              >
+                <option value="">전체</option>
+                <option value="HYUNDAI">HYUNDAI</option>
+                <option value="KIA">KIA</option>
+                <option value="RENAULT">RENAULT</option>
+                <option value="GENESIS">GENESIS</option>
+                <option value="CHEVROLET">CHEVROLET</option>
+              </select>
+            </SearchField>
+            <SearchField label="최소 가격">
+              <input
+                className="c-input"
+                name="minPrice"
+                type="number"
+                min="0"
+                value={filters.minPrice}
+                onChange={handleFilterChange}
+                placeholder="만원"
+              />
+            </SearchField>
+            <SearchField label="최대 가격">
+              <input
+                className="c-input"
+                name="maxPrice"
+                type="number"
+                min="0"
+                value={filters.maxPrice}
+                onChange={handleFilterChange}
+                placeholder="만원"
+              />
+            </SearchField>
+            <SearchField label="연식">
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  className="c-input"
+                  name="minYear"
+                  type="number"
+                  min="1900"
+                  value={filters.minYear}
+                  onChange={handleFilterChange}
+                  placeholder="최소"
+                />
+                <input
+                  className="c-input"
+                  name="maxYear"
+                  type="number"
+                  min="1900"
+                  value={filters.maxYear}
+                  onChange={handleFilterChange}
+                  placeholder="최대"
+                />
+              </div>
+            </SearchField>
           </div>
-        </div>
+        </section>
 
         {/* 차량 목록 */}
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900">
-              {isSearchMode ? "검색 결과" : "추천 매물"}{" "}
-              <span className="text-gray-400">({cars.length})</span>
-            </h2>
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="c-section-title">
+                {isSearchMode ? "검색 결과" : "추천 매물"}{" "}
+                <span className="text-blue-600">{cars.length}</span>
+              </h2>
+              <p className="c-section-desc">
+                조건에 맞는 매물을 비교하고 딜러와 바로 상담해보세요.
+              </p>
+            </div>
             {isDealer && (
               <button
-                className="c-btn-primary px-3 py-1.5 text-xs"
+                className="c-btn-primary hidden px-4 py-2 text-xs sm:inline-flex"
                 onClick={handleGoCreate}
               >
                 + 차량 등록
@@ -593,20 +676,21 @@ function App() {
               cars={cars}
               emptyMessage={
                 isSearchMode
-                  ? "검색 결과가 없습니다."
-                  : "등록된 자동차가 없습니다."
+                  ? "조건에 맞는 차량이 없습니다."
+                  : "아직 등록된 차량이 없습니다."
               }
               emptyDescription={
                 isSearchMode
                   ? "검색 조건을 바꾸거나 초기화해 전체 목록을 다시 확인해보세요."
-                  : "등록 버튼을 눌러 첫 자동차를 추가해보세요."
+                  : "딜러가 차량을 등록하면 이곳에 추천 매물이 표시됩니다."
               }
               onView={handleViewCar}
               onEdit={handleEditCar}
               onDelete={setDeleteTarget}
+              onStartChat={handleStartChat}
             />
           )}
-        </div>
+        </section>
       </div>
     );
   }
@@ -638,7 +722,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#eff6ff,_transparent_32rem),linear-gradient(180deg,_#f8fafc_0%,_#ffffff_45%,_#f8fafc_100%)]">
       <Header
         currentView={activeView}
         isAdmin={isAdmin}
@@ -654,12 +738,20 @@ function App() {
         userProfile={userProfile}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {displayMessage.text && (
           <div className="mb-5">
             <AlertMessage
               type={displayMessage.type}
               message={displayMessage.text}
+              onClose={() => {
+                if (message.text) {
+                  setMessage({ type: "", text: "" });
+                  return;
+                }
+
+                setIsAuthErrorDismissed(true);
+              }}
             />
           </div>
         )}
@@ -779,6 +871,26 @@ function App() {
         onConfirm={handleDeleteCar}
       />
     </div>
+  );
+}
+
+function HeroMetric({ label, value }) {
+  return (
+    <div className="rounded-2xl border border-white/80 bg-white/70 px-3 py-3 shadow-sm backdrop-blur">
+      <p className="text-lg font-black text-slate-950">{value}</p>
+      <p className="mt-0.5 text-xs font-medium text-slate-500">{label}</p>
+    </div>
+  );
+}
+
+function SearchField({ label, className = "", children }) {
+  return (
+    <label className={`block ${className}`}>
+      <span className="mb-1.5 block text-xs font-bold text-slate-600">
+        {label}
+      </span>
+      {children}
+    </label>
   );
 }
 

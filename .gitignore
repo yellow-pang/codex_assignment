@@ -145,3 +145,6 @@ vite.config.ts.timestamp-*
 # Uploaded vehicle images
 uploads/*
 !uploads/default-car.png
+!uploads/car-upload-placeholder.png
+!uploads/pre-default-car.png
+!uploads/auth-car-placeholder.png

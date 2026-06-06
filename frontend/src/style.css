@@ -3,77 +3,91 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    background: #f8fafc;
+  }
+
   body {
     min-width: 320px;
+    @apply bg-slate-50 text-slate-900 antialiased;
   }
 }
 
 @layer components {
   /* 버튼 기본 */
   .c-btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .c-btn-primary {
-    @apply c-btn bg-blue-600 text-white hover:bg-blue-700;
+    @apply c-btn bg-blue-600 text-white shadow-sm shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/25;
   }
   .c-btn-outline {
-    @apply c-btn border border-gray-300 bg-white text-gray-700 hover:bg-gray-50;
+    @apply c-btn border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700;
   }
   .c-btn-danger {
-    @apply c-btn bg-red-600 text-white hover:bg-red-700;
+    @apply c-btn bg-red-600 text-white shadow-sm shadow-red-600/20 hover:bg-red-700;
   }
   .c-btn-warning {
-    @apply c-btn bg-amber-500 text-white hover:bg-amber-600;
+    @apply c-btn bg-amber-500 text-white shadow-sm shadow-amber-500/20 hover:bg-amber-600;
   }
   .c-btn-ghost {
-    @apply c-btn text-gray-600 hover:bg-gray-100;
+    @apply c-btn text-slate-600 hover:bg-slate-100 hover:text-slate-950;
   }
 
   /* 입력 필드 */
   .c-input {
-    @apply block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+    @apply block w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100;
   }
   .c-select {
-    @apply block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+    @apply block w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100;
   }
   .c-textarea {
-    @apply block w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+    @apply block w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100;
   }
 
   /* 카드 */
   .c-card {
-    @apply rounded-xl border border-gray-200 bg-white shadow-sm;
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/70;
+  }
+  .c-surface {
+    @apply rounded-2xl border border-white/70 bg-white/90 shadow-xl shadow-slate-200/80 backdrop-blur;
+  }
+  .c-section-title {
+    @apply text-xl font-black tracking-tight text-slate-950;
+  }
+  .c-section-desc {
+    @apply mt-1 text-sm leading-6 text-slate-500;
   }
 
   /* 배지 */
   .c-badge {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold;
   }
   .c-badge-blue {
-    @apply c-badge bg-blue-50 text-blue-700;
+    @apply c-badge bg-blue-50 text-blue-700 ring-1 ring-blue-100;
   }
   .c-badge-gray {
-    @apply c-badge bg-gray-100 text-gray-600;
+    @apply c-badge bg-slate-100 text-slate-600 ring-1 ring-slate-200;
   }
   .c-badge-green {
-    @apply c-badge bg-green-50 text-green-700;
+    @apply c-badge bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100;
   }
   .c-badge-red {
-    @apply c-badge bg-red-50 text-red-700;
+    @apply c-badge bg-red-50 text-red-700 ring-1 ring-red-100;
   }
   .c-badge-yellow {
-    @apply c-badge bg-yellow-50 text-yellow-700;
+    @apply c-badge bg-amber-50 text-amber-700 ring-1 ring-amber-100;
   }
 
   /* 상태 배너 */
   .c-alert {
-    @apply flex items-center gap-2 rounded-md border px-4 py-3 text-sm;
+    @apply flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium;
   }
   .c-alert-error {
     @apply c-alert border-red-200 bg-red-50 text-red-700;
   }
   .c-alert-success {
-    @apply c-alert border-green-200 bg-green-50 text-green-700;
+    @apply c-alert border-emerald-200 bg-emerald-50 text-emerald-700;
   }
   .c-alert-info {
     @apply c-alert border-blue-200 bg-blue-50 text-blue-700;
@@ -84,6 +98,6 @@
 
   /* 폼 레이블 */
   .c-label {
-    @apply block text-sm font-medium text-gray-700;
+    @apply block text-sm font-semibold text-slate-700;
   }
 }

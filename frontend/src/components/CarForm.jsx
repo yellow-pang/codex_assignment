@@ -17,6 +17,8 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
   const [form, setForm] = useState(emptyForm);
   const [errorMessage, setErrorMessage] = useState("");
   const isEditMode = mode === "edit";
+  const uploadPlaceholderUrl = "/uploads/car-upload-placeholder.png";
+  const currentImageUrl = initialCar?.imageUrl || uploadPlaceholderUrl;
 
   useEffect(() => {
     if (initialCar) {
@@ -93,26 +95,54 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
   }
 
   return (
-    <div className="c-card p-6">
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold text-gray-900">
+    <div className="grid gap-6 lg:grid-cols-[17rem_1fr]">
+      <aside className="h-fit rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white shadow-xl shadow-slate-300/50">
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-blue-300">
+          Dealer
+        </p>
+        <h1 className="mt-3 text-2xl font-black">
           {isEditMode ? "차량 수정" : "차량 등록"}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          필수 정보를 입력한 뒤 저장 버튼을 눌러주세요.
+        <p className="mt-3 text-sm leading-6 text-slate-300">
+          사진과 핵심 정보를 잘 채울수록 구매자 상담 전환율이 높아집니다.
         </p>
-      </div>
-
-      {errorMessage && (
-        <div className="c-alert-error mb-4">
-          <span>{errorMessage}</span>
+        <div className="mt-6 space-y-2 text-sm">
+          {["기본 정보", "차량 스펙", "판매 정보", "사진 업로드", "상세 설명"].map(
+            (item, index) => (
+              <div
+                key={item}
+                className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2 text-slate-200"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-black text-white">
+                  {index + 1}
+                </span>
+                {item}
+              </div>
+            ),
+          )}
         </div>
-      )}
+      </aside>
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="c-card p-5 sm:p-7">
+        <div className="mb-6">
+          <h2 className="text-2xl font-black tracking-tight text-slate-950">
+            {isEditMode ? "등록된 차량 정보 수정" : "새 차량 정보 입력"}
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-500">
+            필수 정보를 입력한 뒤 저장 버튼을 눌러주세요.
+          </p>
+        </div>
+
+        {errorMessage && (
+          <div className="c-alert-error mb-4">
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+      <form className="space-y-7" onSubmit={handleSubmit}>
         {/* 섹션 1: 기본 정보 */}
-        <fieldset className="space-y-4">
-          <legend className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2 w-full">
+        <fieldset className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+          <legend className="px-2 text-sm font-black text-slate-800">
             기본 정보
           </legend>
           <div>
@@ -131,8 +161,8 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
         </fieldset>
 
         {/* 섹션 2: 차량 스펙 */}
-        <fieldset className="space-y-4">
-          <legend className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2 w-full">
+        <fieldset className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+          <legend className="px-2 text-sm font-black text-slate-800">
             차량 스펙
           </legend>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -211,15 +241,15 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
         </fieldset>
 
         {/* 섹션 3: 판매 정보 */}
-        <fieldset className="space-y-4">
-          <legend className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2 w-full">
+        <fieldset className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+          <legend className="px-2 text-sm font-black text-slate-800">
             판매 정보
           </legend>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label className="c-label mb-1" htmlFor="car-price">
                 가격 *{" "}
-                <span className="text-xs font-normal text-gray-400">
+                <span className="text-xs font-normal text-slate-400">
                   (만원)
                 </span>
               </label>
@@ -236,7 +266,7 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
             <div>
               <label className="c-label mb-1" htmlFor="car-mileage">
                 주행거리 *{" "}
-                <span className="text-xs font-normal text-gray-400">(km)</span>
+                <span className="text-xs font-normal text-slate-400">(km)</span>
               </label>
               <input
                 className="c-input"
@@ -266,30 +296,51 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
         </fieldset>
 
         {/* 섹션 4: 차량 사진 */}
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2 w-full">
-            차량 사진{" "}
-            <span className="text-xs font-normal text-gray-400">
-              jpg, jpeg, png, webp / 최대 5MB
-            </span>
+        <fieldset className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+          <legend className="px-2 text-sm font-black text-slate-800">
+            차량 사진
           </legend>
+          <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+              <img
+                alt="차량 이미지 업로드 안내"
+                className="h-44 w-full rounded-xl object-cover"
+                src={currentImageUrl}
+              />
+            </div>
+            <div className="flex flex-col justify-center">
+              <p className="text-sm font-bold text-slate-800">
+                차량 이미지를 등록해주세요
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                jpg, jpeg, png, webp 형식을 지원하며 최대 5MB까지 업로드할
+                수 있습니다. 이미지가 없으면 기본 placeholder가 목록과 상세에
+                표시됩니다.
+              </p>
           {isEditMode && initialCar?.imageUrl && (
-            <p className="text-xs text-gray-500">
+                <p className="mt-2 text-xs font-medium text-blue-600">
               새 파일을 선택하지 않으면 기존 사진을 유지합니다.
             </p>
           )}
           <input
             accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-            className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                className="mt-4 block w-full text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2.5 file:text-sm file:font-bold file:text-white hover:file:bg-blue-700"
             name="image"
             type="file"
             onChange={handleChange}
           />
+              {form.image && (
+                <p className="mt-2 text-xs font-medium text-slate-500">
+                  선택한 파일: {form.image.name}
+                </p>
+              )}
+            </div>
+          </div>
         </fieldset>
 
         {/* 섹션 5: 차량 설명 */}
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-semibold text-gray-700 border-b border-gray-200 pb-2 w-full">
+        <fieldset className="space-y-2 rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+          <legend className="px-2 text-sm font-black text-slate-800">
             차량 설명 *
           </legend>
           <textarea
@@ -311,6 +362,7 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

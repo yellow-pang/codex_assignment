@@ -1,3 +1,5 @@
+import EmptyState from "./EmptyState.jsx";
+
 function CarCardGrid({
   cars,
   emptyMessage = "등록된 자동차가 없습니다.",
@@ -6,71 +8,86 @@ function CarCardGrid({
   onView,
   onEdit,
   onDelete,
+  onStartChat,
 }) {
   const defaultCarImageUrl = "/uploads/default-car.png";
 
   if (cars.length === 0) {
     return (
-      <div className="rounded-xl border-2 border-dashed border-gray-200 py-20 text-center">
-        <p className="font-semibold text-gray-500">{emptyMessage}</p>
-        <p className="mt-1 text-sm text-gray-400">{emptyDescription}</p>
-      </div>
+      <EmptyState title={emptyMessage} description={emptyDescription} />
     );
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
       {cars.map((car) => (
         <article
           key={car._id}
-          className="c-card flex flex-col overflow-hidden transition-shadow hover:shadow-md"
+          className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-100"
         >
           {/* 차량 이미지 */}
-          <div className="relative">
+          <div className="relative overflow-hidden bg-slate-100">
             <img
               alt={`${car.name} 차량 사진`}
-              className="h-48 w-full object-cover"
+              className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
               src={car.imageUrl || defaultCarImageUrl}
             />
-            <span className="absolute left-3 top-3 c-badge-blue">
+            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/45 to-transparent" />
+            <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">
               {car.company}
+            </span>
+            <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
+              딜러 상담
             </span>
           </div>
 
           {/* 차량 정보 */}
           <div className="flex flex-1 flex-col p-4">
-            <h3 className="font-semibold text-gray-900">{car.name}</h3>
-            <p className="mt-1 text-xl font-bold text-blue-600">
+            <h3 className="line-clamp-1 text-base font-black text-slate-950">
+              {car.name}
+            </h3>
+            <p className="mt-1 text-2xl font-black tracking-tight text-blue-600">
               {Number(car.price).toLocaleString()}만원
             </p>
 
             {/* 기본 스펙 */}
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
-              <span>{car.year}년</span>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-xs text-slate-500">
+              <SpecPill label="연식" value={`${car.year}년`} />
               {car.mileage !== undefined && (
-                <span>{Number(car.mileage).toLocaleString()}km</span>
+                <SpecPill
+                  label="주행"
+                  value={`${Number(car.mileage).toLocaleString()}km`}
+                />
               )}
-              {car.location && <span>{car.location}</span>}
+              {car.location && <SpecPill label="지역" value={car.location} />}
             </div>
 
             {/* 배지 */}
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {car.fuel && <span className="c-badge-gray">{car.fuel}</span>}
               {car.type && <span className="c-badge-gray">{car.type}</span>}
             </div>
 
             {/* 액션 버튼 */}
-            <div className="mt-4 flex gap-2">
+            <div className="mt-auto flex gap-2 pt-4">
               <button
-                className="c-btn-primary flex-1"
+                className="c-btn-outline flex-1 px-3 py-2 text-xs"
                 onClick={() => onView(car)}
               >
                 상세 보기
               </button>
+              {onStartChat && (
+                <button
+                  className="c-btn-primary flex-1 px-3 py-2 text-xs"
+                  onClick={() => onStartChat(car)}
+                >
+                  상담하기
+                </button>
+              )}
               {canManageCar(car) && (
                 <>
                   <button
-                    className="c-btn-outline px-3 py-1.5 text-xs"
+                    className="c-btn-outline px-3 py-2 text-xs"
                     onClick={() => onEdit(car)}
                   >
                     수정
@@ -87,6 +104,17 @@ function CarCardGrid({
           </div>
         </article>
       ))}
+    </div>
+  );
+}
+
+function SpecPill({ label, value }) {
+  return (
+    <div className="rounded-xl bg-slate-50 px-2.5 py-2 ring-1 ring-slate-100">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
+      <p className="mt-0.5 truncate font-bold text-slate-700">{value}</p>
     </div>
   );
 }
