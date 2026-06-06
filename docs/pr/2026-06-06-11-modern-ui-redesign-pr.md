@@ -49,6 +49,11 @@ feat: 핵심 화면 Modern Car Marketplace UI 개선
 - 사진 업로드 영역에 업로드 유도 placeholder 이미지를 연결했다.
 - 입력 섹션을 업무형 폼처럼 구분했다.
 
+### 안내바 UX
+
+- `AlertMessage.jsx`에 X 닫기 버튼을 추가했다.
+- SPA 이동 후 이전 오류 안내가 남는 문제를 줄이기 위해 라우트 변경 시 오류 메시지를 정리한다.
+
 ### 문서
 
 - `docs/plans/plan-11-modern-ui-redesign.md`에 사용자 확정 답변과 1차/2차 구현 범위를 반영했다.
@@ -69,6 +74,7 @@ frontend/src/components/CarDetail.jsx
 frontend/src/components/LoginForm.jsx
 frontend/src/components/RegisterForm.jsx
 frontend/src/components/CarForm.jsx
+frontend/src/components/AlertMessage.jsx
 ```
 
 ## 보존된 항목
@@ -86,6 +92,8 @@ frontend/src/components/CarForm.jsx
 
 | 용도 | 파일명 |
 | --- | --- |
+| 첫 화면 Hero 대기 이미지 | `uploads/pre-default-car.png` |
+| 로그인/회원가입 브랜드 이미지 | `uploads/auth-car-placeholder.png` |
 | 차량 이미지 미등록 | `uploads/default-car.png` |
 | 차량 등록/수정 폼 업로드 유도 | `uploads/car-upload-placeholder.png` |
 

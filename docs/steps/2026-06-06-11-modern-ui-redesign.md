@@ -28,11 +28,14 @@
 
 | 용도 | 파일명 |
 | --- | --- |
+| 첫 화면 Hero 대기 이미지 | `uploads/pre-default-car.png` |
+| 로그인/회원가입 브랜드 이미지 | `uploads/auth-car-placeholder.png` |
 | 차량 이미지 미등록 기본 이미지 | `uploads/default-car.png` |
 | 차량 등록/수정 폼 업로드 유도 이미지 | `uploads/car-upload-placeholder.png` |
 
 차량 이미지가 없는 경우에는 카드와 상세 화면에서 `uploads/default-car.png`를 사용한다.
 차량 목록 자체가 비어 있는 경우에는 새 `EmptyState` 컴포넌트로 “조건에 맞는 차량이 없습니다” 계열 안내를 표시한다.
+로그인/회원가입 브랜드 이미지가 없으면 `uploads/pre-default-car.png`로 대체 표시한다.
 
 ## 변경한 파일 요약
 
@@ -48,6 +51,7 @@
 | `frontend/src/components/LoginForm.jsx` | 2열 브랜드 패널형 로그인 화면으로 개선 |
 | `frontend/src/components/RegisterForm.jsx` | 2열 회원가입 화면, 역할 선택 카드, inline SVG 아이콘 적용 |
 | `frontend/src/components/CarForm.jsx` | 딜러용 slate 사이드바와 업로드 유도 영역을 포함한 폼으로 개선 |
+| `frontend/src/components/AlertMessage.jsx` | 전역 안내바 닫기 버튼 추가 |
 
 ## 주요 변경 내용
 
@@ -61,7 +65,7 @@
 ### 첫 화면
 
 - 기존 파란 그라데이션 텍스트 Hero를 밝은 white/sky/blue gradient Hero로 교체했다.
-- Hero 우측에 `uploads/default-car.png` placeholder 이미지를 배치했다.
+- Hero 우측에 `uploads/pre-default-car.png` placeholder 이미지를 배치했다.
 - 검색 패널은 Hero 아래에 겹쳐 보이도록 `c-surface -mt-12` 형태로 구성했다.
 - 검색 필드는 라벨이 있는 그룹으로 정리했다.
 
@@ -91,6 +95,12 @@
 - 기본 정보, 차량 스펙, 판매 정보, 사진 업로드, 상세 설명 순서가 보이도록 구성했다.
 - 사진 업로드 영역에 `uploads/car-upload-placeholder.png`를 사용하도록 연결했다.
 
+### 안내바 UX
+
+- 전역 안내바에 X 닫기 버튼을 추가했다.
+- 라우트가 바뀔 때 이전 오류 안내가 계속 남지 않도록 오류 메시지를 정리한다.
+- Firebase 인증 오류처럼 `authError`에서 올라오는 안내도 사용자가 닫을 수 있게 처리했다.
+
 ## 보존한 항목
 
 | 항목 | 내용 |
@@ -118,6 +128,8 @@
 
 ## 남은 작업
 
-1. 사용자가 `uploads/default-car.png`를 “차량 등록 대기 중” placeholder 이미지로 교체한다.
-2. 사용자가 `uploads/car-upload-placeholder.png`를 “이미지 업로드 유도” placeholder 이미지로 추가한다.
+1. 사용자가 `uploads/pre-default-car.png`를 첫 화면 Hero용 placeholder 이미지로 교체한다.
+2. 사용자가 `uploads/auth-car-placeholder.png`를 로그인/회원가입용 placeholder 이미지로 추가한다.
+3. 사용자가 `uploads/default-car.png`를 차량 이미지 미등록 기본 이미지로 교체한다.
+4. 사용자가 `uploads/car-upload-placeholder.png`를 “이미지 업로드 유도” placeholder 이미지로 추가한다.
 3. 2차 개선에서 상담방 목록, 채팅 화면, 딜러 관리, 관리자 대시보드, 모바일 하단 내비게이션을 별도 고도화한다.

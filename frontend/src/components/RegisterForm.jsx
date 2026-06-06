@@ -182,9 +182,13 @@ function RegisterForm({ onGoLogin, onRegisterSuccess }) {
           </div>
           <div className="absolute bottom-8 left-8 right-8 rounded-[1.5rem] border border-white/80 bg-white/80 p-3 shadow-2xl shadow-blue-100 backdrop-blur">
             <img
-              alt="차량 등록 대기 중 placeholder"
+              alt="회원가입 화면 차량 이미지"
               className="h-56 w-full rounded-[1.2rem] object-cover"
-              src="/uploads/default-car.png"
+              src="/uploads/auth-car-placeholder.png"
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = "/uploads/pre-default-car.png";
+              }}
             />
           </div>
         </div>

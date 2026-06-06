@@ -16,17 +16,20 @@
 - 사용자 화면 색상을 `white`, `slate-50`, `blue-600`, sky light gradient 중심으로 정리했다.
 - 첫 화면 Hero에 placeholder 차량 이미지를 배치하고 검색 패널을 라벨형 입력 UI로 개선했다.
 - 차량 카드에 가격 강조, 스펙 박스, 상담하기 CTA, hover 효과를 적용했다.
-- 차량 이미지가 없는 경우는 `uploads/default-car.png`, 차량 목록이 없는 경우는 `EmptyState`로 구분했다.
+- 첫 화면 Hero는 `uploads/pre-default-car.png`, 로그인/회원가입은 `uploads/auth-car-placeholder.png`, 차량 이미지 없음은 `uploads/default-car.png`, 차량 목록 없음은 `EmptyState`로 구분했다.
 - 차량 상세 화면을 큰 이미지, 썸네일, 스펙 그리드, 딜러 CTA 카드 중심으로 재구성했다.
 - 로그인/회원가입 화면을 2열 브랜드 패널 구조로 개선했다.
 - 차량 등록/수정 폼은 slate/navy 딜러 사이드바와 업로드 유도 이미지를 포함한 업무형 화면으로 개선했다.
 - 새 아이콘 패키지는 추가하지 않고 inline SVG를 사용했다.
+- 전역 안내바에 닫기 버튼을 추가하고, 페이지 이동 후 이전 오류 안내가 남지 않도록 정리했다.
 
 ### 남은 확인
 
-1. 사용자가 `uploads/default-car.png`를 “차량 등록 대기 중” placeholder 이미지로 교체한다.
-2. 사용자가 `uploads/car-upload-placeholder.png`를 “이미지 업로드 유도” placeholder 이미지로 추가한다.
-3. 2차 개선에서 상담방 목록, 실시간 상담 화면, 딜러 관리, 관리자 대시보드, 모바일 하단 내비게이션을 검토한다.
+1. 사용자가 `uploads/pre-default-car.png`를 첫 화면 Hero용 placeholder 이미지로 교체한다.
+2. 사용자가 `uploads/auth-car-placeholder.png`를 로그인/회원가입용 placeholder 이미지로 추가한다.
+3. 사용자가 `uploads/default-car.png`를 차량 이미지 미등록 기본 이미지로 교체한다.
+4. 사용자가 `uploads/car-upload-placeholder.png`를 “이미지 업로드 유도” placeholder 이미지로 추가한다.
+5. 2차 개선에서 상담방 목록, 실시간 상담 화면, 딜러 관리, 관리자 대시보드, 모바일 하단 내비게이션을 검토한다.
 
 ## Render/GitHub Actions 문서 업데이트와 README 제출용 정리
 

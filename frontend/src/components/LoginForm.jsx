@@ -133,9 +133,13 @@ function AuthBrandPanel() {
         </p>
       </div>
       <img
-        alt="차량 등록 대기 중 placeholder"
+        alt="로그인 화면 차량 이미지"
         className="absolute bottom-8 right-8 z-10 h-56 w-[22rem] rounded-[1.5rem] object-cover shadow-2xl shadow-slate-950/40"
-        src="/uploads/default-car.png"
+        src="/uploads/auth-car-placeholder.png"
+        onError={(event) => {
+          event.currentTarget.onerror = null;
+          event.currentTarget.src = "/uploads/pre-default-car.png";
+        }}
       />
     </div>
   );

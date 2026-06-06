@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Navigate,
   Route,
@@ -33,12 +33,14 @@ function App() {
   } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const previousPathRef = useRef(location.pathname);
   const [cars, setCars] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [currentView, setCurrentView] = useState("list");
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [isAuthErrorDismissed, setIsAuthErrorDismissed] = useState(false);
   const [filters, setFilters] = useState({
     keyword: "",
     company: "",
@@ -73,13 +75,26 @@ function App() {
 
   const displayMessage = message.text
     ? message
-    : authError
+    : authError && !isAuthErrorDismissed
       ? { type: "error", text: authError }
       : message;
 
   useEffect(() => {
     loadCars();
   }, []);
+
+  useEffect(() => {
+    setIsAuthErrorDismissed(false);
+  }, [authError]);
+
+  useEffect(() => {
+    if (previousPathRef.current !== location.pathname) {
+      previousPathRef.current = location.pathname;
+      setMessage((prevMessage) =>
+        prevMessage.type === "error" ? { type: "", text: "" } : prevMessage,
+      );
+    }
+  }, [location.pathname]);
 
   async function requestApi(url, options) {
     const response = await fetch(url, options);
@@ -498,7 +513,7 @@ function App() {
                 <img
                   alt="차량 등록 대기 중 placeholder"
                   className="h-64 w-full rounded-[1.2rem] object-cover sm:h-80"
-                  src="/uploads/default-car.png"
+                  src="/uploads/pre-default-car.png"
                 />
                 <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur">
                   <p className="text-sm font-black text-slate-950">
@@ -721,6 +736,14 @@ function App() {
             <AlertMessage
               type={displayMessage.type}
               message={displayMessage.text}
+              onClose={() => {
+                if (message.text) {
+                  setMessage({ type: "", text: "" });
+                  return;
+                }
+
+                setIsAuthErrorDismissed(true);
+              }}
             />
           </div>
         )}
