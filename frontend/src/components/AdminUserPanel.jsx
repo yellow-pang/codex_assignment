@@ -140,7 +140,7 @@ function AdminUserPanel({
 
   return (
     <div className="grid gap-5 lg:grid-cols-[17rem_1fr]">
-      <aside className="rounded-3xl bg-slate-950 p-5 text-white shadow-xl shadow-slate-300/40">
+      <aside className="rounded-3xl bg-[#0f1f32] p-5 text-white shadow-xl shadow-slate-300/40">
         <button
           className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white"
           onClick={onBack}
@@ -148,15 +148,15 @@ function AdminUserPanel({
           <span aria-hidden="true">←</span>
           차량 검색으로
         </button>
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-300">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-200">
           Admin Console
         </p>
         <h1 className="mt-3 text-2xl font-black tracking-tight">
           관리자 대시보드
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-300">
-          사용자 역할과 딜러 승인 상태를 관리하고, 이후 차량과 상담 현황
-          확장을 이어갈 수 있는 업무 화면입니다.
+          사용자 역할과 딜러 승인 상태를 관리하고, 이후 차량과 상담 현황 확장을
+          이어갈 수 있는 업무 화면입니다.
         </p>
 
         <nav className="mt-7 space-y-2">
@@ -247,8 +247,8 @@ function AdminUserPanel({
                   차량 등록 설정
                 </h2>
                 <p className="mt-1 text-sm leading-6 text-slate-500">
-                  딜러가 차량을 등록할 때 사용하는 숫자 입력 단위와 사진
-                  최대 개수를 관리합니다.
+                  딜러가 차량을 등록할 때 사용하는 숫자 입력 단위와 사진 최대
+                  개수를 관리합니다.
                 </p>
               </div>
               <span className="c-badge-blue">Admin only</span>
@@ -350,7 +350,7 @@ function AdminUserPanel({
       return (
         <div className="flex min-h-56 items-center justify-center">
           <svg
-            className="h-8 w-8 animate-spin text-blue-600"
+            className="h-8 w-8 animate-spin text-[#3f6ea6]"
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -417,7 +417,7 @@ function AdminUserPanel({
     const isSelf = user.uid === currentUserProfile.uid;
 
     return (
-      <tr key={user.uid} className="hover:bg-blue-50/40">
+      <tr key={user.uid} className="hover:bg-[#eff4f9]">
         <td className="px-5 py-4">
           <div>
             <p className="font-bold text-slate-950">{user.displayName}</p>
@@ -458,7 +458,9 @@ function UserMobileCard({
     <div className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate font-black text-slate-950">{user.displayName}</p>
+          <p className="truncate font-black text-slate-950">
+            {user.displayName}
+          </p>
           <p className="mt-1 truncate text-xs text-slate-500">{user.email}</p>
         </div>
         <RoleBadge role={user.role} />
@@ -564,7 +566,7 @@ function SideNavButton({ isActive, label, onClick }) {
     <button
       className={`w-full rounded-2xl px-4 py-3 text-left text-sm font-bold transition-colors ${
         isActive
-          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+          ? "bg-[#3f6ea6] text-white shadow-lg shadow-[#3f6ea6]/25"
           : "text-slate-300 hover:bg-white/10 hover:text-white"
       }`}
       onClick={onClick}
@@ -576,7 +578,7 @@ function SideNavButton({ isActive, label, onClick }) {
 
 function SummaryCard({ label, value, tone }) {
   const toneMap = {
-    blue: "bg-blue-50 text-blue-700 ring-blue-100",
+    blue: "bg-[#edf3f9] text-[#36567a] ring-[#d5e0ee]",
     amber: "bg-amber-50 text-amber-700 ring-amber-100",
     emerald: "bg-emerald-50 text-emerald-700 ring-emerald-100",
     slate: "bg-slate-100 text-slate-700 ring-slate-200",

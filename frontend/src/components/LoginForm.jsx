@@ -43,15 +43,14 @@ function LoginForm({ onGoRegister, onLoginSuccess }) {
         <div className="p-6 sm:p-10">
           {/* 로고 */}
           <div className="mb-8">
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-blue-600">
+            <p className="text-xs font-black uppercase tracking-[0.25em] text-[#3f6ea6]">
               Car Market
             </p>
             <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
               로그인
             </h1>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              차량 상세 정보와 딜러 상담 기능은 로그인 후 사용할 수
-              있습니다.
+              차량 상세 정보와 딜러 상담 기능은 로그인 후 사용할 수 있습니다.
             </p>
           </div>
 
@@ -104,7 +103,7 @@ function LoginForm({ onGoRegister, onLoginSuccess }) {
           <p className="mt-6 text-center text-sm text-slate-500">
             계정이 없으신가요?{" "}
             <button
-              className="font-bold text-blue-600 hover:underline"
+              className="font-bold text-[#3f6ea6] hover:underline"
               type="button"
               onClick={onGoRegister}
             >
@@ -121,8 +120,8 @@ function LoginForm({ onGoRegister, onLoginSuccess }) {
 
 function AuthBrandPanel() {
   return (
-    <div className="relative hidden min-h-[34rem] overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-blue-700 p-10 text-white lg:block">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.45),_transparent_24rem)]" />
+    <div className="relative hidden min-h-[34rem] overflow-hidden bg-gradient-to-br from-[#0b1320] via-[#122b43] to-[#2a4d6f] p-10 text-white lg:block">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(108,149,194,0.45),_transparent_24rem)]" />
       <div className="relative z-10">
         <p className="text-sm font-bold text-sky-200">Car Market</p>
         <h2 className="mt-4 max-w-sm text-4xl font-black leading-tight">

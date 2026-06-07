@@ -122,7 +122,9 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
         });
 
         socket.on("connect_error", (error) => {
-          setSocketError(error?.message || "실시간 상담 서버 인증에 실패했습니다.");
+          setSocketError(
+            error?.message || "실시간 상담 서버 인증에 실패했습니다.",
+          );
         });
       } catch (error) {
         setSocketError(error.message);
@@ -137,12 +139,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
       socket?.disconnect();
       socketRef.current = null;
     };
-  }, [
-    roomId,
-    userProfile?.displayName,
-    userProfile?.role,
-    userProfile?.uid,
-  ]);
+  }, [roomId, userProfile?.displayName, userProfile?.role, userProfile?.uid]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -162,7 +159,9 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
     if (isSending) return;
 
     if (!socketRef.current || !isConnected) {
-      setSocketError("실시간 상담 서버에 연결 중입니다. 잠시 후 다시 시도해주세요.");
+      setSocketError(
+        "실시간 상담 서버에 연결 중입니다. 잠시 후 다시 시도해주세요.",
+      );
       return;
     }
 
@@ -199,7 +198,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[18rem_1fr]">
-      <aside className="hidden rounded-3xl border border-blue-100 bg-white/90 p-4 shadow-xl shadow-blue-100/50 lg:block">
+      <aside className="hidden rounded-3xl border border-[#d4dee9] bg-white/95 p-4 shadow-xl shadow-slate-200/70 lg:block">
         <div className="overflow-hidden rounded-2xl bg-slate-100">
           <img
             alt={`${carName} 차량 이미지`}
@@ -209,7 +208,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
           />
         </div>
         <div className="mt-4">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#3f6ea6]">
             Consultation
           </p>
           <h1 className="mt-2 text-xl font-black leading-tight text-slate-950">
@@ -227,7 +226,9 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
                     : "c-badge-gray"
                 }
               >
-                <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${presenceDotClass}`} />
+                <span
+                  className={`mr-1.5 h-1.5 w-1.5 rounded-full ${presenceDotClass}`}
+                />
                 {presenceLabel}
               </span>
             </div>
@@ -242,7 +243,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
       <section className="flex h-[calc(100vh-12rem)] min-h-[34rem] flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/70 md:h-[calc(100vh-9rem)]">
         <div className="flex items-center gap-3 border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur">
           <button
-            className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 shadow-sm hover:bg-blue-50 hover:text-blue-700"
+            className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 shadow-sm hover:bg-[#edf2f8] hover:text-[#3f6ea6]"
             onClick={onBack}
             aria-label="뒤로 가기"
           >
@@ -276,10 +277,14 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
           </div>
           <span
             className={
-              dealerPresence.status === "online" ? "c-badge-green" : "c-badge-gray"
+              dealerPresence.status === "online"
+                ? "c-badge-green"
+                : "c-badge-gray"
             }
           >
-            <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${presenceDotClass}`} />
+            <span
+              className={`mr-1.5 h-1.5 w-1.5 rounded-full ${presenceDotClass}`}
+            />
             {presenceLabel}
           </span>
         </div>
@@ -289,18 +294,18 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
             {socketError}
           </div>
         ) : (
-          <div className="border-b border-blue-100 bg-blue-50/80 px-4 py-2 text-xs font-semibold text-blue-700">
+          <div className="border-b border-[#d7e1ee] bg-[#eef3f8] px-4 py-2 text-xs font-semibold text-[#36567a]">
             {isConnected
               ? "실시간 상담 서버에 연결되었습니다."
               : "실시간 상담 서버에 연결 중입니다."}
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_left,_#eff6ff,_transparent_26rem),#f8fafc] px-3 py-4 sm:px-5">
+        <div className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_left,_#edf2f8,_transparent_26rem),#f6f8fb] px-3 py-4 sm:px-5">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               <svg
-                className="h-8 w-8 animate-spin text-blue-600"
+                className="h-8 w-8 animate-spin text-[#3f6ea6]"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -340,7 +345,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
                     <div
                       className={`max-w-[82%] rounded-3xl px-4 py-3 text-sm shadow-sm sm:max-w-[68%] ${
                         isMine
-                          ? "rounded-br-md bg-blue-600 text-white shadow-blue-200"
+                          ? "rounded-br-md bg-[#3f6ea6] text-white shadow-[#bfd0e4]"
                           : "rounded-bl-md bg-slate-100 text-slate-900 shadow-slate-200"
                       }`}
                     >
@@ -367,7 +372,10 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
         </div>
 
         <div className="border-t border-slate-100 bg-white px-3 py-3 sm:px-4">
-          <form className="flex items-center gap-2 sm:gap-3" onSubmit={handleSend}>
+          <form
+            className="flex items-center gap-2 sm:gap-3"
+            onSubmit={handleSend}
+          >
             <input
               className="c-input flex-1"
               value={inputText}

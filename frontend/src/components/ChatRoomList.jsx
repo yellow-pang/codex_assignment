@@ -50,19 +50,19 @@ function ChatRoomList({ onGoList, userProfile }) {
 
   return (
     <div className="space-y-5">
-      <section className="relative overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-white via-sky-50 to-blue-100 p-5 shadow-xl shadow-blue-100/50 sm:p-7">
-        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-sky-200/40 blur-3xl" />
+      <section className="relative overflow-hidden rounded-3xl border border-[#d6e0eb] bg-gradient-to-br from-white via-[#f2f6fb] to-[#dfe9f4] p-5 shadow-xl shadow-slate-200/70 sm:p-7">
+        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-[#bed0e6]/45 blur-3xl" />
         <div className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
+            <p className="inline-flex rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-[#3f6ea6] ring-1 ring-[#d3deec]">
               Real-time Consultation
             </p>
             <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
               내 상담 목록
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              관심 차량 상담을 이어서 확인하고, 딜러 온라인 상태와 최근
-              메시지를 빠르게 살펴보세요.
+              관심 차량 상담을 이어서 확인하고, 딜러 온라인 상태와 최근 메시지를
+              빠르게 살펴보세요.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:min-w-64">
@@ -103,7 +103,7 @@ function ChatRoomList({ onGoList, userProfile }) {
       {isLoading ? (
         <div className="flex min-h-40 items-center justify-center">
           <svg
-            className="h-8 w-8 animate-spin text-blue-600"
+            className="h-8 w-8 animate-spin text-[#3f6ea6]"
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -174,7 +174,7 @@ function RoomItem({ room, userProfile }) {
   return (
     <Link
       to={`/chats/${encodeURIComponent(room.roomId)}`}
-      className="group flex gap-3 rounded-3xl border border-slate-200/80 bg-white p-3 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-blue-100 hover:shadow-xl hover:shadow-blue-100/60 sm:items-center sm:gap-4 sm:p-4"
+      className="group flex gap-3 rounded-3xl border border-slate-200/80 bg-white p-3 shadow-sm shadow-slate-200/60 transition-all hover:-translate-y-0.5 hover:border-[#c8d7e8] hover:shadow-xl hover:shadow-slate-200/90 sm:items-center sm:gap-4 sm:p-4"
     >
       <div className="h-20 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-100 sm:h-24 sm:w-32">
         <img
@@ -190,7 +190,8 @@ function RoomItem({ room, userProfile }) {
           <div className="min-w-0">
             <p className="truncate font-black text-slate-950">{room.carName}</p>
             <p className="mt-1 text-sm font-semibold text-slate-500">
-              {isDealer ? "구매자" : "담당 딜러"} · {otherPartyName || "이름 없음"}
+              {isDealer ? "구매자" : "담당 딜러"} ·{" "}
+              {otherPartyName || "이름 없음"}
             </p>
           </div>
           <span className="flex-shrink-0 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-400">
@@ -205,7 +206,9 @@ function RoomItem({ room, userProfile }) {
           {lastMessage}
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="c-badge-blue">{isDealer ? "딜러 상담" : "차량 상담"}</span>
+          <span className="c-badge-blue">
+            {isDealer ? "딜러 상담" : "차량 상담"}
+          </span>
           {!isDealer && (
             <span className={isDealerOnline ? "c-badge-green" : "c-badge-gray"}>
               <span

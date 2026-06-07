@@ -38,19 +38,19 @@ function Header({
   const navLinkClass = (active) =>
     `rounded-full px-3.5 py-2 text-sm font-bold transition-colors ${
       active
-        ? "bg-blue-50 text-blue-700 ring-1 ring-blue-100"
-        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+        ? "bg-white/16 text-white ring-1 ring-white/28"
+        : "text-slate-200 hover:bg-white/12 hover:text-white"
     }`;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/70 bg-white/85 shadow-sm shadow-slate-200/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-white/14 bg-[#0b1320]/90 shadow-[0_12px_28px_rgba(11,19,32,0.5)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* 로고 */}
         <button
-          className="flex items-center gap-2 text-lg font-black tracking-tight text-slate-950"
+          className="flex items-center gap-2 text-lg font-black tracking-tight text-white"
           onClick={onGoList}
         >
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/25">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#3f6ea6] text-white shadow-lg shadow-[#3f6ea6]/30">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -117,7 +117,7 @@ function Header({
             <>
               {canRequestDealer && (
                 <button
-                  className="c-btn-outline px-3 py-1.5 text-xs"
+                  className="rounded-full border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-slate-100 transition hover:bg-white/20"
                   disabled={isDealerRequesting}
                   onClick={onRequestDealer}
                 >
@@ -130,11 +130,11 @@ function Header({
               {isDealerRejected && (
                 <span className="c-badge-red">딜러 신청 거절</span>
               )}
-              <span className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-600">
+              <span className="rounded-full bg-white/12 px-3 py-1.5 text-sm font-semibold text-slate-100 ring-1 ring-white/20">
                 {userProfile.displayName}
               </span>
               <button
-                className="c-btn-ghost px-3 py-1.5 text-xs"
+                className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white"
                 onClick={onLogout}
               >
                 로그아웃
@@ -143,13 +143,13 @@ function Header({
           ) : (
             <>
               <button
-                className="c-btn-ghost px-3 py-1.5 text-xs"
+                className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white"
                 onClick={onGoLogin}
               >
                 로그인
               </button>
               <button
-                className="c-btn-primary px-3 py-1.5 text-xs"
+                className="rounded-full bg-[#3f6ea6] px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-[#3f6ea6]/35 transition hover:bg-[#355d8e]"
                 onClick={onGoRegister}
               >
                 회원가입
@@ -161,7 +161,7 @@ function Header({
         {/* 모바일 햄버거 버튼 */}
         <button
           aria-label="메뉴 열기"
-          className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50 md:hidden"
+          className="rounded-xl border border-white/30 bg-white/10 p-2 text-slate-100 shadow-sm hover:bg-white/20 md:hidden"
           onClick={toggleMobileMenu}
         >
           {isMobileMenuOpen ? (
@@ -198,17 +198,17 @@ function Header({
 
       {/* 모바일 메뉴 */}
       {isMobileMenuOpen && (
-        <div className="border-t border-slate-100 bg-white/95 px-4 py-4 shadow-xl shadow-slate-200/70 backdrop-blur md:hidden">
+        <div className="border-t border-white/15 bg-[#111b2c]/95 px-4 py-4 shadow-xl shadow-black/35 backdrop-blur md:hidden">
           <div className="flex flex-col gap-1.5">
             <button
-              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-100 hover:bg-white/10"
               onClick={() => handleMobileNav(onGoList)}
             >
               차량 검색
             </button>
             {userProfile && (
               <button
-                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-100 hover:bg-white/10"
                 onClick={() => handleMobileNav(onGoChats)}
               >
                 내 상담
@@ -216,7 +216,7 @@ function Header({
             )}
             {isDealer && (
               <button
-                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-100 hover:bg-white/10"
                 onClick={() => handleMobileNav(onGoDealer)}
               >
                 내 차량 관리
@@ -224,7 +224,7 @@ function Header({
             )}
             {isDealer && (
               <button
-                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-100 hover:bg-white/10"
                 onClick={() => handleMobileNav(onGoCreate)}
               >
                 차량 등록
@@ -232,21 +232,21 @@ function Header({
             )}
             {isAdmin && (
               <button
-                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-100 hover:bg-white/10"
                 onClick={() => handleMobileNav(onGoAdmin)}
               >
                 관리자
               </button>
             )}
-            <hr className="my-2 border-slate-100" />
+            <hr className="my-2 border-white/15" />
             {userProfile ? (
               <>
-                <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
+                <div className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-slate-200">
                   {userProfile.displayName} · {userProfile.role}
                 </div>
                 {canRequestDealer && (
                   <button
-                    className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-100 hover:bg-white/10"
                     disabled={isDealerRequesting}
                     onClick={() => handleMobileNav(onRequestDealer)}
                   >
@@ -263,13 +263,13 @@ function Header({
             ) : (
               <>
                 <button
-                  className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-slate-50"
+                  className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-100 hover:bg-white/10"
                   onClick={() => handleMobileNav(onGoLogin)}
                 >
                   로그인
                 </button>
                 <button
-                  className="w-full rounded-xl bg-blue-600 px-3 py-2.5 text-left text-sm font-bold text-white shadow-sm shadow-blue-600/25"
+                  className="w-full rounded-xl bg-[#3f6ea6] px-3 py-2.5 text-left text-sm font-bold text-white shadow-sm shadow-[#3f6ea6]/30"
                   onClick={() => handleMobileNav(onGoRegister)}
                 >
                   회원가입
