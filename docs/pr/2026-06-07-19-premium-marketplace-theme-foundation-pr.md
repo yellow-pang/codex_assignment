@@ -50,6 +50,12 @@ frontend/src/style.css
 frontend/src/App.jsx
 frontend/src/components/Header.jsx
 frontend/src/components/CarCardGrid.jsx
+frontend/src/components/CarDetail.jsx
+frontend/src/components/ChatRoom.jsx
+frontend/src/components/ChatRoomList.jsx
+frontend/src/components/LoginForm.jsx
+frontend/src/components/RegisterForm.jsx
+frontend/src/components/AdminUserPanel.jsx
 docs/steps/2026-06-07-19-premium-marketplace-theme-foundation.md
 docs/pr/2026-06-07-19-premium-marketplace-theme-foundation-pr.md
 docs/progress.md
@@ -79,6 +85,6 @@ npm.cmd run build                    → 성공
 
 ## 다음 단계
 
-1. 관리자/딜러 대시보드의 색상 체계 2차 통일
-2. 상세/상담/인증 화면 테마 확장
-3. 반응형 QA와 시각 일관성 최종 점검
+1. `DealerDashboard` 포함 대시보드 잔여 컴포넌트의 스타일 토큰 일관성 최종 점검
+2. daisyUI 잔여 class 및 레거시 유틸 사용 여부 최종 점검
+3. 375px, 768px, 1280px 기준 반응형 QA와 시각 일관성 최종 점검

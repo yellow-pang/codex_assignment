@@ -23,6 +23,12 @@
 - `frontend/src/App.jsx`
 - `frontend/src/components/Header.jsx`
 - `frontend/src/components/CarCardGrid.jsx`
+- `frontend/src/components/CarDetail.jsx`
+- `frontend/src/components/ChatRoom.jsx`
+- `frontend/src/components/ChatRoomList.jsx`
+- `frontend/src/components/LoginForm.jsx`
+- `frontend/src/components/RegisterForm.jsx`
+- `frontend/src/components/AdminUserPanel.jsx`
 
 ## 4. 구현 상세
 
@@ -63,7 +69,7 @@
 
 ## 6. 남은 작업
 
-1. 관리자/딜러 대시보드 중 `DealerDashboard` 잔여 색상/컴포넌트 톤을 추가 통일.
+1. `DealerDashboard` 포함 대시보드 잔여 컴포넌트의 스타일 토큰 일관성 최종 점검.
 2. daisyUI 잔여 class 최종 제거 점검.
 3. 디자인 QA(375px, 768px, 1280px)와 실제 기기 스크롤 겹침 재확인.
 
