@@ -3,22 +3,52 @@ const {
   findChatRoomById,
   handleChatMessage,
 } = require("../services/chats.service");
+const { verifyFirebaseIdToken } = require("../config/firebaseAdmin");
 const {
   emitDealerPresenceToRooms,
   getDealerPresence,
   markDealerOffline,
   markDealerOnline,
 } = require("../services/dealerPresence.service");
+const { findUserByUid } = require("../services/users.service");
 const { normalizeUid } = require("../utils/ids");
 
 function setupChatSocketHandlers(io) {
+  io.use(async (socket, next) => {
+    try {
+      const token = String(socket.handshake.auth?.token || "").trim();
+
+      if (!token) {
+        next(new Error("인증이 필요합니다."));
+        return;
+      }
+
+      const decodedToken = await verifyFirebaseIdToken(token);
+      const userProfile = await findUserByUid(decodedToken.uid);
+
+      if (!userProfile) {
+        next(new Error("사용자 정보를 찾을 수 없습니다."));
+        return;
+      }
+
+      socket.data.auth = {
+        uid: decodedToken.uid,
+        email: decodedToken.email || "",
+      };
+      socket.data.userProfile = userProfile;
+      next();
+    } catch (error) {
+      next(new Error("Firebase 인증 토큰을 확인하지 못했습니다."));
+    }
+  });
+
   io.on("connection", (socket) => {
     socket.data.joinedRooms = new Set();
 
     socket.on("join-room", async (payload = {}) => {
       try {
         const roomId = String(payload.roomId || "").trim();
-        const userId = normalizeUid(payload.userId);
+        const userId = normalizeUid(socket.data.userProfile?.uid);
 
         if (!roomId || !userId) {
           socket.emit(
@@ -67,7 +97,10 @@ function setupChatSocketHandlers(io) {
 
     socket.on("send-message", async (payload = {}) => {
       try {
-        const { message } = await handleChatMessage(payload);
+        const { message } = await handleChatMessage(
+          payload,
+          socket.data.userProfile,
+        );
         io.to(message.roomId).emit("receive-message", message);
       } catch (error) {
         socket.emit("chat-error", createChatError(error.message));

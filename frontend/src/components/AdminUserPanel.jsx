@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { authenticatedFetch } from "../api/authenticatedFetch.js";
 
 function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
   const [users, setUsers] = useState([]);
@@ -23,7 +24,7 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
   }, []);
 
   async function requestAdminApi(url, options = {}) {
-    const response = await fetch(url, options);
+    const response = await authenticatedFetch(url, options);
 
     if (!response.ok) {
       let errorMessage = "요청을 처리하지 못했습니다.";
@@ -48,10 +49,7 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
     setMessage({ type: "", text: "" });
 
     try {
-      const requesterUid = encodeURIComponent(currentUserProfile.uid);
-      const data = await requestAdminApi(
-        `/api/users?requesterUid=${requesterUid}`,
-      );
+      const data = await requestAdminApi("/api/users");
       setUsers(data);
 
       if (successMessage) {
@@ -70,7 +68,6 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          requesterUid: currentUserProfile.uid,
           role,
           dealerStatus,
         }),

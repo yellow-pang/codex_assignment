@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import {
+  authenticatedFetch,
+  getCurrentUserIdToken,
+} from "../api/authenticatedFetch.js";
 
 function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
   const [messages, setMessages] = useState([]);
@@ -27,8 +31,10 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
 
       try {
         const [roomRes, messagesRes] = await Promise.all([
-          fetch(`/api/chats/rooms/${encodeURIComponent(roomId)}`),
-          fetch(`/api/chats/rooms/${encodeURIComponent(roomId)}/messages`),
+          authenticatedFetch(`/api/chats/rooms/${encodeURIComponent(roomId)}`),
+          authenticatedFetch(
+            `/api/chats/rooms/${encodeURIComponent(roomId)}/messages`,
+          ),
         ]);
 
         if (!roomRes.ok) throw new Error("상담방 정보를 불러오지 못했습니다.");
@@ -55,53 +61,75 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
   useEffect(() => {
     if (!roomId || !userProfile?.uid) return undefined;
 
-    const socketUrl = import.meta.env.VITE_API_BASE_URL || undefined;
-    const socket = io(socketUrl);
-    socketRef.current = socket;
+    let socket = null;
+    let isMounted = true;
 
-    socket.on("connect", () => {
-      setIsConnected(true);
-      setSocketError("");
-      socket.emit("join-room", {
-        roomId,
-        userId: userProfile.uid,
-        userName: userProfile.displayName,
-        role: userProfile.role,
-      });
-    });
+    async function connectSocket() {
+      try {
+        const token = await getCurrentUserIdToken();
 
-    socket.on("disconnect", () => {
-      setIsConnected(false);
-    });
+        if (!isMounted) return;
 
-    socket.on("receive-message", (message) => {
-      setMessages((prevMessages) => {
-        if (message._id && prevMessages.some((item) => item._id === message._id)) {
-          return prevMessages;
-        }
+        const socketUrl = import.meta.env.VITE_API_BASE_URL || undefined;
+        socket = io(socketUrl, {
+          auth: { token },
+        });
+        socketRef.current = socket;
 
-        return [...prevMessages, message];
-      });
-    });
+        socket.on("connect", () => {
+          setIsConnected(true);
+          setSocketError("");
+          socket.emit("join-room", { roomId });
+        });
 
-    socket.on("dealer-online", () => {
-      setDealerPresence({ status: "online", lastSeenAt: null });
-    });
+        socket.on("disconnect", () => {
+          setIsConnected(false);
+        });
 
-    socket.on("dealer-offline", (presence) => {
-      setDealerPresence({
-        status: "offline",
-        lastSeenAt: presence?.lastSeenAt || null,
-      });
-    });
+        socket.on("receive-message", (message) => {
+          setMessages((prevMessages) => {
+            if (
+              message._id &&
+              prevMessages.some((item) => item._id === message._id)
+            ) {
+              return prevMessages;
+            }
 
-    socket.on("chat-error", (error) => {
-      setSocketError(error?.message || "실시간 상담 처리 중 오류가 발생했습니다.");
-    });
+            return [...prevMessages, message];
+          });
+        });
+
+        socket.on("dealer-online", () => {
+          setDealerPresence({ status: "online", lastSeenAt: null });
+        });
+
+        socket.on("dealer-offline", (presence) => {
+          setDealerPresence({
+            status: "offline",
+            lastSeenAt: presence?.lastSeenAt || null,
+          });
+        });
+
+        socket.on("chat-error", (error) => {
+          setSocketError(
+            error?.message || "실시간 상담 처리 중 오류가 발생했습니다.",
+          );
+        });
+
+        socket.on("connect_error", (error) => {
+          setSocketError(error?.message || "실시간 상담 서버 인증에 실패했습니다.");
+        });
+      } catch (error) {
+        setSocketError(error.message);
+      }
+    }
+
+    connectSocket();
 
     return () => {
-      socket.emit("leave-room", { roomId });
-      socket.disconnect();
+      isMounted = false;
+      socket?.emit("leave-room", { roomId });
+      socket?.disconnect();
       socketRef.current = null;
     };
   }, [
@@ -128,8 +156,6 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
 
     socketRef.current.emit("send-message", {
       roomId,
-      senderId: userProfile.uid,
-      senderName: userProfile.displayName || "사용자",
       text,
     });
     setInputText("");

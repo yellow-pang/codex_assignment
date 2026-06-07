@@ -7,6 +7,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { authenticatedFetch } from "../api/authenticatedFetch.js";
 import { auth } from "../firebase.js";
 
 const AuthContext = createContext(null);
@@ -29,7 +30,7 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const profile = await fetchUserProfile(firebaseUser.uid);
+        const profile = await fetchUserProfile();
         setUserProfile(profile);
       } catch (error) {
         setAuthError(error.message);
@@ -81,7 +82,7 @@ export function AuthProvider({ children }) {
       email,
       password,
     );
-    const profile = await fetchUserProfile(userCredential.user.uid);
+    const profile = await fetchUserProfile();
 
     setCurrentUser(userCredential.user);
     setUserProfile(profile);
@@ -103,7 +104,7 @@ export function AuthProvider({ children }) {
       return null;
     }
 
-    const profile = await fetchUserProfile(auth.currentUser.uid);
+    const profile = await fetchUserProfile();
     setUserProfile(profile);
     setAuthError("");
     return profile;
@@ -114,10 +115,10 @@ export function AuthProvider({ children }) {
       throw new Error("로그인 후 딜러 신청을 할 수 있습니다.");
     }
 
-    const response = await fetch("/api/users/dealer-request", {
+    const response = await authenticatedFetch("/api/users/dealer-request", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ requesterUid: currentUser.uid }),
+      body: JSON.stringify({}),
     });
 
     if (!response.ok) {
@@ -165,8 +166,8 @@ export function useAuth() {
   return context;
 }
 
-async function fetchUserProfile(uid) {
-  const response = await fetch(`/api/users/me?uid=${encodeURIComponent(uid)}`);
+async function fetchUserProfile() {
+  const response = await authenticatedFetch("/api/users/me");
 
   if (!response.ok) {
     const message = await getApiErrorMessage(
@@ -180,7 +181,7 @@ async function fetchUserProfile(uid) {
 }
 
 async function saveUserProfile(profileInput) {
-  const response = await fetch("/api/users", {
+  const response = await authenticatedFetch("/api/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(profileInput),

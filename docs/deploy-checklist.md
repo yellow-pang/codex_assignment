@@ -13,7 +13,7 @@
 | 업로드 경로 | 루트 `uploads/` 유지 |
 | 현재 배포 URL | `https://codex-assignment.onrender.com/` |
 
-사용자 확인 기준으로 `.env.example`에 정리된 환경변수 이름은 Render Environment에 반영되어 있으며, 현재 Render 배포가 완료된 상태다.
+15단계 보안 강화 이전 환경변수는 Render Environment에 반영되어 있으며, 15단계 이후 새로 추가된 `FIREBASE_SERVICE_ACCOUNT_JSON`은 사용자가 Render Environment에 추가로 등록해야 한다.
 실제 Secret 값은 문서에 작성하지 않는다.
 
 ## 1. 코드 점검 항목
@@ -57,11 +57,11 @@
 
 | 파일 또는 위치 | 상태 |
 | --- | --- |
-| `.env.example` | `NODE_ENV`, `PORT`, MongoDB Atlas, Firebase, 최초 admin, Socket.io 관련 환경변수 예시 작성 |
+| `.env.example` | `NODE_ENV`, `PORT`, MongoDB Atlas, Firebase Web config, Firebase Admin 서비스 계정, 최초 admin, Socket.io 관련 환경변수 예시 작성 |
 | `.env` | 커밋 금지 |
 | `.gitignore` | `.env`, `.env.*`, `node_modules`, `dist`, 로그 파일 제외 |
 | `.gitignore` | `uploads/*` 런타임 업로드 파일 제외, `uploads/default-car.png` 기본 이미지는 커밋 가능 |
-| Render Environment | `.env.example` 기준 환경변수 이름 반영 완료. 실제 Secret 값은 Render에만 등록. 분리 배포가 아니면 `VITE_API_BASE_URL`은 비워둘 수 있음 |
+| Render Environment | `FIREBASE_SERVICE_ACCOUNT_JSON`을 새로 등록해야 함. 실제 Secret 값은 Render에만 등록. 분리 배포가 아니면 `VITE_API_BASE_URL`은 비워둘 수 있음 |
 | GitHub Secrets | `RENDER_DEPLOY_HOOK_URL` 필요 |
 
 ## 5. GitHub Actions 점검 항목
@@ -116,6 +116,8 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 - [ ] Firebase 이메일/비밀번호 회원가입이 동작한다.
 - [ ] 회원가입 후 MongoDB `users` 컬렉션에 사용자 프로필이 저장된다.
 - [ ] Firebase 로그인, 로그아웃, 새로고침 후 인증 상태 유지가 동작한다.
+- [ ] Render Environment 또는 로컬 `.env`에 `FIREBASE_SERVICE_ACCOUNT_JSON`이 등록되어 있다.
+- [ ] 보호 API 요청에 Firebase ID Token 기반 `Authorization: Bearer` 헤더가 전달된다.
 - [ ] `INITIAL_ADMIN_EMAILS`에 등록한 이메일로 가입한 사용자가 admin으로 저장된다.
 - [ ] 일반 사용자 `buyer`는 딜러 신청을 할 수 있다.
 - [ ] admin은 딜러 신청 사용자를 승인할 수 있다.
@@ -134,6 +136,8 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 - [ ] 딜러 접속 종료 시 구매자 화면에 오프라인 상태가 표시된다.
 - [ ] MongoDB `users` 문서의 딜러 온라인 상태 필드가 접속 상태에 따라 갱신된다.
 - [ ] 자기 자신과 상담방을 만드는 요청은 차단된다.
+- [ ] 인증 토큰 없는 차량 등록, 사용자 목록, 상담방 조회 요청은 `401`로 차단된다.
+- [ ] 권한 없는 buyer의 차량 등록, admin이 아닌 사용자의 역할 변경 요청은 `403`으로 차단된다.
 - [ ] Render 무료 환경에서는 `uploads/` 파일이 영구 보관되지 않을 수 있음을 확인했다.
 - [ ] 새로고침해도 React 화면이 유지된다.
 - [ ] Render Logs에 포트 오류가 없다.

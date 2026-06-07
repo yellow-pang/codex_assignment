@@ -1,4 +1,6 @@
 const express = require("express");
+const { requireAuth, requireUserProfile } = require("../middleware/auth");
+const { asyncRoute } = require("../middleware/errors");
 const {
   createChatRoom,
   getChatRoomDetail,
@@ -9,62 +11,48 @@ const {
 function createChatsRouter() {
   const router = express.Router();
 
-  router.post("/rooms", async (req, res) => {
-    try {
+  router.post(
+    "/rooms",
+    requireAuth,
+    requireUserProfile,
+    asyncRoute(async (req, res) => {
       res.status(201).json(
         await createChatRoom({
-          buyerId: req.body.buyerId,
+          buyerProfile: req.userProfile,
           carId: req.body.carId,
         }),
       );
-    } catch (error) {
-      console.error("상담방 생성 실패:", error.message);
-      res.status(error.statusCode || 500).json({
-        message: error.statusCode
-          ? error.message
-          : "상담방을 생성하지 못했습니다.",
-      });
-    }
-  });
+    }),
+  );
 
-  router.get("/rooms", async (req, res) => {
-    try {
-      res.json(await listChatRooms(req.query.uid));
-    } catch (error) {
-      console.error("상담방 목록 조회 실패:", error.message);
-      res.status(error.statusCode || 500).json({
-        message: error.statusCode
-          ? error.message
-          : "상담방 목록을 조회하지 못했습니다.",
-      });
-    }
-  });
+  router.get(
+    "/rooms",
+    requireAuth,
+    requireUserProfile,
+    asyncRoute(async (req, res) => {
+      res.json(await listChatRooms(req.userProfile));
+    }),
+  );
 
-  router.get("/rooms/:roomId", async (req, res) => {
-    try {
+  router.get(
+    "/rooms/:roomId",
+    requireAuth,
+    requireUserProfile,
+    asyncRoute(async (req, res) => {
       const roomId = String(req.params.roomId || "").trim();
-      res.json(await getChatRoomDetail(roomId));
-    } catch (error) {
-      console.error("상담방 상세 조회 실패:", error.message);
-      res.status(error.statusCode || 500).json({
-        message: error.statusCode
-          ? error.message
-          : "상담방 정보를 조회하지 못했습니다.",
-      });
-    }
-  });
+      res.json(await getChatRoomDetail(roomId, req.userProfile.uid));
+    }),
+  );
 
-  router.get("/rooms/:roomId/messages", async (req, res) => {
-    try {
+  router.get(
+    "/rooms/:roomId/messages",
+    requireAuth,
+    requireUserProfile,
+    asyncRoute(async (req, res) => {
       const roomId = String(req.params.roomId || "").trim();
-      res.json(await listChatRoomMessages(roomId));
-    } catch (error) {
-      console.error("메시지 조회 실패:", error.message);
-      res.status(error.statusCode || 500).json({
-        message: error.statusCode ? error.message : "메시지를 조회하지 못했습니다.",
-      });
-    }
-  });
+      res.json(await listChatRoomMessages(roomId, req.userProfile.uid));
+    }),
+  );
 
   return router;
 }

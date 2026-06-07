@@ -20,6 +20,7 @@ import Header from "./components/Header.jsx";
 import LoginForm from "./components/LoginForm.jsx";
 import MobileBottomNav from "./components/MobileBottomNav.jsx";
 import RegisterForm from "./components/RegisterForm.jsx";
+import { authenticatedFetch } from "./api/authenticatedFetch.js";
 import { useAuth } from "./contexts/AuthContext.jsx";
 
 function App() {
@@ -109,8 +110,11 @@ function App() {
     return () => window.clearTimeout(timeoutId);
   }, [message.text, message.type]);
 
-  async function requestApi(url, options) {
-    const response = await fetch(url, options);
+  async function requestApi(url, options = {}) {
+    const { authenticated = false, ...fetchOptions } = options;
+    const response = authenticated
+      ? await authenticatedFetch(url, fetchOptions)
+      : await fetch(url, fetchOptions);
 
     if (!response.ok) {
       let errorMessage = "요청을 처리하지 못했습니다.";
@@ -245,8 +249,9 @@ function App() {
 
     try {
       await requestApi("/api/cars", {
+        authenticated: true,
         method: "POST",
-        body: createCarFormData(addDealerFields(carInput)),
+        body: createCarFormData(carInput),
       });
 
       await loadCars("자동차가 등록되었습니다.");
@@ -270,8 +275,9 @@ function App() {
 
     try {
       const updatedCar = await requestApi(`/api/cars/${selectedCar._id}`, {
+        authenticated: true,
         method: "PUT",
-        body: createCarFormData(addDealerFields(carInput)),
+        body: createCarFormData(carInput),
       });
 
       setSelectedCar(updatedCar);
@@ -295,8 +301,8 @@ function App() {
     }
 
     try {
-      const dealerId = encodeURIComponent(userProfile.uid);
-      await requestApi(`/api/cars/${deleteTarget._id}?dealerId=${dealerId}`, {
+      await requestApi(`/api/cars/${deleteTarget._id}`, {
+        authenticated: true,
         method: "DELETE",
       });
       setDeleteTarget(null);
@@ -409,11 +415,11 @@ function App() {
 
     try {
       const chatRoom = await requestApi("/api/chats/rooms", {
+        authenticated: true,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           carId: String(car._id),
-          buyerId: userProfile.uid,
         }),
       });
 
@@ -462,15 +468,6 @@ function App() {
     });
 
     return formData;
-  }
-
-  function addDealerFields(carInput) {
-    return {
-      ...carInput,
-      dealerId: userProfile.uid,
-      dealerName: userProfile.displayName,
-      dealerRole: userProfile.role,
-    };
   }
 
   function canManageCar(car) {
@@ -985,7 +982,9 @@ function CarDetailRoute({
       setDetailError("");
 
       try {
-        const data = await requestApi(`/api/cars/${encodeURIComponent(id)}`);
+        const data = await requestApi(`/api/cars/${encodeURIComponent(id)}`, {
+          authenticated: true,
+        });
 
         if (!isMounted) return;
 
