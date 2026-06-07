@@ -29,7 +29,7 @@ function CarCardGrid({
         return (
           <article
             key={car._id}
-            className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-100"
+            className="group flex flex-col overflow-hidden rounded-2xl border border-[#d6dee8] bg-white shadow-sm shadow-slate-200/70 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#1c4e6d]/15"
           >
             {/* 차량 이미지 */}
             <div className="relative overflow-hidden bg-slate-100">
@@ -40,10 +40,10 @@ function CarCardGrid({
                 onError={handleCarImageError}
               />
               <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/45 to-transparent" />
-              <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">
+              <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-[#1c4e6d] shadow-sm backdrop-blur">
                 {car.company}
               </span>
-              <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
+              <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-[#2fae9b] shadow-sm backdrop-blur">
                 딜러 상담
               </span>
             </div>
@@ -53,7 +53,7 @@ function CarCardGrid({
             <h3 className="line-clamp-1 text-base font-black text-slate-950">
               {car.name}
             </h3>
-            <p className="mt-1 text-2xl font-black tracking-tight text-blue-600">
+            <p className="mt-1 text-2xl font-black tracking-tight text-[#d98a3a]">
               {Number(car.price).toLocaleString()}만원
             </p>
 

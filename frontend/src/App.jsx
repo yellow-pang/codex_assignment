@@ -579,19 +579,19 @@ function App() {
     return (
       <div className="space-y-8">
         {/* Hero 섹션 */}
-        <section className="relative overflow-hidden rounded-[2rem] border border-blue-100 bg-gradient-to-br from-white via-sky-50 to-blue-100 px-5 py-6 shadow-2xl shadow-blue-100/60 sm:px-8 sm:py-10">
-          <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-sky-200/40 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-blue-200/40 blur-3xl" />
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-[linear-gradient(120deg,_#0e1420_0%,_#14263d_52%,_#1c4e6d_100%)] px-5 py-6 shadow-2xl shadow-slate-950/30 sm:px-8 sm:py-10">
+          <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-300/20 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-teal-300/20 blur-3xl" />
           <div className="relative grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
-              <p className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
+              <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-emerald-100 ring-1 ring-white/30">
                 실시간 상담이 가능한 중고차 마켓
               </p>
-              <h1 className="mt-5 max-w-xl text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-5xl">
+              <h1 className="mt-5 max-w-xl text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl">
                 내 조건에 맞는
-                <span className="block text-blue-600">중고차를 찾아보세요</span>
+                <span className="block text-emerald-300">중고차를 찾아보세요</span>
               </h1>
-              <p className="mt-4 max-w-lg text-sm leading-7 text-slate-600 sm:text-base">
+              <p className="mt-4 max-w-lg text-sm leading-7 text-slate-200 sm:text-base">
                 예산, 연식, 제조사 조건으로 빠르게 비교하고 마음에 드는
                 딜러와 바로 상담하세요.
               </p>
@@ -603,18 +603,18 @@ function App() {
             </div>
 
             <div className="relative">
-              <div className="absolute inset-x-10 bottom-2 h-10 rounded-full bg-blue-950/20 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/70 p-3 shadow-2xl shadow-blue-200/60 backdrop-blur">
+              <div className="absolute inset-x-10 bottom-2 h-10 rounded-full bg-black/35 blur-2xl" />
+              <div className="relative overflow-hidden rounded-[1.5rem] border border-white/40 bg-white/10 p-3 shadow-2xl shadow-black/25 backdrop-blur">
                 <img
                   alt="Car Market 대표 차량 이미지"
                   className="h-64 w-full rounded-[1.2rem] object-cover sm:h-80"
                   src="/uploads/pre-default-car.png"
                 />
                 <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur">
-                  <p className="text-sm font-black text-slate-950">
+                  <p className="text-sm font-black text-[#0e1420]">
                     조건에 맞는 차량을 빠르게 비교하세요
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-[#5d6b7c]">
                     검색부터 딜러 상담까지 한 화면에서 이어집니다
                   </p>
                 </div>
@@ -731,7 +731,7 @@ function App() {
             <div>
               <h2 className="c-section-title">
                 {isSearchMode ? "검색 결과" : "추천 매물"}{" "}
-                <span className="text-blue-600">{cars.length}</span>
+                <span className="text-[#2fae9b]">{cars.length}</span>
               </h2>
               <p className="c-section-desc">
                 조건에 맞는 매물을 비교하고 딜러와 바로 상담해보세요.
@@ -750,7 +750,7 @@ function App() {
           {isLoading ? (
             <div className="flex min-h-40 items-center justify-center">
               <svg
-                className="h-8 w-8 animate-spin text-blue-600"
+                className="h-8 w-8 animate-spin text-[#2fae9b]"
                 fill="none"
                 viewBox="0 0 24 24"
               >
@@ -797,9 +797,9 @@ function App() {
 
   if (isAuthLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fa]">
         <svg
-          className="h-10 w-10 animate-spin text-blue-600"
+          className="h-10 w-10 animate-spin text-[#2fae9b]"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -822,7 +822,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_#eff6ff,_transparent_32rem),linear-gradient(180deg,_#f8fafc_0%,_#ffffff_45%,_#f8fafc_100%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(47,174,155,0.1),_transparent_30rem),linear-gradient(180deg,_#f5f7fa_0%,_#ffffff_45%,_#f5f7fa_100%)]">
       <Header
         currentView={activeView}
         isAdmin={isAdmin}
@@ -1022,9 +1022,9 @@ function App() {
 
 function HeroMetric({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/80 bg-white/70 px-3 py-3 shadow-sm backdrop-blur">
-      <p className="text-lg font-black text-slate-950">{value}</p>
-      <p className="mt-0.5 text-xs font-medium text-slate-500">{label}</p>
+    <div className="rounded-2xl border border-white/30 bg-white/12 px-3 py-3 shadow-sm backdrop-blur">
+      <p className="text-lg font-black text-white">{value}</p>
+      <p className="mt-0.5 text-xs font-medium text-slate-200">{label}</p>
     </div>
   );
 }

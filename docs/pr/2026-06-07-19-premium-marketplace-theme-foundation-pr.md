@@ -1,0 +1,72 @@
+# PR: 프리미엄 마켓플레이스 테마 1차 적용
+
+## PR 제목
+
+```text
+feat: 프리미엄 마켓플레이스 컬러 토큰과 홈 UI 1차 적용
+```
+
+## 작업 배경
+
+UI 방향은 `plan-18`에서 확정되었지만, 실제 화면은 아직 기본 Tailwind 코발트 계열이 많이 남아 있어 첫인상과 화면 통일성이 부족했다.
+
+이번 PR은 기능 변경 없이 디자인 토큰과 핵심 사용자 화면(홈/헤더/차량 카드)의 시각 톤을 먼저 통일하는 1차 적용이다.
+
+## 변경 내용
+
+### 1) 전역 스타일 토큰 적용
+
+- `frontend/src/style.css`에 브랜드 토큰을 추가했다.
+- 코발트 중심 스타일을 `brand-ink/deep/ocean/mint/amber` 중심으로 보정했다.
+- 버튼, 입력, 카드, 배지, 상태 배너의 공통 스타일을 토큰 기반으로 통일했다.
+
+### 2) 홈 Hero 프리미엄 톤 반영
+
+- 홈 Hero를 딥 네이비-오션 그라디언트 기반으로 전환했다.
+- Hero 강조 문구와 통계 카드 톤을 프리미엄 스타일에 맞게 조정했다.
+- 로딩/카운트 색상을 민트 계열로 통일했다.
+
+### 3) 헤더/차량 카드 시각 통일
+
+- Header의 active 상태, 모바일 메뉴 hover, 로고 포인트 색을 브랜드 토큰에 맞췄다.
+- CarCardGrid의 카드 hover, 배지, 가격 강조색을 신규 팔레트로 조정했다.
+
+## 변경 파일
+
+```text
+frontend/src/style.css
+frontend/src/App.jsx
+frontend/src/components/Header.jsx
+frontend/src/components/CarCardGrid.jsx
+docs/steps/2026-06-07-19-premium-marketplace-theme-foundation.md
+docs/pr/2026-06-07-19-premium-marketplace-theme-foundation-pr.md
+docs/progress.md
+```
+
+## 비기능 영향
+
+| 항목 | 내용 |
+| --- | --- |
+| API | 변경 없음 |
+| 백엔드 로직 | 변경 없음 |
+| 권한/인증 | 변경 없음 |
+| Socket.io 이벤트 | 변경 없음 |
+| 패키지 추가/삭제 | 없음 |
+
+## 검증
+
+```text
+npm.cmd --prefix frontend run build  → 성공
+npm.cmd run build                    → 성공
+```
+
+참고:
+
+- Vite 기존 경고(`NODE_ENV=production` in .env)는 출력되지만 빌드는 성공했다.
+- frontend 의존성 moderate 취약점 안내(2건)는 기존 상태다.
+
+## 다음 단계
+
+1. 관리자/딜러 대시보드의 색상 체계 2차 통일
+2. 상세/상담/인증 화면 테마 확장
+3. 반응형 QA와 시각 일관성 최종 점검

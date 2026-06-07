@@ -3,80 +3,171 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --brand-ink: #0e1420;
+    --brand-deep: #14263d;
+    --brand-ocean: #1c4e6d;
+    --brand-mint: #2fae9b;
+    --brand-amber: #d98a3a;
+    --surface-0: #f5f7fa;
+    --surface-1: #ffffff;
+    --line-soft: #d6dee8;
+    --text-main: #172334;
+    --text-muted: #5d6b7c;
+  }
+
   html {
-    background: #f8fafc;
+    background: var(--surface-0);
   }
 
   body {
     min-width: 320px;
-    @apply bg-slate-50 text-slate-900 antialiased;
+    color: var(--text-main);
+    @apply antialiased;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(47, 174, 155, 0.09), transparent 28rem),
+      linear-gradient(180deg, var(--surface-0) 0%, #ffffff 45%, var(--surface-0) 100%);
   }
 }
 
 @layer components {
-  /* 버튼 기본 */
+  /* 버튼 */
   .c-btn {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
+    --tw-ring-color: rgba(47, 174, 155, 0.35);
   }
+
   .c-btn-primary {
-    @apply c-btn bg-blue-600 text-white shadow-sm shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/25;
+    @apply c-btn text-white shadow-sm hover:-translate-y-0.5 hover:shadow-lg;
+    background-color: var(--brand-mint);
+    box-shadow: 0 8px 20px rgba(47, 174, 155, 0.24);
   }
+  .c-btn-primary:hover {
+    background-color: #289988;
+    box-shadow: 0 10px 24px rgba(47, 174, 155, 0.3);
+  }
+
   .c-btn-outline {
-    @apply c-btn border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700;
+    @apply c-btn bg-white shadow-sm hover:-translate-y-0.5;
+    border: 1px solid var(--line-soft);
+    color: var(--text-main);
   }
+  .c-btn-outline:hover {
+    border-color: rgba(28, 78, 109, 0.35);
+    background-color: rgba(28, 78, 109, 0.06);
+    color: var(--brand-ocean);
+  }
+
   .c-btn-danger {
     @apply c-btn bg-red-600 text-white shadow-sm shadow-red-600/20 hover:bg-red-700;
   }
+
   .c-btn-warning {
-    @apply c-btn bg-amber-500 text-white shadow-sm shadow-amber-500/20 hover:bg-amber-600;
+    @apply c-btn text-white shadow-sm;
+    background-color: var(--brand-amber);
+    box-shadow: 0 8px 18px rgba(217, 138, 58, 0.25);
   }
-  .c-btn-ghost {
-    @apply c-btn text-slate-600 hover:bg-slate-100 hover:text-slate-950;
+  .c-btn-warning:hover {
+    background-color: #c77722;
   }
 
-  /* 입력 필드 */
+  .c-btn-ghost {
+    @apply c-btn;
+    color: var(--text-muted);
+  }
+  .c-btn-ghost:hover {
+    background-color: rgba(20, 38, 61, 0.07);
+    color: var(--brand-ink);
+  }
+
+  /* 입력 */
   .c-input {
-    @apply block w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100;
+    @apply block w-full rounded-xl bg-white px-3.5 py-2.5 text-sm shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2;
+    border: 1px solid var(--line-soft);
+    color: var(--text-main);
+    --tw-ring-color: rgba(47, 174, 155, 0.25);
   }
+  .c-input:focus {
+    border-color: var(--brand-mint);
+  }
+
   .c-select {
-    @apply block w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100;
+    @apply block w-full rounded-xl bg-white px-3.5 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2;
+    border: 1px solid var(--line-soft);
+    color: var(--text-main);
+    --tw-ring-color: rgba(47, 174, 155, 0.25);
   }
+  .c-select:focus {
+    border-color: var(--brand-mint);
+  }
+
   .c-textarea {
-    @apply block w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100;
+    @apply block w-full resize-none rounded-xl bg-white px-3.5 py-2.5 text-sm shadow-sm placeholder:text-slate-400 focus:outline-none focus:ring-2;
+    border: 1px solid var(--line-soft);
+    color: var(--text-main);
+    --tw-ring-color: rgba(47, 174, 155, 0.25);
+  }
+  .c-textarea:focus {
+    border-color: var(--brand-mint);
   }
 
   /* 카드 */
   .c-card {
-    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/70;
+    @apply rounded-2xl bg-white shadow-sm;
+    border: 1px solid var(--line-soft);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
   }
+
   .c-surface {
-    @apply rounded-2xl border border-white/70 bg-white/90 shadow-xl shadow-slate-200/80 backdrop-blur;
+    @apply rounded-2xl bg-white/90 shadow-xl backdrop-blur;
+    border: 1px solid rgba(214, 222, 232, 0.85);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1);
   }
+
   .c-section-title {
-    @apply text-xl font-black tracking-tight text-slate-950;
+    @apply text-xl font-black tracking-tight;
+    color: var(--brand-ink);
   }
+
   .c-section-desc {
-    @apply mt-1 text-sm leading-6 text-slate-500;
+    @apply mt-1 text-sm leading-6;
+    color: var(--text-muted);
   }
 
   /* 배지 */
   .c-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold;
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1;
   }
+
   .c-badge-blue {
-    @apply c-badge bg-blue-50 text-blue-700 ring-1 ring-blue-100;
+    @apply c-badge;
+    background-color: rgba(28, 78, 109, 0.1);
+    color: var(--brand-ocean);
+    --tw-ring-color: rgba(28, 78, 109, 0.2);
   }
+
   .c-badge-gray {
-    @apply c-badge bg-slate-100 text-slate-600 ring-1 ring-slate-200;
+    @apply c-badge;
+    background-color: rgba(93, 107, 124, 0.1);
+    color: var(--text-muted);
+    --tw-ring-color: rgba(93, 107, 124, 0.2);
   }
+
   .c-badge-green {
-    @apply c-badge bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100;
+    @apply c-badge bg-emerald-50 text-emerald-700;
+    --tw-ring-color: rgba(16, 185, 129, 0.2);
   }
+
   .c-badge-red {
-    @apply c-badge bg-red-50 text-red-700 ring-1 ring-red-100;
+    @apply c-badge bg-red-50 text-red-700;
+    --tw-ring-color: rgba(239, 68, 68, 0.2);
   }
+
   .c-badge-yellow {
-    @apply c-badge bg-amber-50 text-amber-700 ring-1 ring-amber-100;
+    @apply c-badge;
+    background-color: rgba(217, 138, 58, 0.14);
+    color: #a95f1e;
+    --tw-ring-color: rgba(217, 138, 58, 0.22);
   }
 
   /* 상태 배너 */
@@ -98,6 +189,7 @@
 
   /* 폼 레이블 */
   .c-label {
-    @apply block text-sm font-semibold text-slate-700;
+    @apply block text-sm font-semibold;
+    color: var(--text-main);
   }
 }

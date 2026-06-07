@@ -38,19 +38,19 @@ function Header({
   const navLinkClass = (active) =>
     `rounded-full px-3.5 py-2 text-sm font-bold transition-colors ${
       active
-        ? "bg-blue-50 text-blue-700 ring-1 ring-blue-100"
+        ? "bg-[#dff4ef] text-[#1c4e6d] ring-1 ring-[#bde8df]"
         : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
     }`;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/70 bg-white/85 shadow-sm shadow-slate-200/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-white/60 bg-white/85 shadow-sm shadow-slate-200/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* 로고 */}
         <button
           className="flex items-center gap-2 text-lg font-black tracking-tight text-slate-950"
           onClick={onGoList}
         >
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-600/25">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#2fae9b] text-white shadow-lg shadow-[#2fae9b]/30">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -201,14 +201,14 @@ function Header({
         <div className="border-t border-slate-100 bg-white/95 px-4 py-4 shadow-xl shadow-slate-200/70 backdrop-blur md:hidden">
           <div className="flex flex-col gap-1.5">
             <button
-              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-[#dff4ef] hover:text-[#1c4e6d]"
               onClick={() => handleMobileNav(onGoList)}
             >
               차량 검색
             </button>
             {userProfile && (
               <button
-                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-[#dff4ef] hover:text-[#1c4e6d]"
                 onClick={() => handleMobileNav(onGoChats)}
               >
                 내 상담
@@ -216,7 +216,7 @@ function Header({
             )}
             {isDealer && (
               <button
-                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-[#dff4ef] hover:text-[#1c4e6d]"
                 onClick={() => handleMobileNav(onGoDealer)}
               >
                 내 차량 관리
@@ -224,7 +224,7 @@ function Header({
             )}
             {isDealer && (
               <button
-                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-[#dff4ef] hover:text-[#1c4e6d]"
                 onClick={() => handleMobileNav(onGoCreate)}
               >
                 차량 등록
@@ -232,7 +232,7 @@ function Header({
             )}
             {isAdmin && (
               <button
-                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-[#dff4ef] hover:text-[#1c4e6d]"
                 onClick={() => handleMobileNav(onGoAdmin)}
               >
                 관리자
@@ -246,7 +246,7 @@ function Header({
                 </div>
                 {canRequestDealer && (
                   <button
-                    className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-[#dff4ef] hover:text-[#1c4e6d]"
                     disabled={isDealerRequesting}
                     onClick={() => handleMobileNav(onRequestDealer)}
                   >
