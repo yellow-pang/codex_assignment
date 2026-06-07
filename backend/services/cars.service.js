@@ -6,7 +6,7 @@ const { createCarFilterById, getMongoDocument } = require("../utils/ids");
 const { normalizeCarInput, validateCarInput } = require("../utils/normalizers");
 const { assertNotDuplicateRequest, createStableHash } = require("../utils/requestGuard");
 const { createCarSearchQuery } = require("../utils/search");
-const { getCarsCollection } = require("./collections");
+const { getCarsCollection, getChatRoomsCollection } = require("./collections");
 const { assertCarOwner, requireDealerProfile } = require("./users.service");
 
 async function createCar(input, files, dealerProfile) {
@@ -139,6 +139,8 @@ async function updateCar(id, input, files, dealerProfile) {
     throw error;
   }
 
+  await syncChatRoomsCarSnapshot(updatedCar);
+
   return updatedCar;
 }
 
@@ -150,6 +152,19 @@ function validateOrThrow(validationMessage) {
   const error = new Error(validationMessage);
   error.statusCode = 400;
   throw error;
+}
+
+async function syncChatRoomsCarSnapshot(car) {
+  await getChatRoomsCollection().updateMany(
+    { carId: String(car._id) },
+    {
+      $set: {
+        carName: car.name || "",
+        imageUrl: car.imageUrl || "",
+        imageUrls: Array.isArray(car.imageUrls) ? car.imageUrls : [],
+      },
+    },
+  );
 }
 
 module.exports = {

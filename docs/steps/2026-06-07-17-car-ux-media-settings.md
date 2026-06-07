@@ -41,6 +41,16 @@
 | `frontend/src/components/AdminUserPanel.jsx` | 관리자 `차량 등록 설정` 탭과 설정 저장 UI를 추가했다. |
 | 이미지 표시 컴포넌트 | 목록, 테이블, 딜러 대시보드, 상담 목록, 상담방 이미지 fallback을 적용했다. |
 
+## 4.1 상담방 이미지 동기화 보강
+
+기존 상담방은 생성 시점의 `imageUrl`을 `chat_rooms` 문서에 저장하므로, 차량 사진 수정 후에도 예전 채팅방에는 이전 이미지가 남을 수 있었다.
+
+이를 보정하기 위해 다음을 추가했다.
+
+- 상담방 목록 조회와 상담방 상세 조회 시 현재 `cars` 문서를 다시 읽어 `imageUrl`, `imageUrls`, `carName`을 최신 값으로 내려준다.
+- 차량 수정 후 관련 `chat_rooms` 문서의 `carName`, `imageUrl`, `imageUrls`도 함께 갱신한다.
+- 기존 채팅방 문서에 예전 이미지가 남아 있어도 화면 조회 시 현재 차량 대표 이미지로 보정된다.
+
 ## 5. 데이터 호환 정책
 
 기존 차량 문서는 `imageUrl` 하나만 있어도 계속 정상 동작한다.
@@ -77,6 +87,7 @@
 | `node --check backend/server.js` | 성공 |
 | `node --check backend/config/upload.js` | 성공 |
 | `node --check backend/services/cars.service.js` | 성공 |
+| `node --check backend/services/chats.service.js` | 성공 |
 | `node --check backend/services/settings.service.js` | 성공 |
 | `node --check backend/routes/settings.routes.js` | 성공 |
 | `npm.cmd --prefix frontend run build` | 성공 |

@@ -32,6 +32,8 @@ feat: 차량 등록 UX와 다중 이미지 갤러리 개선
 
 - 차량 목록, 테이블, 딜러 대시보드, 상담 목록, 상담방, 상세 화면에 이미지 로딩 실패 fallback을 적용했다.
 - 이미지가 없거나 재배포 후 파일이 사라져도 `/uploads/default-car.png`로 대체한다.
+- 기존 상담방이 생성 시점의 예전 이미지를 들고 있더라도 상담방 목록/상세 조회 시 현재 차량 이미지로 보정한다.
+- 차량 수정 후 관련 상담방 문서의 차량명과 이미지 스냅샷도 함께 갱신한다.
 
 ### 차량 등록 폼 UX 개선
 
@@ -60,6 +62,7 @@ backend/routes/cars.routes.js
 backend/routes/settings.routes.js
 backend/server.js
 backend/services/cars.service.js
+backend/services/chats.service.js
 backend/services/collections.js
 backend/services/settings.service.js
 backend/utils/normalizers.js
@@ -100,6 +103,7 @@ docs/progress.md
 node --check backend/server.js                    → 성공
 node --check backend/config/upload.js             → 성공
 node --check backend/services/cars.service.js     → 성공
+node --check backend/services/chats.service.js    → 성공
 node --check backend/services/settings.service.js → 성공
 node --check backend/routes/settings.routes.js    → 성공
 npm.cmd --prefix frontend run build               → 성공

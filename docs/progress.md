@@ -6,7 +6,7 @@
 | --- | --- |
 | 작업 단계명 | 차량 등록 UX, 다중 이미지, 설정, 모던 UI 개선 |
 | 작업 일자 | 2026-06-07 |
-| 작업 내용 | 제조사 직접 입력, 다중 이미지 업로드, 상세 갤러리, 이미지 fallback, 차량 등록 설정 API와 관리자 설정 화면 추가 |
+| 작업 내용 | 제조사 직접 입력, 다중 이미지 업로드, 상세 갤러리, 이미지 fallback, 상담방 이미지 동기화, 차량 등록 설정 API와 관리자 설정 화면 추가 |
 | 설치한 패키지 | 없음 |
 | 수정한 주요 파일 | `backend/config/upload.js`, `backend/db.js`, `backend/routes/cars.routes.js`, `backend/server.js`, `backend/services/cars.service.js`, `backend/services/collections.js`, `backend/utils/normalizers.js`, `frontend/src/App.jsx`, `frontend/src/components/AdminUserPanel.jsx`, `frontend/src/components/CarCardGrid.jsx`, `frontend/src/components/CarDetail.jsx`, `frontend/src/components/CarForm.jsx`, `frontend/src/components/CarTable.jsx`, `frontend/src/components/ChatRoom.jsx`, `frontend/src/components/ChatRoomList.jsx`, `frontend/src/components/DealerDashboard.jsx`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md` |
 | 추가한 주요 파일 | `backend/routes/settings.routes.js`, `backend/services/settings.service.js`, `frontend/src/utils/carImages.js`, `docs/plans/plan-17-car-ux-media-settings.md`, `docs/steps/2026-06-07-17-car-ux-media-settings.md`, `docs/pr/2026-06-07-17-car-ux-media-settings-pr.md` |
@@ -23,6 +23,7 @@
 - 관리자 화면에 `차량 등록 설정` 탭을 추가해 연식, 가격, 주행거리 입력 단위와 최대 사진 개수를 관리할 수 있게 했다.
 - 차량 등록/검색 숫자 input에 설정값 기반 `step`을 적용했다.
 - 이미지가 없거나 Render 재배포 후 업로드 파일이 사라져 로딩에 실패해도 placeholder로 대체되도록 목록/상세/상담/딜러 화면을 보강했다.
+- 기존 상담방이 과거 차량 이미지를 들고 있어도 상담방 목록/상세 조회 시 현재 차량 이미지로 보정하고, 차량 수정 후 관련 상담방 이미지 스냅샷도 함께 갱신하도록 했다.
 - README와 배포 문서에 다중 이미지와 Render 파일 비영속성 한계를 반영했다.
 
 ### 남은 확인
