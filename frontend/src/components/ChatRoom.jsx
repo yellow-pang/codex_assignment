@@ -4,6 +4,7 @@ import {
   authenticatedFetch,
   getCurrentUserIdToken,
 } from "../api/authenticatedFetch.js";
+import { defaultCarImageUrl, handleCarImageError } from "../utils/carImages.js";
 
 function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
   const [messages, setMessages] = useState([]);
@@ -185,7 +186,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
   const carName = currentRoom?.carName || "차량 상담";
   const dealerName = currentRoom?.dealerName || "딜러";
   const buyerName = currentRoom?.buyerName || "구매자";
-  const carImageUrl = currentRoom?.imageUrl || "/uploads/default-car.png";
+  const carImageUrl = currentRoom?.imageUrl || defaultCarImageUrl;
   const isDealer = userProfile?.role === "dealer";
   const presenceLabel =
     dealerPresence.status === "online"
@@ -204,6 +205,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
             alt={`${carName} 차량 이미지`}
             className="h-44 w-full object-cover"
             src={carImageUrl}
+            onError={handleCarImageError}
           />
         </div>
         <div className="mt-4">
@@ -263,6 +265,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
               alt={`${carName} 차량 이미지`}
               className="h-full w-full object-cover"
               src={carImageUrl}
+              onError={handleCarImageError}
             />
           </div>
           <div className="min-w-0 flex-1">

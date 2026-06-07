@@ -1,4 +1,7 @@
-const { createImageUrl } = require("../config/upload");
+const {
+  createImageUrls,
+  getUploadedCarImageFiles,
+} = require("../config/upload");
 const { createCarFilterById, getMongoDocument } = require("../utils/ids");
 const { normalizeCarInput, validateCarInput } = require("../utils/normalizers");
 const { assertNotDuplicateRequest, createStableHash } = require("../utils/requestGuard");
@@ -6,11 +9,12 @@ const { createCarSearchQuery } = require("../utils/search");
 const { getCarsCollection } = require("./collections");
 const { assertCarOwner, requireDealerProfile } = require("./users.service");
 
-async function createCar(input, file, dealerProfile) {
+async function createCar(input, files, dealerProfile) {
   const now = new Date();
   const dealer = await requireDealerProfile(dealerProfile?.uid);
   const carInput = normalizeCarInput(input);
   validateOrThrow(validateCarInput(carInput));
+  const imageUrls = createImageUrls(getUploadedCarImageFiles(files));
   assertNotDuplicateRequest({
     keyParts: ["car:create", dealer.uid, createStableHash(carInput)],
     message: "같은 차량 등록 요청이 너무 빠르게 반복되었습니다.",
@@ -19,7 +23,8 @@ async function createCar(input, file, dealerProfile) {
 
   const newCar = {
     ...carInput,
-    imageUrl: createImageUrl(file),
+    imageUrl: imageUrls[0] || "",
+    imageUrls,
     dealerId: dealer.uid,
     dealerName: dealer.displayName,
     createdAt: now,
@@ -89,7 +94,7 @@ async function searchCars(queryParams) {
     .toArray();
 }
 
-async function updateCar(id, input, file, dealerProfile) {
+async function updateCar(id, input, files, dealerProfile) {
   const filter = createCarFilterById(id);
   const dealer = await requireDealerProfile(dealerProfile?.uid);
   const existingCar = await getCarsCollection().findOne(filter);
@@ -104,14 +109,16 @@ async function updateCar(id, input, file, dealerProfile) {
 
   const carInput = normalizeCarInput(input);
   validateOrThrow(validateCarInput(carInput));
+  const uploadedImageUrls = createImageUrls(getUploadedCarImageFiles(files));
   assertNotDuplicateRequest({
     keyParts: ["car:update", dealer.uid, id, createStableHash(carInput)],
     message: "같은 차량 수정 요청이 너무 빠르게 반복되었습니다.",
     ttlMs: 3000,
   });
 
-  if (file) {
-    carInput.imageUrl = createImageUrl(file);
+  if (uploadedImageUrls.length > 0) {
+    carInput.imageUrl = uploadedImageUrls[0];
+    carInput.imageUrls = uploadedImageUrls;
   }
 
   const result = await getCarsCollection().findOneAndUpdate(

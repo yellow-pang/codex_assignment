@@ -1,4 +1,8 @@
 import EmptyState from "./EmptyState.jsx";
+import {
+  getPrimaryCarImageUrl,
+  handleCarImageError,
+} from "../utils/carImages.js";
 
 function CarCardGrid({
   cars,
@@ -11,8 +15,6 @@ function CarCardGrid({
   onStartChat,
   pendingAction = "",
 }) {
-  const defaultCarImageUrl = "/uploads/default-car.png";
-
   if (cars.length === 0) {
     return (
       <EmptyState title={emptyMessage} description={emptyDescription} />
@@ -34,7 +36,8 @@ function CarCardGrid({
               <img
                 alt={`${car.name} 차량 사진`}
                 className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                src={car.imageUrl || defaultCarImageUrl}
+                src={getPrimaryCarImageUrl(car)}
+                onError={handleCarImageError}
               />
               <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/45 to-transparent" />
               <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">

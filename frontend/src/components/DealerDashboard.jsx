@@ -1,3 +1,8 @@
+import {
+  getPrimaryCarImageUrl,
+  handleCarImageError,
+} from "../utils/carImages.js";
+
 function DealerDashboard({
   cars,
   onBack,
@@ -7,7 +12,6 @@ function DealerDashboard({
   onView,
   userProfile,
 }) {
-  const defaultCarImageUrl = "/uploads/default-car.png";
   const dealerCars = cars.filter(
     (car) => String(car.dealerId || "") === String(userProfile?.uid || ""),
   );
@@ -110,7 +114,8 @@ function DealerDashboard({
                             <img
                               alt={`${car.name} 차량 사진`}
                               className="h-14 w-20 rounded-xl object-cover"
-                              src={car.imageUrl || defaultCarImageUrl}
+                              src={getPrimaryCarImageUrl(car)}
+                              onError={handleCarImageError}
                             />
                             <div>
                               <p className="font-bold text-slate-950">{car.name}</p>
@@ -169,7 +174,8 @@ function DealerDashboard({
                       <img
                         alt={`${car.name} 차량 사진`}
                         className="h-20 w-24 rounded-2xl object-cover"
-                        src={car.imageUrl || defaultCarImageUrl}
+                        src={getPrimaryCarImageUrl(car)}
+                        onError={handleCarImageError}
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-black text-slate-950">

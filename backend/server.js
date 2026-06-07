@@ -16,6 +16,7 @@ const { connectDatabase } = require("./db");
 const { sendErrorResponse } = require("./middleware/errors");
 const { createCarsRouter } = require("./routes/cars.routes");
 const { createChatsRouter } = require("./routes/chats.routes");
+const { createSettingsRouter } = require("./routes/settings.routes");
 const { createUsersRouter } = require("./routes/users.routes");
 const { resetDealerPresenceOnStartup } = require("./services/dealerPresence.service");
 const { setupChatSocketHandlers } = require("./sockets/chat.socket");
@@ -42,6 +43,7 @@ app.use(express.static(frontendDistPath));
 const carsRouter = createCarsRouter();
 
 app.use("/api/users", createUsersRouter());
+app.use("/api/settings", createSettingsRouter());
 app.use("/api/cars", carsRouter);
 app.use("/api/chats", createChatsRouter());
 app.use("/cars", carsRouter);

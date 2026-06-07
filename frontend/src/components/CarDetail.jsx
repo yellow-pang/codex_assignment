@@ -1,3 +1,6 @@
+import { useEffect, useMemo, useState } from "react";
+import { getCarImageUrls, handleCarImageError } from "../utils/carImages.js";
+
 function CarDetail({
   canManage,
   car,
@@ -7,7 +10,12 @@ function CarDetail({
   onDelete,
   onStartChat,
 }) {
-  const defaultCarImageUrl = "/uploads/default-car.png";
+  const imageUrls = useMemo(() => getCarImageUrls(car), [car]);
+  const [selectedImageUrl, setSelectedImageUrl] = useState(imageUrls[0]);
+
+  useEffect(() => {
+    setSelectedImageUrl(imageUrls[0]);
+  }, [imageUrls]);
 
   if (!car) {
     return null;
@@ -15,7 +23,6 @@ function CarDetail({
 
   return (
     <div className="space-y-6">
-      {/* 브레드크럼 */}
       <nav className="flex items-center gap-2 text-sm font-medium text-slate-500">
         <button className="hover:text-blue-600" onClick={onBack}>
           홈
@@ -28,39 +35,53 @@ function CarDetail({
         <span className="font-semibold text-slate-900">{car.name}</span>
       </nav>
 
-      {/* 메인 2열 레이아웃 */}
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        {/* 좌: 차량 이미지 */}
+      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-3">
           <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-slate-100 shadow-xl shadow-slate-200/70">
             <img
               alt={`${car.name} 차량 사진`}
-              className="h-[26rem] w-full object-cover"
-              src={car.imageUrl || defaultCarImageUrl}
+              className="h-[22rem] w-full object-cover sm:h-[30rem]"
+              src={selectedImageUrl}
+              onError={handleCarImageError}
             />
             <span className="absolute right-5 top-5 c-badge-green">
               상담 가능
             </span>
+            <span className="absolute bottom-5 left-5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm backdrop-blur">
+              사진 {imageUrls.length}장
+            </span>
           </div>
-          <div className="grid grid-cols-4 gap-3">
-            {[0, 1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-sm"
-              >
-                <img
-                  alt={`${car.name} 썸네일`}
-                  className="h-20 w-full rounded-xl object-cover"
-                  src={car.imageUrl || defaultCarImageUrl}
-                />
-              </div>
-            ))}
-          </div>
+
+          {imageUrls.length > 1 && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {imageUrls.slice(0, 8).map((imageUrl, index) => {
+                const isSelected = imageUrl === selectedImageUrl;
+
+                return (
+                  <button
+                    key={`${imageUrl}-${index}`}
+                    className={`overflow-hidden rounded-2xl border bg-white p-1 shadow-sm transition-all ${
+                      isSelected
+                        ? "border-blue-500 ring-2 ring-blue-100"
+                        : "border-slate-200 hover:border-blue-200"
+                    }`}
+                    type="button"
+                    onClick={() => setSelectedImageUrl(imageUrl)}
+                  >
+                    <img
+                      alt={`${car.name} 썸네일 ${index + 1}`}
+                      className="h-20 w-full rounded-xl object-cover"
+                      src={imageUrl}
+                      onError={handleCarImageError}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* 우: 차량 정보 */}
         <div className="flex flex-col gap-4">
-          {/* 헤더 정보 */}
           <div className="c-card p-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="c-badge-blue">{car.company}</span>
@@ -79,7 +100,6 @@ function CarDetail({
             </p>
           </div>
 
-          {/* 스펙 그리드 */}
           <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <SpecItem label="연식" value={`${car.year}년`} />
             <SpecItem
@@ -93,9 +113,9 @@ function CarDetail({
             <SpecItem label="차종" value={car.type || "-"} />
             <SpecItem label="연료" value={car.fuel || "-"} />
             <SpecItem label="지역" value={car.location || "-"} />
+            <SpecItem label="사진" value={`${imageUrls.length}장`} />
           </div>
 
-          {/* 딜러 CTA */}
           <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white">
@@ -121,7 +141,6 @@ function CarDetail({
             </button>
           </div>
 
-          {/* 관리 버튼 */}
           <div className="flex gap-2">
             <button className="c-btn-outline flex-1" onClick={onBack}>
               목록으로
@@ -140,7 +159,6 @@ function CarDetail({
         </div>
       </div>
 
-      {/* 차량 설명 */}
       <div className="c-card p-6">
         <h2 className="text-lg font-black text-slate-950">차량 설명</h2>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-600">

@@ -18,7 +18,7 @@ https://codex-assignment.onrender.com/
 - 차량 목록 조회와 복합 검색
 - 차량 상세 URL 접근과 새로고침 유지
 - 승인된 딜러의 차량 등록, 수정, 삭제
-- `multer` 기반 차량 사진 업로드와 `/uploads` 정적 제공
+- `multer` 기반 차량 사진 다중 업로드와 `/uploads` 정적 제공
 - Firebase 이메일/비밀번호 회원가입, 로그인, 로그아웃
 - Firebase ID Token 서버 검증과 보호 API 인증
 - MongoDB `users` 컬렉션 기반 사용자 프로필 저장
@@ -225,6 +225,8 @@ Render 실동작 확인은 사용자 확인 기준입니다.
 - Render Secret, GitHub Secret, MongoDB 접속 문자열은 문서에 작성하지 않습니다.
 - Firebase Admin SDK 기반 서버 토큰 검증을 사용하므로 Render Environment에 `FIREBASE_SERVICE_ACCOUNT_JSON`을 등록해야 보호 API가 동작합니다.
 - 차량 사진은 `multer`로 서버의 `uploads/` 폴더에 저장합니다.
+- 차량 등록/수정 시 최대 8장까지 업로드할 수 있고, MongoDB에는 대표 이미지 `imageUrl`과 전체 목록 `imageUrls`를 함께 저장합니다.
+- 이미지 파일이 없거나 재배포 후 사라진 경우 화면에서는 `/uploads/default-car.png` placeholder로 대체됩니다.
 - Render 무료 환경에서는 재배포, 인스턴스 재시작, 환경 재생성 시 `uploads/` 파일이 유지되지 않을 수 있습니다.
 - 장기 운영이 필요하면 S3, Cloudinary 같은 외부 이미지 스토리지 도입을 검토해야 합니다.
 - 실제 AI Agent API 연동은 향후 확장 작업입니다.

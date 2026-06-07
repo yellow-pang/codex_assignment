@@ -1,3 +1,8 @@
+import {
+  getPrimaryCarImageUrl,
+  handleCarImageError,
+} from "../utils/carImages.js";
+
 function CarTable({
   cars,
   emptyMessage = "등록된 자동차가 없습니다.",
@@ -7,8 +12,6 @@ function CarTable({
   onEdit,
   onDelete,
 }) {
-  const defaultCarImageUrl = "/uploads/default-car.png";
-
   if (cars.length === 0) {
     return (
       <div className="rounded-xl border-2 border-dashed border-gray-200 py-12 text-center">
@@ -56,7 +59,8 @@ function CarTable({
                 <img
                   alt={`${car.name} 차량 사진`}
                   className="h-14 w-20 rounded-md object-cover"
-                  src={car.imageUrl || defaultCarImageUrl}
+                  src={getPrimaryCarImageUrl(car)}
+                  onError={handleCarImageError}
                 />
               </td>
               <td className="px-4 py-3 font-semibold text-gray-900">

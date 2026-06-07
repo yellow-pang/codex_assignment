@@ -12,6 +12,10 @@ function getMessagesCollection() {
   return getCollection("messages");
 }
 
+function getSettingsCollection() {
+  return getCollection("settings");
+}
+
 function getUsersCollection() {
   return getCollection("users");
 }
@@ -20,5 +24,6 @@ module.exports = {
   getCarsCollection,
   getChatRoomsCollection,
   getMessagesCollection,
+  getSettingsCollection,
   getUsersCollection,
 };

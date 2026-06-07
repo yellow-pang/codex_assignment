@@ -8,6 +8,7 @@ const collectionNames = {
   users: process.env.COLLECTION_USERS || "users",
   chatRooms: process.env.COLLECTION_CHAT_ROOMS || "chat_rooms",
   messages: process.env.COLLECTION_MESSAGES || "messages",
+  settings: process.env.COLLECTION_SETTINGS || "settings",
 };
 
 let client;
@@ -102,6 +103,11 @@ async function ensureBaseIndexes() {
       collectionName: collectionNames.cars,
       keys: { createdAt: -1, _id: -1 },
       options: { name: "cars_createdAt_id" },
+    },
+    {
+      collectionName: collectionNames.settings,
+      keys: { key: 1 },
+      options: { unique: true, name: "unique_settings_key" },
     },
   ];
 

@@ -1,12 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
 import { authenticatedFetch } from "../api/authenticatedFetch.js";
 
-function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
+function AdminUserPanel({
+  currentUserProfile,
+  formSettings,
+  onBack,
+  onFormSettingsChanged,
+  onProfileChanged,
+}) {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [activeTab, setActiveTab] = useState("users");
   const [pendingUserUid, setPendingUserUid] = useState("");
+  const [settingsForm, setSettingsForm] = useState({
+    yearStep: 1,
+    priceStep: 100,
+    mileageStep: 1000,
+    maxImageCount: 8,
+  });
+  const [isSettingsSaving, setIsSettingsSaving] = useState(false);
 
   const summary = useMemo(
     () => ({
@@ -23,6 +36,15 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  useEffect(() => {
+    setSettingsForm({
+      yearStep: formSettings?.yearStep || 1,
+      priceStep: formSettings?.priceStep || 100,
+      mileageStep: formSettings?.mileageStep || 1000,
+      maxImageCount: formSettings?.maxImageCount || 8,
+    });
+  }, [formSettings]);
 
   async function requestAdminApi(url, options = {}) {
     const response = await authenticatedFetch(url, options);
@@ -86,6 +108,36 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
     }
   }
 
+  async function saveCarFormSettings(event) {
+    event.preventDefault();
+
+    if (isSettingsSaving) return;
+
+    setIsSettingsSaving(true);
+    try {
+      const updatedSettings = await requestAdminApi("/api/settings/car-form", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settingsForm),
+      });
+
+      onFormSettingsChanged?.(updatedSettings);
+      setMessage({ type: "success", text: "차량 등록 설정을 저장했습니다." });
+    } catch (error) {
+      setMessage({ type: "error", text: error.message });
+    } finally {
+      setIsSettingsSaving(false);
+    }
+  }
+
+  function handleSettingsChange(event) {
+    const { name, value } = event.target;
+    setSettingsForm((prevSettings) => ({
+      ...prevSettings,
+      [name]: Number(value),
+    }));
+  }
+
   return (
     <div className="grid gap-5 lg:grid-cols-[17rem_1fr]">
       <aside className="rounded-3xl bg-slate-950 p-5 text-white shadow-xl shadow-slate-300/40">
@@ -117,6 +169,11 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
             label="차량 관리"
             isActive={activeTab === "cars"}
             onClick={() => setActiveTab("cars")}
+          />
+          <SideNavButton
+            label="차량 등록 설정"
+            isActive={activeTab === "settings"}
+            onClick={() => setActiveTab("settings")}
           />
           <SideNavButton
             label="상담 현황"
@@ -180,6 +237,98 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
               "관리자 전체 차량 삭제나 강제 수정은 권한 정책 확정 후 별도 구현합니다.",
             ]}
           />
+        )}
+
+        {activeTab === "settings" && (
+          <div className="c-card p-5 sm:p-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-lg font-black text-slate-950">
+                  차량 등록 설정
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  딜러가 차량을 등록할 때 사용하는 숫자 입력 단위와 사진
+                  최대 개수를 관리합니다.
+                </p>
+              </div>
+              <span className="c-badge-blue">Admin only</span>
+            </div>
+
+            <form className="mt-6 space-y-5" onSubmit={saveCarFormSettings}>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <SettingsField
+                  description="연식 입력의 증감 단위입니다."
+                  label="연식 단위"
+                >
+                  <input
+                    className="c-input"
+                    name="yearStep"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={settingsForm.yearStep}
+                    onChange={handleSettingsChange}
+                  />
+                </SettingsField>
+                <SettingsField
+                  description="가격은 만원 기준으로 저장됩니다."
+                  label="가격 단위"
+                >
+                  <input
+                    className="c-input"
+                    name="priceStep"
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={settingsForm.priceStep}
+                    onChange={handleSettingsChange}
+                  />
+                </SettingsField>
+                <SettingsField
+                  description="주행거리 km 입력의 증감 단위입니다."
+                  label="주행거리 단위"
+                >
+                  <input
+                    className="c-input"
+                    name="mileageStep"
+                    type="number"
+                    min="1"
+                    max="100000"
+                    value={settingsForm.mileageStep}
+                    onChange={handleSettingsChange}
+                  />
+                </SettingsField>
+                <SettingsField
+                  description="서버 제한보다 큰 값은 저장되지 않습니다."
+                  label="최대 사진 개수"
+                >
+                  <input
+                    className="c-input"
+                    name="maxImageCount"
+                    type="number"
+                    min="1"
+                    max="8"
+                    value={settingsForm.maxImageCount}
+                    onChange={handleSettingsChange}
+                  />
+                </SettingsField>
+              </div>
+              <div className="rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600 ring-1 ring-slate-100">
+                현재 추천 기본값은 가격 100만원, 주행거리 1,000km, 연식 1년,
+                사진 8장입니다. 설정은 새로 여는 차량 등록/수정 화면부터
+                반영됩니다.
+              </div>
+              <div className="flex justify-end">
+                <button
+                  className="c-btn-primary"
+                  type="submit"
+                  disabled={isSettingsSaving}
+                >
+                  {isSettingsSaving ? "저장 중..." : "설정 저장"}
+                </button>
+              </div>
+            </form>
+          </div>
         )}
 
         {activeTab === "chats" && (
@@ -466,6 +615,18 @@ function PreparedPanel({ description, points, title }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function SettingsField({ children, description, label }) {
+  return (
+    <label className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <span className="text-sm font-black text-slate-800">{label}</span>
+      <span className="mt-1 block text-xs leading-5 text-slate-500">
+        {description}
+      </span>
+      <span className="mt-3 block">{children}</span>
+    </label>
   );
 }
 
