@@ -17,6 +17,27 @@ function createChatError(message) {
   return { message };
 }
 
+function getPrimaryCarImageUrl(car) {
+  if (Array.isArray(car?.imageUrls) && car.imageUrls.length > 0) {
+    return car.imageUrls[0] || "";
+  }
+
+  return car?.imageUrl || "";
+}
+
+function applyCarSnapshotToRoom(room, car) {
+  if (!room || !car) {
+    return room;
+  }
+
+  return {
+    ...room,
+    carName: car.name || room.carName || "",
+    imageUrl: getPrimaryCarImageUrl(car),
+    imageUrls: Array.isArray(car.imageUrls) ? car.imageUrls : [],
+  };
+}
+
 function assertChatRoomParticipant(room, userId) {
   if (userId !== room.buyerId && userId !== room.dealerId) {
     const error = new Error("상담방 참여자만 접근할 수 있습니다.");
@@ -86,7 +107,8 @@ async function createChatRoom({ buyerProfile, carId: rawCarId }) {
       dealerId,
       dealerName: car.dealerName || "딜러",
       carName: car.name || "",
-      imageUrl: car.imageUrl || "",
+      imageUrl: getPrimaryCarImageUrl(car),
+      imageUrls: Array.isArray(car.imageUrls) ? car.imageUrls : [],
       updatedAt: now,
     },
     $setOnInsert: {
@@ -125,10 +147,14 @@ async function getChatRoomDetail(roomId, userId) {
 
   assertChatRoomParticipant(room, normalizeUid(userId));
 
-  const dealerPresence = await getDealerPresence(room.dealerId);
+  const [dealerPresence, car] = await Promise.all([
+    getDealerPresence(room.dealerId),
+    getCarsCollection().findOne(createCarFilterById(room.carId)),
+  ]);
+  const hydratedRoom = applyCarSnapshotToRoom(room, car);
 
   return {
-    ...room,
+    ...hydratedRoom,
     dealerOnline: dealerPresence.isOnline,
     dealerLastSeenAt: dealerPresence.lastSeenAt,
   };
@@ -232,10 +258,25 @@ async function listChatRooms(userProfile) {
     throw error;
   }
 
-  return getChatRoomsCollection()
+  const rooms = await getChatRoomsCollection()
     .find({ $or: [{ buyerId: userId }, { dealerId: userId }] })
     .sort({ updatedAt: -1, _id: -1 })
     .toArray();
+
+  const carIds = [...new Set(rooms.map((room) => room.carId).filter(Boolean))];
+
+  if (carIds.length === 0) {
+    return rooms;
+  }
+
+  const cars = await getCarsCollection()
+    .find({ $or: carIds.map((carId) => createCarFilterById(carId)) })
+    .toArray();
+  const carsById = new Map(cars.map((car) => [String(car._id), car]));
+
+  return rooms.map((room) =>
+    applyCarSnapshotToRoom(room, carsById.get(String(room.carId))),
+  );
 }
 
 function validateChatMessageOrThrow(text) {

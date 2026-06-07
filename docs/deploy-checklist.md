@@ -10,7 +10,7 @@
 | MongoDB 연결 파일 | `backend/db.js` |
 | React 프로젝트 | `frontend/` |
 | React 빌드 출력 | `frontend/dist/` |
-| 업로드 경로 | 루트 `uploads/` 유지 |
+| 업로드 경로 | 루트 `uploads/` 유지, 차량당 최대 8장 업로드 |
 | 현재 배포 URL | `https://codex-assignment.onrender.com/` |
 
 15단계 보안 강화 이전 환경변수는 Render Environment에 반영되어 있으며, 15단계 이후 새로 추가된 `FIREBASE_SERVICE_ACCOUNT_JSON`은 사용자가 Render Environment에 추가로 등록해야 한다.
@@ -24,6 +24,7 @@
 - [x] Express가 `frontend/dist`를 정적 파일로 제공한다.
 - [x] 백엔드 파일은 `backend/` 아래에 있고, 루트 `npm start`가 `backend/server.js`를 실행한다.
 - [x] 업로드 설정은 `backend/config/upload.js`로 분리되어 있고 루트 `uploads/`를 유지한다.
+- [x] 차량 이미지는 대표 `imageUrl`과 전체 `imageUrls` 배열을 함께 사용할 수 있다.
 - [x] React 새로고침 404 방지를 위한 fallback이 있다.
 - [x] CRUD 기능 로직은 변경하지 않았다.
 - [x] UI 디자인은 이번 단계에서 변경하지 않았다.
@@ -108,11 +109,14 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 - [ ] `GET /api/cars`가 자동차 목록 JSON을 반환한다.
 - [ ] Render Logs에 `MongoDB connected: car_market` 메시지가 보인다.
 - [ ] 자동차 등록 기능이 동작한다.
-- [ ] 차량 사진을 포함한 자동차 등록이 동작한다.
+- [ ] 차량 사진 여러 장을 포함한 자동차 등록이 동작한다.
 - [ ] 자동차 수정 기능이 동작한다.
-- [ ] 차량 사진 교체가 동작한다.
+- [ ] 차량 수정 시 새 사진을 선택하면 사진 목록 전체 교체가 동작한다.
+- [ ] 차량 수정 시 새 사진을 선택하지 않으면 기존 사진 목록이 유지된다.
 - [ ] 자동차 삭제 기능이 동작한다.
 - [ ] 사진 없는 차량에서 `/uploads/default-car.png` 기본 이미지가 보인다.
+- [ ] 이미지 파일 로딩 실패 시 깨진 이미지 대신 placeholder가 보인다.
+- [ ] 관리자 화면에서 차량 등록 설정을 저장하면 숫자 입력 단위와 최대 사진 개수가 반영된다.
 - [ ] Firebase 이메일/비밀번호 회원가입이 동작한다.
 - [ ] 회원가입 후 MongoDB `users` 컬렉션에 사용자 프로필이 저장된다.
 - [ ] Firebase 로그인, 로그아웃, 새로고침 후 인증 상태 유지가 동작한다.

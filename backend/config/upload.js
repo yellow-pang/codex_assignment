@@ -4,6 +4,7 @@ const path = require("path");
 const { uploadsPath } = require("./paths");
 
 const maxUploadFileSize = 5 * 1024 * 1024;
+const maxCarImageCount = 8;
 const allowedImageExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const allowedImageMimeTypes = new Set([
   "image/jpeg",
@@ -24,7 +25,7 @@ const upload = multer({
       cb(null, safeName);
     },
   }),
-  limits: { fileSize: maxUploadFileSize, files: 1 },
+  limits: { fileSize: maxUploadFileSize, files: maxCarImageCount },
   fileFilter: (req, file, cb) => {
     const extension = path.extname(file.originalname).toLowerCase();
 
@@ -48,13 +49,33 @@ function createImageUrl(file) {
   return file ? `/uploads/${file.filename}` : "";
 }
 
+function createImageUrls(files) {
+  return files.map((file) => createImageUrl(file)).filter(Boolean);
+}
+
+function getUploadedCarImageFiles(files, file) {
+  if (Array.isArray(files)) {
+    return files;
+  }
+
+  if (files?.images?.length) {
+    return files.images;
+  }
+
+  if (files?.image?.length) {
+    return files.image;
+  }
+
+  return file ? [file] : [];
+}
+
 function handleUploadError(error, res, fallbackMessage, next) {
   if (error instanceof multer.MulterError) {
     const message =
       error.code === "LIMIT_FILE_SIZE"
         ? "차량 사진은 5MB 이하로 업로드해주세요."
         : error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPECTED_FILE"
-          ? "차량 사진은 image 필드로 1장만 업로드할 수 있습니다."
+          ? `차량 사진은 images 필드로 최대 ${maxCarImageCount}장까지 업로드할 수 있습니다.`
         : "차량 사진 업로드를 처리하지 못했습니다.";
 
     res.status(400).json({ message });
@@ -77,6 +98,10 @@ function handleUploadError(error, res, fallbackMessage, next) {
 
 module.exports = {
   createImageUrl,
+  createImageUrls,
+  getUploadedCarImageFiles,
   handleUploadError,
+  maxCarImageCount,
+  maxUploadFileSize,
   upload,
 };

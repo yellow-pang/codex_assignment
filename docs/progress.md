@@ -1,5 +1,38 @@
 # 작업 진행 기록
 
+## 차량 등록 UX, 다중 이미지, 설정, 모던 UI 개선
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 차량 등록 UX, 다중 이미지, 설정, 모던 UI 개선 |
+| 작업 일자 | 2026-06-07 |
+| 작업 내용 | 제조사 직접 입력, 다중 이미지 업로드, 상세 갤러리, 이미지 fallback, 상담방 이미지 동기화, 차량 등록 설정 API와 관리자 설정 화면 추가 |
+| 설치한 패키지 | 없음 |
+| 수정한 주요 파일 | `backend/config/upload.js`, `backend/db.js`, `backend/routes/cars.routes.js`, `backend/server.js`, `backend/services/cars.service.js`, `backend/services/collections.js`, `backend/utils/normalizers.js`, `frontend/src/App.jsx`, `frontend/src/components/AdminUserPanel.jsx`, `frontend/src/components/CarCardGrid.jsx`, `frontend/src/components/CarDetail.jsx`, `frontend/src/components/CarForm.jsx`, `frontend/src/components/CarTable.jsx`, `frontend/src/components/ChatRoom.jsx`, `frontend/src/components/ChatRoomList.jsx`, `frontend/src/components/DealerDashboard.jsx`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md` |
+| 추가한 주요 파일 | `backend/routes/settings.routes.js`, `backend/services/settings.service.js`, `frontend/src/utils/carImages.js`, `docs/plans/plan-17-car-ux-media-settings.md`, `docs/steps/2026-06-07-17-car-ux-media-settings.md`, `docs/pr/2026-06-07-17-car-ux-media-settings-pr.md` |
+| 확인한 명령어 | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+
+### 작업 내용
+
+- 차량 등록/수정 API가 `images` 필드로 최대 8장까지 업로드할 수 있게 했다.
+- 기존 대표 이미지 `imageUrl`은 유지하고, 새 차량과 사진 교체 차량에는 `imageUrls` 배열도 함께 저장한다.
+- 기존 `imageUrl`만 가진 차량도 목록, 상세, 상담 화면에서 계속 표시되도록 호환 helper를 추가했다.
+- 상세 화면은 같은 사진 반복 썸네일을 제거하고 실제 이미지 개수 기반 갤러리와 선택 썸네일 UI로 바꿨다.
+- 제조사는 select 고정값 대신 추천 목록이 있는 직접 입력 방식으로 변경했다.
+- 관리자 전용 `/api/settings/car-form` 조회/저장 API와 `settings` 컬렉션 저장 구조를 추가했다.
+- 관리자 화면에 `차량 등록 설정` 탭을 추가해 연식, 가격, 주행거리 입력 단위와 최대 사진 개수를 관리할 수 있게 했다.
+- 차량 등록/검색 숫자 input에 설정값 기반 `step`을 적용했다.
+- 이미지가 없거나 Render 재배포 후 업로드 파일이 사라져 로딩에 실패해도 placeholder로 대체되도록 목록/상세/상담/딜러 화면을 보강했다.
+- 기존 상담방이 과거 차량 이미지를 들고 있어도 상담방 목록/상세 조회 시 현재 차량 이미지로 보정하고, 차량 수정 후 관련 상담방 이미지 스냅샷도 함께 갱신하도록 했다.
+- README와 배포 문서에 다중 이미지와 Render 파일 비영속성 한계를 반영했다.
+
+### 남은 확인
+
+1. 실제 MongoDB/Firebase 환경에서 승인된 딜러로 여러 장의 사진 등록과 수정 전체 교체를 확인한다.
+2. admin 계정으로 차량 등록 설정 저장 후 새 등록/수정 화면에 단위가 반영되는지 확인한다.
+3. Render 재배포 후 사라진 업로드 이미지가 placeholder로 대체되는지 확인한다.
+4. 업로드 사진을 영구 보관하려면 S3 또는 Cloudinary 같은 외부 이미지 스토리지를 별도 단계로 검토한다.
+
 ## 입력 검증, 정합성, 동시성, 중복 요청 방지
 
 | 항목 | 내용 |

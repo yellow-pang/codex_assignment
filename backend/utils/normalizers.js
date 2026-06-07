@@ -30,6 +30,7 @@ function normalizeCarInput(input) {
   delete car.dealerId;
   delete car.dealerName;
   delete car.dealerRole;
+  delete car.imageUrls;
 
   if (car.company) {
     car.company = String(car.company).trim().toUpperCase();
@@ -119,8 +120,8 @@ function validateCarInput(car) {
   }
 
   if (!car.company) return "제조사를 입력해주세요.";
-  if (!allowedCompanies.has(car.company)) {
-    return "지원하는 제조사를 선택해주세요.";
+  if (car.company.length < 2 || car.company.length > 40) {
+    return "제조사는 2자 이상 40자 이하로 입력해주세요.";
   }
 
   if (!Number.isInteger(car.year) || car.year < 1900 || car.year > currentYear) {

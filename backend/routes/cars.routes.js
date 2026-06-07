@@ -33,9 +33,12 @@ function createCarsRouter() {
     "/",
     requireAuth,
     requireDealer,
-    upload.single("image"),
+    upload.fields([
+      { name: "images", maxCount: 8 },
+      { name: "image", maxCount: 1 },
+    ]),
     asyncRoute(async (req, res) => {
-      res.status(201).json(await createCar(req.body, req.file, req.userProfile));
+      res.status(201).json(await createCar(req.body, req.files, req.userProfile));
     }),
   );
 
@@ -43,10 +46,13 @@ function createCarsRouter() {
     "/:id",
     requireAuth,
     requireDealer,
-    upload.single("image"),
+    upload.fields([
+      { name: "images", maxCount: 8 },
+      { name: "image", maxCount: 1 },
+    ]),
     asyncRoute(async (req, res) => {
       res.json(
-        await updateCar(req.params.id, req.body, req.file, req.userProfile),
+        await updateCar(req.params.id, req.body, req.files, req.userProfile),
       );
     }),
   );

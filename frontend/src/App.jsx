@@ -54,6 +54,12 @@ function App() {
     maxYear: "",
   });
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [carFormSettings, setCarFormSettings] = useState({
+    yearStep: 1,
+    priceStep: 100,
+    mileageStep: 1000,
+    maxImageCount: 8,
+  });
 
   const activeView = useMemo(() => {
     if (location.pathname === "/") {
@@ -88,6 +94,7 @@ function App() {
 
   useEffect(() => {
     loadCars();
+    loadCarFormSettings();
   }, []);
 
   useEffect(() => {
@@ -153,6 +160,18 @@ function App() {
       setMessage({ type: "error", text: error.message });
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function loadCarFormSettings() {
+    try {
+      const data = await requestApi("/api/settings/car-form");
+      setCarFormSettings((prevSettings) => ({ ...prevSettings, ...data }));
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: `차량 입력 설정을 불러오지 못했습니다. 기본값을 사용합니다. (${error.message})`,
+      });
     }
   }
 
@@ -509,6 +528,13 @@ function App() {
         return;
       }
 
+      if (key === "images") {
+        if (Array.isArray(value)) {
+          value.forEach((file) => formData.append("images", file));
+        }
+        return;
+      }
+
       formData.append(key, value ?? "");
     });
 
@@ -529,6 +555,7 @@ function App() {
       return (
         <CarForm
           mode="create"
+          formSettings={carFormSettings}
           isSubmitting={pendingAction === "create-car"}
           onCancel={handleGoList}
           onSubmit={handleCreateCar}
@@ -540,6 +567,7 @@ function App() {
       return (
         <CarForm
           mode="edit"
+          formSettings={carFormSettings}
           initialCar={selectedCar}
           isSubmitting={pendingAction === "update-car"}
           onCancel={handleGoList}
@@ -655,6 +683,7 @@ function App() {
                 value={filters.minPrice}
                 onChange={handleFilterChange}
                 placeholder="만원"
+                step={carFormSettings.priceStep}
               />
             </SearchField>
             <SearchField label="최대 가격">
@@ -666,6 +695,7 @@ function App() {
                 value={filters.maxPrice}
                 onChange={handleFilterChange}
                 placeholder="만원"
+                step={carFormSettings.priceStep}
               />
             </SearchField>
             <SearchField label="연식">
@@ -678,6 +708,7 @@ function App() {
                   value={filters.minYear}
                   onChange={handleFilterChange}
                   placeholder="최소"
+                  step={carFormSettings.yearStep}
                 />
                 <input
                   className="c-input"
@@ -687,6 +718,7 @@ function App() {
                   value={filters.maxYear}
                   onChange={handleFilterChange}
                   placeholder="최대"
+                  step={carFormSettings.yearStep}
                 />
               </div>
             </SearchField>
@@ -895,7 +927,9 @@ function App() {
               isAdmin ? (
                 <AdminUserPanel
                   currentUserProfile={userProfile}
+                  formSettings={carFormSettings}
                   onBack={handleGoList}
+                  onFormSettingsChanged={setCarFormSettings}
                   onProfileChanged={refreshUserProfile}
                 />
               ) : (

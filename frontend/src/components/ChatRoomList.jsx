@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { authenticatedFetch } from "../api/authenticatedFetch.js";
+import { defaultCarImageUrl, handleCarImageError } from "../utils/carImages.js";
 
 function ChatRoomList({ onGoList, userProfile }) {
   const [rooms, setRooms] = useState([]);
@@ -149,7 +150,6 @@ function ChatRoomList({ onGoList, userProfile }) {
 function RoomItem({ room, userProfile }) {
   const isDealer = userProfile?.role === "dealer";
   const otherPartyName = isDealer ? room.buyerName : room.dealerName;
-  const defaultCarImageUrl = "/uploads/default-car.png";
   const lastMessage = room.lastMessage || "아직 주고받은 메시지가 없습니다.";
   const hasLastMessage = Boolean(room.lastMessage);
   const isDealerOnline = Boolean(room.dealerOnline);
@@ -181,6 +181,7 @@ function RoomItem({ room, userProfile }) {
           alt={room.carName}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           src={room.imageUrl || defaultCarImageUrl}
+          onError={handleCarImageError}
         />
       </div>
 
