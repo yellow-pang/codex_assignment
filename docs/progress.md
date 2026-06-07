@@ -1,5 +1,32 @@
 # 작업 진행 기록
 
+## 요구사항 차이점 문서화
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 요구사항 차이점 문서화 |
+| 작업 일자 | 2026-06-07 |
+| 작업 내용 | 요구사항 정의서와 현재 구현의 차이점, 정책 확장 사유, 상담 메시지 REST 저장 API 구현 여부 추천 범위 정리 |
+| 설치한 패키지 | 없음 |
+| 수정한 주요 파일 | `docs/progress.md` |
+| 추가한 주요 파일 | `docs/steps/2026-06-07-18-requirements-gap-documentation.md`, `docs/pr/2026-06-07-18-requirements-gap-documentation-pr.md` |
+| 확인한 명령어 | 문서 작업만 진행. 직전 점검에서 주요 `node --check`와 `npm.cmd run build` 성공 확인 |
+
+### 작업 내용
+
+- 문서만 추가하는 작은 작업이므로 새 브랜치가 필수는 아니며, 현재 `dev`에서 커밋해도 되는 범위로 정리했다.
+- 새 브랜치가 필요할 경우 `docs/requirements-gap-notes`를 제안했다.
+- 딜러 회원가입이 admin 승인 기반으로 확장된 이유를 문서화했다.
+- 사진 1장 이상 필수 요구사항과 현재 placeholder fallback 정책의 차이를 기록했다.
+- 상담 메시지 저장 REST API 대신 Socket.io `send-message`에서 MongoDB에 저장하는 현재 구조를 설명했다.
+- 특히 `POST /api/chats/rooms/:roomId/messages`는 화면 중심 제출에서는 구현하지 않고, API 표 전체를 직접 검증하는 경우에만 얇은 REST API로 별도 구현하는 것을 추천했다.
+
+### 남은 확인
+
+1. 제출 평가가 화면 중심인지, API 표 전체 직접 검증인지 확인한다.
+2. API 표 직접 검증이 필요하면 별도 단계에서 `POST /api/chats/rooms/:roomId/messages` 얇은 라우트를 추가한다.
+3. 사진 필수 정책을 엄격히 요구받으면 차량 등록 검증에 이미지 필수 조건을 별도 단계로 추가한다.
+
 ## 차량 등록 UX, 다중 이미지, 설정, 모던 UI 개선
 
 | 항목 | 내용 |
