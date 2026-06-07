@@ -24,7 +24,7 @@ const upload = multer({
       cb(null, safeName);
     },
   }),
-  limits: { fileSize: maxUploadFileSize },
+  limits: { fileSize: maxUploadFileSize, files: 1 },
   fileFilter: (req, file, cb) => {
     const extension = path.extname(file.originalname).toLowerCase();
 
@@ -53,6 +53,8 @@ function handleUploadError(error, res, fallbackMessage, next) {
     const message =
       error.code === "LIMIT_FILE_SIZE"
         ? "차량 사진은 5MB 이하로 업로드해주세요."
+        : error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPECTED_FILE"
+          ? "차량 사진은 image 필드로 1장만 업로드할 수 있습니다."
         : "차량 사진 업로드를 처리하지 못했습니다.";
 
     res.status(400).json({ message });

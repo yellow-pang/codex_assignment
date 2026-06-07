@@ -44,6 +44,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [isAuthErrorDismissed, setIsAuthErrorDismissed] = useState(false);
+  const [pendingAction, setPendingAction] = useState("");
   const [filters, setFilters] = useState({
     keyword: "",
     company: "",
@@ -179,6 +180,8 @@ function App() {
   }
 
   async function searchCars() {
+    if (pendingAction) return;
+
     const validationMessage = validateNumericFilters();
 
     if (validationMessage) {
@@ -199,17 +202,29 @@ function App() {
     });
 
     if (!params.toString()) {
-      await loadCars("전체 목록을 조회했습니다.");
-      return;
+      setPendingAction("search");
+      try {
+        await loadCars("전체 목록을 조회했습니다.");
+        return;
+      } finally {
+        setPendingAction("");
+      }
     }
 
-    await loadFilteredCars(
-      `/api/cars/search?${params.toString()}`,
-      "차량 검색 결과입니다.",
-    );
+    setPendingAction("search");
+    try {
+      await loadFilteredCars(
+        `/api/cars/search?${params.toString()}`,
+        "차량 검색 결과입니다.",
+      );
+    } finally {
+      setPendingAction("");
+    }
   }
 
   async function resetSearchFilters() {
+    if (pendingAction) return;
+
     setFilters({
       keyword: "",
       company: "",
@@ -218,7 +233,12 @@ function App() {
       minYear: "",
       maxYear: "",
     });
-    await loadCars("검색 조건을 초기화했습니다.");
+    setPendingAction("reset-search");
+    try {
+      await loadCars("검색 조건을 초기화했습니다.");
+    } finally {
+      setPendingAction("");
+    }
   }
 
   async function loadFilteredCars(url, successMessage) {
@@ -238,6 +258,8 @@ function App() {
   }
 
   async function handleCreateCar(carInput) {
+    if (pendingAction) return;
+
     if (!isDealer || !userProfile) {
       setMessage({
         type: "error",
@@ -247,6 +269,7 @@ function App() {
       return;
     }
 
+    setPendingAction("create-car");
     try {
       await requestApi("/api/cars", {
         authenticated: true,
@@ -258,10 +281,14 @@ function App() {
       navigate("/");
     } catch (error) {
       setMessage({ type: "error", text: error.message });
+    } finally {
+      setPendingAction("");
     }
   }
 
   async function handleUpdateCar(carInput) {
+    if (pendingAction) return;
+
     if (!selectedCar) return;
 
     if (!canManageCar(selectedCar)) {
@@ -273,6 +300,7 @@ function App() {
       return;
     }
 
+    setPendingAction("update-car");
     try {
       const updatedCar = await requestApi(`/api/cars/${selectedCar._id}`, {
         authenticated: true,
@@ -285,10 +313,14 @@ function App() {
       navigate(`/cars/${updatedCar._id}`);
     } catch (error) {
       setMessage({ type: "error", text: error.message });
+    } finally {
+      setPendingAction("");
     }
   }
 
   async function handleDeleteCar() {
+    if (pendingAction) return;
+
     if (!deleteTarget) return;
 
     if (!canManageCar(deleteTarget)) {
@@ -300,6 +332,7 @@ function App() {
       return;
     }
 
+    setPendingAction("delete-car");
     try {
       await requestApi(`/api/cars/${deleteTarget._id}`, {
         authenticated: true,
@@ -311,6 +344,8 @@ function App() {
       navigate("/");
     } catch (error) {
       setMessage({ type: "error", text: error.message });
+    } finally {
+      setPendingAction("");
     }
   }
 
@@ -392,6 +427,9 @@ function App() {
   }
 
   async function handleRequestDealer() {
+    if (pendingAction) return;
+
+    setPendingAction("dealer-request");
     try {
       await requestDealerApproval();
       setMessage({
@@ -400,10 +438,14 @@ function App() {
       });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
+    } finally {
+      setPendingAction("");
     }
   }
 
   async function handleStartChat(car) {
+    if (pendingAction) return;
+
     if (!userProfile) {
       setMessage({
         type: "error",
@@ -413,6 +455,7 @@ function App() {
       return;
     }
 
+    setPendingAction(`start-chat:${car._id}`);
     try {
       const chatRoom = await requestApi("/api/chats/rooms", {
         authenticated: true,
@@ -432,6 +475,8 @@ function App() {
       });
     } catch (error) {
       setMessage({ type: "error", text: error.message });
+    } finally {
+      setPendingAction("");
     }
   }
 
@@ -484,6 +529,7 @@ function App() {
       return (
         <CarForm
           mode="create"
+          isSubmitting={pendingAction === "create-car"}
           onCancel={handleGoList}
           onSubmit={handleCreateCar}
         />
@@ -495,6 +541,7 @@ function App() {
         <CarForm
           mode="edit"
           initialCar={selectedCar}
+          isSubmitting={pendingAction === "update-car"}
           onCancel={handleGoList}
           onSubmit={handleUpdateCar}
         />
@@ -558,11 +605,19 @@ function App() {
               </p>
             </div>
             <div className="flex gap-2 pt-2 sm:pt-0">
-              <button className="c-btn-outline px-4 py-2" onClick={resetSearchFilters}>
-                초기화
+              <button
+                className="c-btn-outline px-4 py-2"
+                disabled={Boolean(pendingAction)}
+                onClick={resetSearchFilters}
+              >
+                {pendingAction === "reset-search" ? "초기화 중..." : "초기화"}
               </button>
-              <button className="c-btn-primary px-5 py-2" onClick={searchCars}>
-                검색하기
+              <button
+                className="c-btn-primary px-5 py-2"
+                disabled={Boolean(pendingAction)}
+                onClick={searchCars}
+              >
+                {pendingAction === "search" ? "검색 중..." : "검색하기"}
               </button>
             </div>
           </div>
@@ -700,6 +755,7 @@ function App() {
               onEdit={handleEditCar}
               onDelete={setDeleteTarget}
               onStartChat={handleStartChat}
+              pendingAction={pendingAction}
             />
           )}
         </section>
@@ -747,6 +803,7 @@ function App() {
         onGoRegister={() => navigate("/register")}
         onGoChats={handleGoChats}
         onRequestDealer={handleRequestDealer}
+        isDealerRequesting={pendingAction === "dealer-request"}
         onLogout={handleLogout}
         userProfile={userProfile}
       />
@@ -780,6 +837,7 @@ function App() {
                 onDelete={setDeleteTarget}
                 onEdit={handleEditCar}
                 onStartChat={handleStartChat}
+                pendingAction={pendingAction}
                 requestApi={requestApi}
                 selectedCar={selectedCar}
                 setMessage={setMessage}
@@ -910,6 +968,7 @@ function App() {
 
       <DeleteConfirmModal
         car={deleteTarget}
+        isDeleting={pendingAction === "delete-car"}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={handleDeleteCar}
       />
@@ -953,6 +1012,7 @@ function CarDetailRoute({
   onDelete,
   onEdit,
   onStartChat,
+  pendingAction,
   requestApi,
   selectedCar,
   setMessage,
@@ -1057,6 +1117,7 @@ function CarDetailRoute({
       onBack={onBack}
       onDelete={onDelete}
       onEdit={onEdit}
+      isStartingChat={pendingAction === `start-chat:${detailCar._id}`}
       onStartChat={onStartChat}
     />
   );

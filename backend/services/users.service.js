@@ -1,11 +1,12 @@
 const { getMongoDocument, normalizeUid } = require("../utils/ids");
 const {
-  normalizeDealerStatus,
   normalizeUserDocument,
   normalizeUserInput,
-  userRoles,
+  dealerStatuses,
+  validateRoleUpdateInput,
   validateUserInput,
 } = require("../utils/normalizers");
+const { assertNotDuplicateRequest } = require("../utils/requestGuard");
 const { getUsersCollection } = require("./collections");
 
 const initialAdminEmails = new Set(
@@ -178,6 +179,11 @@ async function requestDealerApproval(userProfile) {
   }
 
   const now = new Date();
+  assertNotDuplicateRequest({
+    keyParts: ["user:dealer-request", user.uid],
+    message: "딜러 신청 요청이 너무 빠르게 반복되었습니다.",
+    ttlMs: 3000,
+  });
   const result = await getUsersCollection().findOneAndUpdate(
     { uid: user.uid },
     {
@@ -249,7 +255,10 @@ async function saveUserProfile(input, authUser = {}) {
 async function updateUserRole({ targetUid, adminProfile, role, dealerStatus }) {
   const admin = adminProfile;
   const nextRole = String(role || "").trim();
-  const nextDealerStatus = normalizeDealerStatus(dealerStatus);
+  const rawDealerStatus = String(dealerStatus || "").trim();
+  const nextDealerStatus = dealerStatuses.has(rawDealerStatus)
+    ? rawDealerStatus
+    : "__invalid__";
 
   if (!admin || admin.role !== "admin") {
     const error = new Error("관리자 권한이 필요합니다.");
@@ -263,8 +272,13 @@ async function updateUserRole({ targetUid, adminProfile, role, dealerStatus }) {
     throw error;
   }
 
-  if (!userRoles.has(nextRole)) {
-    const error = new Error("사용자 역할 값이 올바르지 않습니다.");
+  const roleValidationMessage = validateRoleUpdateInput({
+    role: nextRole,
+    dealerStatus: nextDealerStatus,
+  });
+
+  if (roleValidationMessage) {
+    const error = new Error(roleValidationMessage);
     error.statusCode = 400;
     throw error;
   }
@@ -284,6 +298,11 @@ async function updateUserRole({ targetUid, adminProfile, role, dealerStatus }) {
   }
 
   const now = new Date();
+  assertNotDuplicateRequest({
+    keyParts: ["user:role", admin.uid, targetUid, nextRole, nextDealerStatus],
+    message: "같은 권한 변경 요청이 너무 빠르게 반복되었습니다.",
+    ttlMs: 2000,
+  });
   const roleUpdate = createRoleUpdate({
     admin,
     nextDealerStatus,

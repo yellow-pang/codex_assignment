@@ -1,6 +1,7 @@
 const { createImageUrl } = require("../config/upload");
 const { createCarFilterById, getMongoDocument } = require("../utils/ids");
-const { normalizeCarInput } = require("../utils/normalizers");
+const { normalizeCarInput, validateCarInput } = require("../utils/normalizers");
+const { assertNotDuplicateRequest, createStableHash } = require("../utils/requestGuard");
 const { createCarSearchQuery } = require("../utils/search");
 const { getCarsCollection } = require("./collections");
 const { assertCarOwner, requireDealerProfile } = require("./users.service");
@@ -8,8 +9,16 @@ const { assertCarOwner, requireDealerProfile } = require("./users.service");
 async function createCar(input, file, dealerProfile) {
   const now = new Date();
   const dealer = await requireDealerProfile(dealerProfile?.uid);
+  const carInput = normalizeCarInput(input);
+  validateOrThrow(validateCarInput(carInput));
+  assertNotDuplicateRequest({
+    keyParts: ["car:create", dealer.uid, createStableHash(carInput)],
+    message: "같은 차량 등록 요청이 너무 빠르게 반복되었습니다.",
+    ttlMs: 3000,
+  });
+
   const newCar = {
-    ...normalizeCarInput(input),
+    ...carInput,
     imageUrl: createImageUrl(file),
     dealerId: dealer.uid,
     dealerName: dealer.displayName,
@@ -25,6 +34,11 @@ async function createCar(input, file, dealerProfile) {
 async function deleteCar(id, dealerProfile) {
   const dealer = await requireDealerProfile(dealerProfile?.uid);
   const filter = createCarFilterById(id);
+  assertNotDuplicateRequest({
+    keyParts: ["car:delete", dealer.uid, id],
+    message: "같은 차량 삭제 요청이 너무 빠르게 반복되었습니다.",
+    ttlMs: 3000,
+  });
   const existingCar = await getCarsCollection().findOne(filter);
 
   if (!existingCar) {
@@ -89,6 +103,12 @@ async function updateCar(id, input, file, dealerProfile) {
   assertCarOwner(existingCar, dealer.uid);
 
   const carInput = normalizeCarInput(input);
+  validateOrThrow(validateCarInput(carInput));
+  assertNotDuplicateRequest({
+    keyParts: ["car:update", dealer.uid, id, createStableHash(carInput)],
+    message: "같은 차량 수정 요청이 너무 빠르게 반복되었습니다.",
+    ttlMs: 3000,
+  });
 
   if (file) {
     carInput.imageUrl = createImageUrl(file);
@@ -113,6 +133,16 @@ async function updateCar(id, input, file, dealerProfile) {
   }
 
   return updatedCar;
+}
+
+function validateOrThrow(validationMessage) {
+  if (!validationMessage) {
+    return;
+  }
+
+  const error = new Error(validationMessage);
+  error.statusCode = 400;
+  throw error;
 }
 
 module.exports = {

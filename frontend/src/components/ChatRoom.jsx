@@ -12,6 +12,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
   const [currentRoom, setCurrentRoom] = useState(chatRoom || null);
   const [socketError, setSocketError] = useState("");
   const [isConnected, setIsConnected] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [dealerPresence, setDealerPresence] = useState({
     status: "checking",
     lastSeenAt: null,
@@ -84,9 +85,11 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
 
         socket.on("disconnect", () => {
           setIsConnected(false);
+          setIsSending(false);
         });
 
         socket.on("receive-message", (message) => {
+          setIsSending(false);
           setMessages((prevMessages) => {
             if (
               message._id &&
@@ -111,6 +114,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
         });
 
         socket.on("chat-error", (error) => {
+          setIsSending(false);
           setSocketError(
             error?.message || "실시간 상담 처리 중 오류가 발생했습니다.",
           );
@@ -149,11 +153,19 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
 
     if (!text) return;
 
+    if (text.length > 1000) {
+      setSocketError("메시지는 1000자 이하로 입력해주세요.");
+      return;
+    }
+
+    if (isSending) return;
+
     if (!socketRef.current || !isConnected) {
       setSocketError("실시간 상담 서버에 연결 중입니다. 잠시 후 다시 시도해주세요.");
       return;
     }
 
+    setIsSending(true);
     socketRef.current.emit("send-message", {
       roomId,
       text,
@@ -363,9 +375,9 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
             <button
               className="c-btn-primary px-4 py-2.5"
               type="submit"
-              disabled={!inputText.trim() || !isConnected}
+              disabled={!inputText.trim() || !isConnected || isSending}
             >
-              전송
+              {isSending ? "전송 중..." : "전송"}
             </button>
           </form>
         </div>

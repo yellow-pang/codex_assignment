@@ -1,5 +1,9 @@
 const { createCarFilterById, createChatRoomId, getMongoDocument, normalizeUid } = require("../utils/ids");
-const { normalizeChatMessageText } = require("../utils/normalizers");
+const {
+  normalizeChatMessageText,
+  validateChatMessageText,
+} = require("../utils/normalizers");
+const { assertNotDuplicateRequest, createStableHash } = require("../utils/requestGuard");
 const { buildAgentContext, generateAgentReply } = require("./agent.service");
 const {
   getCarsCollection,
@@ -69,6 +73,11 @@ async function createChatRoom({ buyerProfile, carId: rawCarId }) {
 
   const now = new Date();
   const roomId = createChatRoomId({ buyerId, carId, dealerId });
+  assertNotDuplicateRequest({
+    keyParts: ["chat-room:create", buyerId, roomId],
+    message: "상담방 생성 요청이 너무 빠르게 반복되었습니다.",
+    ttlMs: 3000,
+  });
   const roomUpdate = {
     $set: {
       carId,
@@ -140,9 +149,7 @@ async function handleChatMessage(payload, senderProfile) {
     throw new Error("보낸 사람 UID가 필요합니다.");
   }
 
-  if (!text) {
-    throw new Error("메시지를 입력해주세요.");
-  }
+  validateChatMessageOrThrow(text);
 
   const room = await findChatRoomById(roomId);
 
@@ -151,6 +158,11 @@ async function handleChatMessage(payload, senderProfile) {
   }
 
   assertChatRoomParticipant(room, senderId);
+  assertNotDuplicateRequest({
+    keyParts: ["chat:message", senderId, roomId, createStableHash(text)],
+    message: "같은 메시지가 너무 빠르게 반복 전송되었습니다.",
+    ttlMs: 1500,
+  });
 
   const now = new Date();
   const message = {
@@ -207,7 +219,7 @@ async function listChatRoomMessages(roomId, userId) {
 
   return getMessagesCollection()
     .find({ roomId })
-    .sort({ createdAt: 1 })
+    .sort({ createdAt: 1, _id: 1 })
     .toArray();
 }
 
@@ -222,8 +234,20 @@ async function listChatRooms(userProfile) {
 
   return getChatRoomsCollection()
     .find({ $or: [{ buyerId: userId }, { dealerId: userId }] })
-    .sort({ updatedAt: -1 })
+    .sort({ updatedAt: -1, _id: -1 })
     .toArray();
+}
+
+function validateChatMessageOrThrow(text) {
+  const validationMessage = validateChatMessageText(text);
+
+  if (!validationMessage) {
+    return;
+  }
+
+  const error = new Error(validationMessage);
+  error.statusCode = 400;
+  throw error;
 }
 
 module.exports = {

@@ -6,6 +6,7 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [activeTab, setActiveTab] = useState("users");
+  const [pendingUserUid, setPendingUserUid] = useState("");
 
   const summary = useMemo(
     () => ({
@@ -63,6 +64,9 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
   }
 
   async function updateUserRole(user, role, dealerStatus) {
+    if (pendingUserUid) return;
+
+    setPendingUserUid(user.uid);
     try {
       await requestAdminApi(`/api/users/${encodeURIComponent(user.uid)}/role`, {
         method: "PATCH",
@@ -77,6 +81,8 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
       await loadUsers("사용자 권한을 변경했습니다.");
     } catch (error) {
       setMessage({ type: "error", text: error.message });
+    } finally {
+      setPendingUserUid("");
     }
   }
 
@@ -249,6 +255,7 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
               key={user.uid}
               currentUserProfile={currentUserProfile}
               onUpdateRole={updateUserRole}
+              pendingUserUid={pendingUserUid}
               user={user}
             />
           ))}
@@ -281,6 +288,7 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
           <UserActions
             isSelf={isSelf}
             onUpdateRole={updateUserRole}
+            pendingUserUid={pendingUserUid}
             user={user}
           />
         </td>
@@ -289,7 +297,12 @@ function AdminUserPanel({ currentUserProfile, onBack, onProfileChanged }) {
   }
 }
 
-function UserMobileCard({ currentUserProfile, onUpdateRole, user }) {
+function UserMobileCard({
+  currentUserProfile,
+  onUpdateRole,
+  pendingUserUid = "",
+  user,
+}) {
   const isSelf = user.uid === currentUserProfile.uid;
 
   return (
@@ -310,15 +323,22 @@ function UserMobileCard({ currentUserProfile, onUpdateRole, user }) {
         </span>
       </div>
       <div className="mt-3">
-        <UserActions isSelf={isSelf} onUpdateRole={onUpdateRole} user={user} />
+        <UserActions
+          isSelf={isSelf}
+          onUpdateRole={onUpdateRole}
+          pendingUserUid={pendingUserUid}
+          user={user}
+        />
       </div>
     </div>
   );
 }
 
-function UserActions({ isSelf, onUpdateRole, user }) {
+function UserActions({ isSelf, onUpdateRole, pendingUserUid = "", user }) {
   const isApprovedDealer =
     user.role === "dealer" && user.dealerStatus === "approved";
+  const isPending = pendingUserUid === user.uid;
+  const isDisabled = Boolean(pendingUserUid);
 
   if (isSelf) {
     return (
@@ -336,12 +356,14 @@ function UserActions({ isSelf, onUpdateRole, user }) {
         <>
           <button
             className="c-btn-primary px-2.5 py-1.5 text-xs"
+            disabled={isDisabled}
             onClick={() => onUpdateRole(user, "dealer", "approved")}
           >
-            승인
+            {isPending ? "처리 중..." : "승인"}
           </button>
           <button
             className="c-btn-outline px-2.5 py-1.5 text-xs"
+            disabled={isDisabled}
             onClick={() => onUpdateRole(user, "buyer", "rejected")}
           >
             거절
@@ -351,33 +373,37 @@ function UserActions({ isSelf, onUpdateRole, user }) {
       {isApprovedDealer && (
         <button
           className="c-btn-warning px-2.5 py-1.5 text-xs"
+          disabled={isDisabled}
           onClick={() => onUpdateRole(user, "buyer", "none")}
         >
-          딜러 회수
+          {isPending ? "처리 중..." : "딜러 회수"}
         </button>
       )}
       {user.role === "buyer" && user.dealerStatus !== "pending" && (
         <button
           className="c-btn-outline px-2.5 py-1.5 text-xs"
+          disabled={isDisabled}
           onClick={() => onUpdateRole(user, "dealer", "approved")}
         >
-          딜러 지정
+          {isPending ? "처리 중..." : "딜러 지정"}
         </button>
       )}
       {user.role !== "admin" && (
         <button
           className="c-btn-outline px-2.5 py-1.5 text-xs"
+          disabled={isDisabled}
           onClick={() => onUpdateRole(user, "admin", "none")}
         >
-          admin 지정
+          {isPending ? "처리 중..." : "admin 지정"}
         </button>
       )}
       {user.role === "admin" && (
         <button
           className="c-btn-danger px-2.5 py-1.5 text-xs"
+          disabled={isDisabled}
           onClick={() => onUpdateRole(user, "buyer", "none")}
         >
-          admin 해제
+          {isPending ? "처리 중..." : "admin 해제"}
         </button>
       )}
     </div>

@@ -1,4 +1,12 @@
-function CarDetail({ canManage, car, onBack, onEdit, onDelete, onStartChat }) {
+function CarDetail({
+  canManage,
+  car,
+  isStartingChat = false,
+  onBack,
+  onEdit,
+  onDelete,
+  onStartChat,
+}) {
   const defaultCarImageUrl = "/uploads/default-car.png";
 
   if (!car) {
@@ -106,10 +114,10 @@ function CarDetail({ canManage, car, onBack, onEdit, onDelete, onStartChat }) {
             </div>
             <button
               className="c-btn-primary mt-4 w-full"
-              disabled={!car.dealerId}
+              disabled={!car.dealerId || isStartingChat}
               onClick={() => onStartChat(car)}
             >
-              딜러와 상담하기
+              {isStartingChat ? "상담방 준비 중..." : "딜러와 상담하기"}
             </button>
           </div>
 
