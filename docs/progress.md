@@ -1,16 +1,41 @@
 # 작업 진행 기록
 
+## 프리미엄 마켓플레이스 UI 리프레시 계획 문서화
+
+| 항목             | 내용                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | 프리미엄 마켓플레이스 UI 리프레시 계획 문서화                                                                                     |
+| 작업 일자        | 2026-06-07                                                                                                                        |
+| 작업 내용        | 사용자 선택(프리미엄 홈 + 실용형 구매 구간 + 운영형 대시보드) 반영, 코발트 대체 모던 컬러 시스템 확정, 구현 전 디자인 기준 문서화 |
+| 설치한 패키지    | 없음                                                                                                                              |
+| 수정한 주요 파일 | `docs/실시간_Car_Market_UI_개선_분석_보고서.md`, `docs/progress.md`                                                               |
+| 추가한 주요 파일 | `docs/plans/plan-18-premium-marketplace-refresh.md`                                                                               |
+| 확인한 명령어    | `git status --short --branch` (문서 변경 상태 확인)                                                                               |
+
+### 작업 내용
+
+- 사용자 화면 전략을 `첫 페이지 프리미엄`, `구매 구간 실용형`, `운영 화면 대시보드형`으로 최종 고정했다.
+- 기존 코발트 중심 느낌을 줄이기 위해 `brand-ink/deep/ocean/mint/amber` 기반 전역 컬러 토큰을 확정했다.
+- 통일성 문제를 방지하기 위해 색상, 타이포, radius, 컴포넌트 규칙을 전역 기준으로 문서화했다.
+- 기존 UI 분석 보고서에 2차 확정 방향(2026-06-07) 섹션을 추가해 변경 의도를 추적 가능하게 정리했다.
+
+### 남은 확인
+
+1. 폰트 적용 방식(CDN 또는 로컬)을 확정한다.
+2. 색 토큰을 실제 `frontend` 스타일 변수로 옮길 때 접근성 대비(명도 대비) 기준을 함께 검증한다.
+3. 구현 단계 시작 시 plan-18 순서대로 화면 단위 적용을 진행한다.
+
 ## 요구사항 차이점 문서화
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 요구사항 차이점 문서화 |
-| 작업 일자 | 2026-06-07 |
-| 작업 내용 | 요구사항 정의서와 현재 구현의 차이점, 정책 확장 사유, 상담 메시지 REST 저장 API 구현 여부 추천 범위 정리 |
-| 설치한 패키지 | 없음 |
-| 수정한 주요 파일 | `README.md`, `docs/progress.md` |
+| 항목             | 내용                                                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | 요구사항 차이점 문서화                                                                                                     |
+| 작업 일자        | 2026-06-07                                                                                                                 |
+| 작업 내용        | 요구사항 정의서와 현재 구현의 차이점, 정책 확장 사유, 상담 메시지 REST 저장 API 구현 여부 추천 범위 정리                   |
+| 설치한 패키지    | 없음                                                                                                                       |
+| 수정한 주요 파일 | `README.md`, `docs/progress.md`                                                                                            |
 | 추가한 주요 파일 | `docs/steps/2026-06-07-18-requirements-gap-documentation.md`, `docs/pr/2026-06-07-18-requirements-gap-documentation-pr.md` |
-| 확인한 명령어 | 문서 작업만 진행. 직전 점검에서 주요 `node --check`와 `npm.cmd run build` 성공 확인 |
+| 확인한 명령어    | 문서 작업만 진행. 직전 점검에서 주요 `node --check`와 `npm.cmd run build` 성공 확인                                        |
 
 ### 작업 내용
 
@@ -30,15 +55,15 @@
 
 ## 차량 등록 UX, 다중 이미지, 설정, 모던 UI 개선
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 차량 등록 UX, 다중 이미지, 설정, 모던 UI 개선 |
-| 작업 일자 | 2026-06-07 |
-| 작업 내용 | 제조사 직접 입력, 다중 이미지 업로드, 상세 갤러리, 이미지 fallback, 상담방 이미지 동기화, 차량 등록 설정 API와 관리자 설정 화면 추가 |
-| 설치한 패키지 | 없음 |
+| 항목             | 내용                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | 차량 등록 UX, 다중 이미지, 설정, 모던 UI 개선                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 작업 일자        | 2026-06-07                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 작업 내용        | 제조사 직접 입력, 다중 이미지 업로드, 상세 갤러리, 이미지 fallback, 상담방 이미지 동기화, 차량 등록 설정 API와 관리자 설정 화면 추가                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 설치한 패키지    | 없음                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 수정한 주요 파일 | `backend/config/upload.js`, `backend/db.js`, `backend/routes/cars.routes.js`, `backend/server.js`, `backend/services/cars.service.js`, `backend/services/collections.js`, `backend/utils/normalizers.js`, `frontend/src/App.jsx`, `frontend/src/components/AdminUserPanel.jsx`, `frontend/src/components/CarCardGrid.jsx`, `frontend/src/components/CarDetail.jsx`, `frontend/src/components/CarForm.jsx`, `frontend/src/components/CarTable.jsx`, `frontend/src/components/ChatRoom.jsx`, `frontend/src/components/ChatRoomList.jsx`, `frontend/src/components/DealerDashboard.jsx`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md` |
-| 추가한 주요 파일 | `backend/routes/settings.routes.js`, `backend/services/settings.service.js`, `frontend/src/utils/carImages.js`, `docs/plans/plan-17-car-ux-media-settings.md`, `docs/steps/2026-06-07-17-car-ux-media-settings.md`, `docs/pr/2026-06-07-17-car-ux-media-settings-pr.md` |
-| 확인한 명령어 | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+| 추가한 주요 파일 | `backend/routes/settings.routes.js`, `backend/services/settings.service.js`, `frontend/src/utils/carImages.js`, `docs/plans/plan-17-car-ux-media-settings.md`, `docs/steps/2026-06-07-17-car-ux-media-settings.md`, `docs/pr/2026-06-07-17-car-ux-media-settings-pr.md`                                                                                                                                                                                                                                                                                                                                                                               |
+| 확인한 명령어    | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ### 작업 내용
 
@@ -63,15 +88,15 @@
 
 ## 입력 검증, 정합성, 동시성, 중복 요청 방지
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 입력 검증, 정합성, 동시성, 중복 요청 방지 |
-| 작업 일자 | 2026-06-07 |
-| 작업 내용 | 차량/사용자/메시지 서버 검증 강화, 서버 메모리 TTL 중복 요청 guard, MongoDB index 생성 로직, 메시지 정렬 기준, 프론트 버튼 loading/disabled 보강 |
-| 설치한 패키지 | 없음 |
+| 항목             | 내용                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | 입력 검증, 정합성, 동시성, 중복 요청 방지                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 작업 일자        | 2026-06-07                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 작업 내용        | 차량/사용자/메시지 서버 검증 강화, 서버 메모리 TTL 중복 요청 guard, MongoDB index 생성 로직, 메시지 정렬 기준, 프론트 버튼 loading/disabled 보강                                                                                                                                                                                                                                                                                                                                                                           |
+| 설치한 패키지    | 없음                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 수정한 주요 파일 | `backend/db.js`, `backend/config/upload.js`, `backend/services/cars.service.js`, `backend/services/users.service.js`, `backend/services/chats.service.js`, `backend/utils/normalizers.js`, `frontend/src/App.jsx`, `frontend/src/components/CarForm.jsx`, `frontend/src/components/CarCardGrid.jsx`, `frontend/src/components/CarDetail.jsx`, `frontend/src/components/DeleteConfirmModal.jsx`, `frontend/src/components/Header.jsx`, `frontend/src/components/AdminUserPanel.jsx`, `frontend/src/components/ChatRoom.jsx` |
-| 추가한 주요 파일 | `backend/utils/requestGuard.js`, `docs/plans/plan-16-validation-consistency.md`, `docs/steps/2026-06-07-16-validation-consistency.md`, `docs/pr/2026-06-07-16-validation-consistency-pr.md` |
-| 확인한 명령어 | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+| 추가한 주요 파일 | `backend/utils/requestGuard.js`, `docs/plans/plan-16-validation-consistency.md`, `docs/steps/2026-06-07-16-validation-consistency.md`, `docs/pr/2026-06-07-16-validation-consistency-pr.md`                                                                                                                                                                                                                                                                                                                                |
+| 확인한 명령어    | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ### 작업 내용
 
@@ -93,15 +118,15 @@
 
 ## 핵심 보안 강화
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 핵심 보안 강화 |
-| 작업 일자 | 2026-06-07 |
-| 작업 내용 | Firebase ID Token 서버 검증, 인증/권한 미들웨어, 보호 API Authorization 헤더, 상담 참여자 검증, Socket.io 인증 보강 |
-| 설치한 패키지 | 루트 `firebase-admin` |
+| 항목             | 내용                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 작업 단계명      | 핵심 보안 강화                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 작업 일자        | 2026-06-07                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 작업 내용        | Firebase ID Token 서버 검증, 인증/권한 미들웨어, 보호 API Authorization 헤더, 상담 참여자 검증, Socket.io 인증 보강                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| 설치한 패키지    | 루트 `firebase-admin`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | 수정한 주요 파일 | `backend/server.js`, `backend/routes/cars.routes.js`, `backend/routes/users.routes.js`, `backend/routes/chats.routes.js`, `backend/services/cars.service.js`, `backend/services/users.service.js`, `backend/services/chats.service.js`, `backend/sockets/chat.socket.js`, `frontend/src/App.jsx`, `frontend/src/contexts/AuthContext.jsx`, `frontend/src/components/AdminUserPanel.jsx`, `frontend/src/components/ChatRoom.jsx`, `frontend/src/components/ChatRoomList.jsx`, `.env.example`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md` |
-| 추가한 주요 파일 | `backend/config/firebaseAdmin.js`, `backend/middleware/auth.js`, `backend/middleware/errors.js`, `frontend/src/api/authenticatedFetch.js`, `docs/plans/plan-15-core-security-hardening.md`, `docs/steps/2026-06-07-15-core-security-hardening.md`, `docs/pr/2026-06-07-15-core-security-hardening-pr.md` |
-| 확인한 명령어 | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+| 추가한 주요 파일 | `backend/config/firebaseAdmin.js`, `backend/middleware/auth.js`, `backend/middleware/errors.js`, `frontend/src/api/authenticatedFetch.js`, `docs/plans/plan-15-core-security-hardening.md`, `docs/steps/2026-06-07-15-core-security-hardening.md`, `docs/pr/2026-06-07-15-core-security-hardening-pr.md`                                                                                                                                                                                                                                                     |
+| 확인한 명령어    | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ### 작업 내용
 
@@ -126,14 +151,14 @@
 
 ## 백엔드 라우터와 서비스 세분화
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 백엔드 라우터와 서비스 세분화 |
-| 작업 일자 | 2026-06-07 |
-| 작업 내용 | `backend/server.js`에 남아 있던 REST API, 서비스성 함수, Socket.io 이벤트, 정규화 helper를 routes/services/sockets/utils로 분리 |
-| 수정한 주요 파일 | `backend/server.js` |
+| 항목             | 내용                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | 백엔드 라우터와 서비스 세분화                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 작업 일자        | 2026-06-07                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 작업 내용        | `backend/server.js`에 남아 있던 REST API, 서비스성 함수, Socket.io 이벤트, 정규화 helper를 routes/services/sockets/utils로 분리                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 수정한 주요 파일 | `backend/server.js`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 추가한 주요 파일 | `backend/routes/cars.routes.js`, `backend/routes/users.routes.js`, `backend/routes/chats.routes.js`, `backend/services/agent.service.js`, `backend/services/cars.service.js`, `backend/services/chats.service.js`, `backend/services/collections.js`, `backend/services/dealerPresence.service.js`, `backend/services/users.service.js`, `backend/sockets/chat.socket.js`, `backend/utils/ids.js`, `backend/utils/normalizers.js`, `backend/utils/search.js`, `docs/plans/plan-14-backend-routes-services.md`, `docs/steps/2026-06-07-14-backend-routes-services.md`, `docs/pr/2026-06-07-14-backend-routes-services-pr.md` |
-| 확인한 명령어 | `node --check backend/server.js` 성공, `node --check backend/routes/*.js` 성공, `node --check backend/services/*.js` 성공, `node --check backend/sockets/chat.socket.js` 성공, `node --check backend/utils/*.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+| 확인한 명령어    | `node --check backend/server.js` 성공, `node --check backend/routes/*.js` 성공, `node --check backend/services/*.js` 성공, `node --check backend/sockets/chat.socket.js` 성공, `node --check backend/utils/*.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                                                                                                                                                                                                                                                 |
 
 ### 작업 내용
 
@@ -156,15 +181,15 @@
 
 ## 백엔드 구조 분리와 보안 기반 리팩토링
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 백엔드 구조 분리와 보안 기반 리팩토링 |
-| 작업 일자 | 2026-06-07 |
-| 작업 내용 | Render 단일 배포 구조를 유지하면서 루트 서버 파일을 `backend/` 아래로 이동하고 경로/업로드 설정을 분리 |
-| 수정한 주요 파일 | `package.json`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md` |
-| 이동한 주요 파일 | `server.js` → `backend/server.js`, `db.js` → `backend/db.js` |
+| 항목             | 내용                                                                                                                                                                                                                                                     |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | 백엔드 구조 분리와 보안 기반 리팩토링                                                                                                                                                                                                                    |
+| 작업 일자        | 2026-06-07                                                                                                                                                                                                                                               |
+| 작업 내용        | Render 단일 배포 구조를 유지하면서 루트 서버 파일을 `backend/` 아래로 이동하고 경로/업로드 설정을 분리                                                                                                                                                   |
+| 수정한 주요 파일 | `package.json`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`                                                                                                                            |
+| 이동한 주요 파일 | `server.js` → `backend/server.js`, `db.js` → `backend/db.js`                                                                                                                                                                                             |
 | 추가한 주요 파일 | `backend/config/paths.js`, `backend/config/upload.js`, `docs/plans/plan-13-backend-structure-secure-foundation.md`, `docs/steps/2026-06-07-13-backend-structure-secure-foundation.md`, `docs/pr/2026-06-07-13-backend-structure-secure-foundation-pr.md` |
-| 확인한 명령어 | `node --check backend/server.js` 성공, `node --check backend/db.js` 성공, `node --check backend/config/paths.js` 성공, `node --check backend/config/upload.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+| 확인한 명령어    | `node --check backend/server.js` 성공, `node --check backend/db.js` 성공, `node --check backend/config/paths.js` 성공, `node --check backend/config/upload.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                |
 
 ### 작업 내용
 
@@ -185,14 +210,14 @@
 
 ## 상담·관리자·모바일 UI 고도화
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 상담·관리자·모바일 UI 고도화 |
-| 작업 일자 | 2026-06-06 |
-| 작업 내용 | 상담방 목록, 채팅 화면, 딜러 내 차량 관리, 관리자 대시보드, 모바일 하단 내비게이션을 12단계 범위로 고도화 |
-| 수정한 주요 파일 | `frontend/src/App.jsx`, `Header.jsx`, `ChatRoomList.jsx`, `ChatRoom.jsx`, `AdminUserPanel.jsx` |
+| 항목             | 내용                                                                                                                                                                                                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | 상담·관리자·모바일 UI 고도화                                                                                                                                                                                                                                               |
+| 작업 일자        | 2026-06-06                                                                                                                                                                                                                                                                 |
+| 작업 내용        | 상담방 목록, 채팅 화면, 딜러 내 차량 관리, 관리자 대시보드, 모바일 하단 내비게이션을 12단계 범위로 고도화                                                                                                                                                                  |
+| 수정한 주요 파일 | `frontend/src/App.jsx`, `Header.jsx`, `ChatRoomList.jsx`, `ChatRoom.jsx`, `AdminUserPanel.jsx`                                                                                                                                                                             |
 | 추가한 주요 파일 | `frontend/src/components/DealerDashboard.jsx`, `frontend/src/components/MobileBottomNav.jsx`, `docs/plans/plan-12-consultation-admin-mobile-ui.md`, `docs/steps/2026-06-06-12-consultation-admin-mobile-ui.md`, `docs/pr/2026-06-06-12-consultation-admin-mobile-ui-pr.md` |
-| 확인한 명령어 | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+| 확인한 명령어    | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                                                                                                                       |
 
 ### 작업 내용
 
@@ -215,14 +240,14 @@
 
 ## Modern UI 재설계 — 핵심 사용자 화면 고도화
 
-| 항목             | 내용                                                                                                                                                                       |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 작업 단계명      | Modern UI 재설계                                                                                                                                                          |
-| 작업 일자        | 2026-06-06                                                                                                                                                                 |
-| 작업 내용        | Clean Blue Trust 콘셉트로 첫 화면, 검색, 차량 카드, 상세, 로그인/회원가입, 차량 등록/수정 폼을 Modern Car Marketplace 스타일로 개선                                      |
-| 수정한 주요 파일 | `frontend/src/App.jsx`, `frontend/src/style.css`, `Header.jsx`, `CarCardGrid.jsx`, `CarDetail.jsx`, `LoginForm.jsx`, `RegisterForm.jsx`, `CarForm.jsx`                    |
+| 항목             | 내용                                                                                                                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | Modern UI 재설계                                                                                                                                                                         |
+| 작업 일자        | 2026-06-06                                                                                                                                                                               |
+| 작업 내용        | Clean Blue Trust 콘셉트로 첫 화면, 검색, 차량 카드, 상세, 로그인/회원가입, 차량 등록/수정 폼을 Modern Car Marketplace 스타일로 개선                                                      |
+| 수정한 주요 파일 | `frontend/src/App.jsx`, `frontend/src/style.css`, `Header.jsx`, `CarCardGrid.jsx`, `CarDetail.jsx`, `LoginForm.jsx`, `RegisterForm.jsx`, `CarForm.jsx`                                   |
 | 추가한 주요 파일 | `frontend/src/components/EmptyState.jsx`, `docs/plans/plan-11-modern-ui-redesign.md`, `docs/steps/2026-06-06-11-modern-ui-redesign.md`, `docs/pr/2026-06-06-11-modern-ui-redesign-pr.md` |
-| 확인한 명령어    | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                      |
+| 확인한 명령어    | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                                     |
 
 ### 작업 내용
 
@@ -248,14 +273,14 @@
 
 ## Render/GitHub Actions 문서 업데이트와 README 제출용 정리
 
-| 항목             | 내용                                                                                                                                      |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 작업 단계명      | Render/GitHub Actions 문서 업데이트와 README 제출용 정리                                                                                 |
-| 작업 일자        | 2026-06-06                                                                                                                                |
-| 작업 내용        | 실제 Render 배포 URL, 환경변수 반영 상태, CI/CD 흐름, 제출용 README 구조를 현재 구현 기준으로 정리                                        |
-| 수정한 주요 파일 | `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md`         |
+| 항목             | 내용                                                                                                                                                             |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | Render/GitHub Actions 문서 업데이트와 README 제출용 정리                                                                                                         |
+| 작업 일자        | 2026-06-06                                                                                                                                                       |
+| 작업 내용        | 실제 Render 배포 URL, 환경변수 반영 상태, CI/CD 흐름, 제출용 README 구조를 현재 구현 기준으로 정리                                                               |
+| 수정한 주요 파일 | `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/실시간_Car_Market_향후_개발_계획서.md`, `docs/progress.md`                                |
 | 추가한 주요 파일 | `docs/plans/plan-10-render-readme-submission.md`, `docs/steps/2026-06-06-10-render-readme-submission.md`, `docs/pr/2026-06-06-10-render-readme-submission-pr.md` |
-| 확인한 명령어    | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                      |
+| 확인한 명령어    | `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                             |
 
 ### 작업 내용
 
@@ -273,15 +298,15 @@
 
 ## Socket.io 실시간 상담과 딜러 온라인 상태
 
-| 항목             | 내용                                                                                                                                                                                                 |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 작업 단계명      | Socket.io 실시간 상담과 딜러 온라인 상태                                                                                                                                                            |
-| 작업 일자        | 2026-06-06                                                                                                                                                                                           |
-| 작업 내용        | ChatRoom 메시지 전송·수신을 Socket.io로 연결하고, 딜러 온라인 상태를 MongoDB 기반으로 표시                                                                                                           |
-| 설치한 패키지    | 루트 `socket.io`, 프론트엔드 `socket.io-client`                                                                                                                                                      |
+| 항목             | 내용                                                                                                                                                                                                             |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | Socket.io 실시간 상담과 딜러 온라인 상태                                                                                                                                                                         |
+| 작업 일자        | 2026-06-06                                                                                                                                                                                                       |
+| 작업 내용        | ChatRoom 메시지 전송·수신을 Socket.io로 연결하고, 딜러 온라인 상태를 MongoDB 기반으로 표시                                                                                                                       |
+| 설치한 패키지    | 루트 `socket.io`, 프론트엔드 `socket.io-client`                                                                                                                                                                  |
 | 수정한 주요 파일 | `server.js`, `frontend/src/components/ChatRoom.jsx`, `package.json`, `package-lock.json`, `frontend/package.json`, `frontend/package-lock.json`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md` |
-| 추가한 주요 파일 | `docs/plans/plan-08-socketio-chat-presence.md`, `docs/steps/2026-06-06-08-socketio-chat-presence.md`, `docs/pr/2026-06-06-08-socketio-chat-presence-pr.md`                                           |
-| 확인한 명령어    | `node --check server.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                  |
+| 추가한 주요 파일 | `docs/plans/plan-08-socketio-chat-presence.md`, `docs/steps/2026-06-06-08-socketio-chat-presence.md`, `docs/pr/2026-06-06-08-socketio-chat-presence-pr.md`                                                       |
+| 확인한 명령어    | `node --check server.js` 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공                                                                                                              |
 
 ### 작업 내용
 
