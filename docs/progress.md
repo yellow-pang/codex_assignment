@@ -2,27 +2,32 @@
 
 ## 프리미엄 마켓플레이스 테마 1차 적용
 
-| 항목 | 내용 |
-| --- | --- |
-| 작업 단계명 | 프리미엄 마켓플레이스 테마 1차 적용 |
-| 작업 일자 | 2026-06-07 |
-| 작업 내용 | 모던 컬러 토큰 전역 적용, 홈 Hero 프리미엄 톤 반영, 헤더/차량 카드 색상 통일 |
-| 설치한 패키지 | 없음 |
-| 수정한 주요 파일 | `frontend/src/style.css`, `frontend/src/App.jsx`, `frontend/src/components/Header.jsx`, `frontend/src/components/CarCardGrid.jsx`, `docs/progress.md` |
-| 추가한 주요 파일 | `docs/steps/2026-06-07-19-premium-marketplace-theme-foundation.md`, `docs/pr/2026-06-07-19-premium-marketplace-theme-foundation-pr.md` |
-| 확인한 명령어 | `npm.cmd --prefix frontend run build`, `npm.cmd run build` |
+| 항목             | 내용                                                                                                                                                                 |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 작업 단계명      | 프리미엄 마켓플레이스 테마 1차 적용                                                                                                                                  |
+| 작업 일자        | 2026-06-07                                                                                                                                                           |
+| 작업 내용        | 모던 컬러 토큰 전역 적용, 홈/검색/목록 구조 전면 리디자인, 헤더/차량 카드 전면 재구성, 사용자 피드백 기반 가시성/모바일 겹침 수정, 상세/상담/로그인/관리자 화면 확장 |
+| 설치한 패키지    | 없음                                                                                                                                                                 |
+| 수정한 주요 파일 | `frontend/src/style.css`, `frontend/src/App.jsx`, `frontend/src/components/Header.jsx`, `frontend/src/components/CarCardGrid.jsx`, `docs/progress.md`                |
+| 추가한 주요 파일 | `docs/steps/2026-06-07-19-premium-marketplace-theme-foundation.md`, `docs/pr/2026-06-07-19-premium-marketplace-theme-foundation-pr.md`                               |
+| 확인한 명령어    | `npm.cmd --prefix frontend run build`, `npm.cmd run build`                                                                                                           |
 
 ### 작업 내용
 
 - `plan-18` 디자인 기준에 맞춰 전역 컬러 토큰(`brand-ink/deep/ocean/mint/amber`)을 스타일 레이어에 적용했다.
 - 공통 UI 클래스(`c-btn`, `c-input`, `c-card`, `c-badge`)를 코발트 중심에서 모던 토큰 기반으로 보정했다.
-- 첫 페이지 Hero를 프리미엄 톤으로 전환하고, 카드/검색/로딩 강조색을 신규 팔레트로 통일했다.
-- 헤더 active/모바일 hover와 차량 카드 가격/배지 색상을 동일 기준으로 맞췄다.
+- 첫 페이지 Hero를 랜딩형 구조(대형 비주얼 + CTA + 퀵 배지)로 전면 재구성했다.
+- 검색/결과 레이아웃을 좌측 필터 + 우측 인벤토리 구조로 변경해 실용형 마켓 UX를 강화했다.
+- 헤더와 차량 카드 UI를 전면 재설계해 예시 사이트 우선의 프리미엄/마켓플레이스 톤을 반영했다.
+- `조건 초기화` 버튼 가시성 문제를 수정해 항상 명확히 보이도록 보정했다.
+- 모바일에서 필터 패널이 sticky로 남아 카드와 겹치던 문제를 해결했다.
+- `CarDetail`, `ChatRoom`, `ChatRoomList`, `LoginForm`, `RegisterForm`, `AdminUserPanel`까지 신뢰형 브랜드 톤을 확장 적용했다.
+- 전역 폰트 스택을 조정해 기본 Tailwind/Bootstrap 느낌을 줄였다.
 
 ### 남은 확인
 
-1. 관리자/딜러 대시보드 화면 색상 통일(2차 적용)
-2. 상세/상담/인증 화면 테마 확장
+1. `DealerDashboard` 잔여 색상/컴포넌트 톤 정리
+2. daisyUI 잔여 class 최종 제거 점검
 3. 375px, 768px, 1280px 반응형 시각 QA
 
 ## 프리미엄 마켓플레이스 UI 리프레시 계획 문서화

@@ -24,11 +24,11 @@ function CarDetail({
   return (
     <div className="space-y-6">
       <nav className="flex items-center gap-2 text-sm font-medium text-slate-500">
-        <button className="hover:text-blue-600" onClick={onBack}>
+        <button className="hover:text-[#3f6ea6]" onClick={onBack}>
           홈
         </button>
         <span>/</span>
-        <button className="hover:text-blue-600" onClick={onBack}>
+        <button className="hover:text-[#3f6ea6]" onClick={onBack}>
           차량 검색
         </button>
         <span>/</span>
@@ -62,8 +62,8 @@ function CarDetail({
                     key={`${imageUrl}-${index}`}
                     className={`overflow-hidden rounded-2xl border bg-white p-1 shadow-sm transition-all ${
                       isSelected
-                        ? "border-blue-500 ring-2 ring-blue-100"
-                        : "border-slate-200 hover:border-blue-200"
+                        ? "border-[#3f6ea6] ring-2 ring-[#d6e1ef]"
+                        : "border-slate-200 hover:border-[#b9cce1]"
                     }`}
                     type="button"
                     onClick={() => setSelectedImageUrl(imageUrl)}
@@ -91,12 +91,12 @@ function CarDetail({
             <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950">
               {car.name}
             </h1>
-            <p className="mt-2 text-4xl font-black tracking-tight text-blue-600">
+            <p className="mt-2 text-4xl font-black tracking-tight text-[#b88746]">
               {Number(car.price).toLocaleString()}만원
             </p>
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              차량 상태와 딜러 정보를 확인한 뒤 실시간 상담으로 바로
-              문의할 수 있습니다.
+              차량 상태와 딜러 정보를 확인한 뒤 실시간 상담으로 바로 문의할 수
+              있습니다.
             </p>
           </div>
 
@@ -116,9 +116,9 @@ function CarDetail({
             <SpecItem label="사진" value={`${imageUrls.length}장`} />
           </div>
 
-          <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-[#d4dee9] bg-gradient-to-br from-[#edf2f8] to-white p-5 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0b1320] text-sm font-black text-white">
                 딜러
               </div>
               <div>
@@ -171,7 +171,7 @@ function CarDetail({
 
 function SpecItem({ label, value }) {
   return (
-    <div className="rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-100">
+    <div className="rounded-2xl bg-[#f4f7fa] px-4 py-3 ring-1 ring-[#e2e8ef]">
       <p className="text-xs font-bold text-slate-400">{label}</p>
       <p className="mt-1 text-sm font-black text-slate-800">{value}</p>
     </div>

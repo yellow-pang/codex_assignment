@@ -577,219 +577,265 @@ function App() {
     }
 
     return (
-      <div className="space-y-8">
-        {/* Hero 섹션 */}
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-[linear-gradient(120deg,_#0e1420_0%,_#14263d_52%,_#1c4e6d_100%)] px-5 py-6 shadow-2xl shadow-slate-950/30 sm:px-8 sm:py-10">
-          <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-300/20 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 h-44 w-44 rounded-full bg-teal-300/20 blur-3xl" />
-          <div className="relative grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="space-y-10">
+        <section className="relative overflow-hidden rounded-[2.25rem] border border-white/16 bg-[linear-gradient(118deg,_#0b1320_0%,_#122b43_52%,_#2a4d6f_100%)] px-5 py-6 shadow-[0_32px_80px_rgba(11,19,32,0.45)] sm:px-8 sm:py-10 lg:px-10">
+          <div className="absolute -right-10 -top-10 h-56 w-56 rounded-full bg-blue-300/18 blur-3xl" />
+          <div className="absolute left-1/3 top-10 h-40 w-40 rounded-full bg-sky-300/14 blur-3xl" />
+          <div className="absolute -bottom-16 left-8 h-48 w-48 rounded-full bg-slate-200/10 blur-3xl" />
+
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1.12fr_0.88fr]">
             <div>
-              <p className="inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-emerald-100 ring-1 ring-white/30">
-                실시간 상담이 가능한 중고차 마켓
+              <p className="inline-flex rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-100 ring-1 ring-white/20">
+                Premium Dealer Marketplace
               </p>
-              <h1 className="mt-5 max-w-xl text-3xl font-black leading-tight tracking-tight text-white sm:text-5xl">
-                내 조건에 맞는
-                <span className="block text-emerald-300">중고차를 찾아보세요</span>
+              <h1 className="mt-5 max-w-2xl text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-[3.35rem]">
+                오늘의 드라이브를 바꿀
+                <span className="block text-sky-300">프리미엄 인증 중고차</span>
               </h1>
-              <p className="mt-4 max-w-lg text-sm leading-7 text-slate-200 sm:text-base">
-                예산, 연식, 제조사 조건으로 빠르게 비교하고 마음에 드는
-                딜러와 바로 상담하세요.
+              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+                인기 사이트처럼 빠르게 탐색하고, 가격과 상태를 비교한 뒤 딜러와
+                바로 상담까지 연결하세요.
               </p>
-              <div className="mt-6 grid max-w-md grid-cols-3 gap-3">
+              <div className="mt-7 flex flex-wrap gap-2">
+                <button
+                  className="c-btn-primary px-5 py-2.5 text-sm"
+                  disabled={Boolean(pendingAction)}
+                  onClick={searchCars}
+                >
+                  지금 매물 탐색
+                </button>
+                <button
+                  className="inline-flex items-center justify-center rounded-xl border border-white/28 bg-white/12 px-5 py-2.5 text-sm font-semibold text-slate-100 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/22"
+                  disabled={Boolean(pendingAction)}
+                  onClick={resetSearchFilters}
+                >
+                  조건 초기화
+                </button>
+              </div>
+              <div className="mt-6 grid max-w-lg grid-cols-3 gap-3">
                 <HeroMetric label="추천 매물" value={cars.length} />
                 <HeroMetric label="실시간 상담" value="LIVE" />
-                <HeroMetric label="간편 검색" value="FAST" />
+                <HeroMetric label="빠른 비교" value="FAST" />
               </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute inset-x-10 bottom-2 h-10 rounded-full bg-black/35 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[1.5rem] border border-white/40 bg-white/10 p-3 shadow-2xl shadow-black/25 backdrop-blur">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="relative overflow-hidden rounded-[1.4rem] border border-white/28 bg-white/8 p-3 backdrop-blur-xl">
                 <img
                   alt="Car Market 대표 차량 이미지"
-                  className="h-64 w-full rounded-[1.2rem] object-cover sm:h-80"
+                  className="h-56 w-full rounded-[1rem] object-cover sm:h-72"
                   src="/uploads/pre-default-car.png"
                 />
-                <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/90 p-4 shadow-lg backdrop-blur">
-                  <p className="text-sm font-black text-[#0e1420]">
-                    조건에 맞는 차량을 빠르게 비교하세요
+                <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white/90 p-3 shadow-lg">
+                  <p className="text-sm font-extrabold text-[#0b1320]">
+                    탑딜러 인증 매물
                   </p>
                   <p className="mt-1 text-xs text-[#5d6b7c]">
-                    검색부터 딜러 상담까지 한 화면에서 이어집니다
+                    사진, 이력, 상담 가능 상태를 한 번에 확인
                   </p>
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+                <QuickBadge text="무사고 우선" />
+                <QuickBadge text="딜러 인증" />
+                <QuickBadge text="당일 상담" />
+                <QuickBadge text="가격 비교" />
+                <QuickBadge text="연식 필터" />
+                <QuickBadge text="지역 탐색" />
+              </div>
             </div>
           </div>
         </section>
 
-        {/* 검색 패널 */}
-        <section className="c-surface -mt-12 p-4 sm:p-5">
-          <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <section className="grid items-start gap-6 lg:grid-cols-[18.5rem_minmax(0,1fr)]">
+          <aside className="c-surface p-5 sm:p-6 lg:sticky lg:top-24">
             <div>
-              <h2 className="text-lg font-black text-slate-950">차량 검색</h2>
-              <p className="text-sm text-slate-500">
-                원하는 조건을 입력하고 추천 매물을 확인하세요.
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#3f6ea6]">
+                Search Filter
+              </p>
+              <h2 className="mt-2 text-2xl font-extrabold text-[#0b1320]">
+                차량 조건 검색
+              </h2>
+              <p className="mt-1 text-sm text-[#5d6b7c]">
+                원하는 조건을 조합해 실시간으로 결과를 확인하세요.
               </p>
             </div>
-            <div className="flex gap-2 pt-2 sm:pt-0">
+
+            <div className="mt-5 space-y-3">
+              <SearchField label="차량명">
+                <input
+                  className="c-input"
+                  name="keyword"
+                  value={filters.keyword}
+                  onChange={handleFilterChange}
+                  placeholder="예: Sonata, K5"
+                />
+              </SearchField>
+              <SearchField label="제조사">
+                <select
+                  className="c-select"
+                  name="company"
+                  value={filters.company}
+                  onChange={handleFilterChange}
+                >
+                  <option value="">전체</option>
+                  <option value="HYUNDAI">HYUNDAI</option>
+                  <option value="KIA">KIA</option>
+                  <option value="RENAULT">RENAULT</option>
+                  <option value="GENESIS">GENESIS</option>
+                  <option value="CHEVROLET">CHEVROLET</option>
+                </select>
+              </SearchField>
+              <div className="grid grid-cols-2 gap-2">
+                <SearchField label="최소 가격">
+                  <input
+                    className="c-input"
+                    name="minPrice"
+                    type="number"
+                    min="0"
+                    value={filters.minPrice}
+                    onChange={handleFilterChange}
+                    placeholder="만원"
+                    step={carFormSettings.priceStep}
+                  />
+                </SearchField>
+                <SearchField label="최대 가격">
+                  <input
+                    className="c-input"
+                    name="maxPrice"
+                    type="number"
+                    min="0"
+                    value={filters.maxPrice}
+                    onChange={handleFilterChange}
+                    placeholder="만원"
+                    step={carFormSettings.priceStep}
+                  />
+                </SearchField>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <SearchField label="최소 연식">
+                  <input
+                    className="c-input"
+                    name="minYear"
+                    type="number"
+                    min="1900"
+                    value={filters.minYear}
+                    onChange={handleFilterChange}
+                    placeholder="최소"
+                    step={carFormSettings.yearStep}
+                  />
+                </SearchField>
+                <SearchField label="최대 연식">
+                  <input
+                    className="c-input"
+                    name="maxYear"
+                    type="number"
+                    min="1900"
+                    value={filters.maxYear}
+                    onChange={handleFilterChange}
+                    placeholder="최대"
+                    step={carFormSettings.yearStep}
+                  />
+                </SearchField>
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-2 gap-2">
               <button
-                className="c-btn-outline px-4 py-2"
+                className="c-btn-outline w-full px-3 py-2"
                 disabled={Boolean(pendingAction)}
                 onClick={resetSearchFilters}
               >
-                {pendingAction === "reset-search" ? "초기화 중..." : "초기화"}
+                {pendingAction === "reset-search" ? "초기화 중" : "초기화"}
               </button>
               <button
-                className="c-btn-primary px-5 py-2"
+                className="c-btn-primary w-full px-3 py-2"
                 disabled={Boolean(pendingAction)}
                 onClick={searchCars}
               >
-                {pendingAction === "search" ? "검색 중..." : "검색하기"}
+                {pendingAction === "search" ? "검색 중" : "검색"}
               </button>
             </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-            <SearchField label="차량명" className="lg:col-span-2">
-              <input
-                className="c-input"
-                name="keyword"
-                value={filters.keyword}
-                onChange={handleFilterChange}
-                placeholder="차량명을 입력하세요"
-              />
-            </SearchField>
-            <SearchField label="제조사">
-              <select
-                className="c-select"
-                name="company"
-                value={filters.company}
-                onChange={handleFilterChange}
-              >
-                <option value="">전체</option>
-                <option value="HYUNDAI">HYUNDAI</option>
-                <option value="KIA">KIA</option>
-                <option value="RENAULT">RENAULT</option>
-                <option value="GENESIS">GENESIS</option>
-                <option value="CHEVROLET">CHEVROLET</option>
-              </select>
-            </SearchField>
-            <SearchField label="최소 가격">
-              <input
-                className="c-input"
-                name="minPrice"
-                type="number"
-                min="0"
-                value={filters.minPrice}
-                onChange={handleFilterChange}
-                placeholder="만원"
-                step={carFormSettings.priceStep}
-              />
-            </SearchField>
-            <SearchField label="최대 가격">
-              <input
-                className="c-input"
-                name="maxPrice"
-                type="number"
-                min="0"
-                value={filters.maxPrice}
-                onChange={handleFilterChange}
-                placeholder="만원"
-                step={carFormSettings.priceStep}
-              />
-            </SearchField>
-            <SearchField label="연식">
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  className="c-input"
-                  name="minYear"
-                  type="number"
-                  min="1900"
-                  value={filters.minYear}
-                  onChange={handleFilterChange}
-                  placeholder="최소"
-                  step={carFormSettings.yearStep}
-                />
-                <input
-                  className="c-input"
-                  name="maxYear"
-                  type="number"
-                  min="1900"
-                  value={filters.maxYear}
-                  onChange={handleFilterChange}
-                  placeholder="최대"
-                  step={carFormSettings.yearStep}
-                />
-              </div>
-            </SearchField>
-          </div>
-        </section>
+          </aside>
 
-        {/* 차량 목록 */}
-        <section>
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h2 className="c-section-title">
-                {isSearchMode ? "검색 결과" : "추천 매물"}{" "}
-                <span className="text-[#2fae9b]">{cars.length}</span>
-              </h2>
-              <p className="c-section-desc">
-                조건에 맞는 매물을 비교하고 딜러와 바로 상담해보세요.
-              </p>
+          <div className="space-y-5">
+            <div className="c-card p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#3f6ea6]">
+                    Vehicle Inventory
+                  </p>
+                  <h2 className="mt-1 text-2xl font-extrabold text-[#0b1320]">
+                    {isSearchMode ? "검색 결과" : "추천 매물"}
+                    <span className="ml-2 text-[#3f6ea6]">{cars.length}</span>
+                  </h2>
+                  <p className="mt-1 text-sm text-[#5d6b7c]">
+                    가격, 연식, 상태를 비교하고 딜러와 바로 연결하세요.
+                  </p>
+                </div>
+                {isDealer && (
+                  <button
+                    className="c-btn-primary px-4 py-2 text-xs"
+                    onClick={handleGoCreate}
+                  >
+                    + 차량 등록
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <ResultChip label="무사고 우선" />
+                <ResultChip label="상담 가능한 차량" />
+                <ResultChip label="최근 등록순" />
+                <ResultChip label="가격 비교형" />
+              </div>
             </div>
-            {isDealer && (
-              <button
-                className="c-btn-primary hidden px-4 py-2 text-xs sm:inline-flex"
-                onClick={handleGoCreate}
-              >
-                + 차량 등록
-              </button>
+
+            {isLoading ? (
+              <div className="c-card flex min-h-64 items-center justify-center p-8">
+                <svg
+                  className="h-9 w-9 animate-spin text-[#3f6ea6]"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  />
+                </svg>
+              </div>
+            ) : (
+              <CarCardGrid
+                canManageCar={canManageCar}
+                cars={cars}
+                emptyMessage={
+                  isSearchMode
+                    ? "조건에 맞는 차량이 없습니다."
+                    : "아직 등록된 차량이 없습니다."
+                }
+                emptyDescription={
+                  isSearchMode
+                    ? "검색 조건을 바꾸거나 초기화해 전체 목록을 다시 확인해보세요."
+                    : "딜러가 차량을 등록하면 이곳에 추천 매물이 표시됩니다."
+                }
+                onView={handleViewCar}
+                onEdit={handleEditCar}
+                onDelete={setDeleteTarget}
+                onStartChat={handleStartChat}
+                pendingAction={pendingAction}
+              />
             )}
           </div>
-
-          {isLoading ? (
-            <div className="flex min-h-40 items-center justify-center">
-              <svg
-                className="h-8 w-8 animate-spin text-[#2fae9b]"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                />
-              </svg>
-            </div>
-          ) : (
-            <CarCardGrid
-              canManageCar={canManageCar}
-              cars={cars}
-              emptyMessage={
-                isSearchMode
-                  ? "조건에 맞는 차량이 없습니다."
-                  : "아직 등록된 차량이 없습니다."
-              }
-              emptyDescription={
-                isSearchMode
-                  ? "검색 조건을 바꾸거나 초기화해 전체 목록을 다시 확인해보세요."
-                  : "딜러가 차량을 등록하면 이곳에 추천 매물이 표시됩니다."
-              }
-              onView={handleViewCar}
-              onEdit={handleEditCar}
-              onDelete={setDeleteTarget}
-              onStartChat={handleStartChat}
-              pendingAction={pendingAction}
-            />
-          )}
         </section>
       </div>
     );
@@ -799,7 +845,7 @@ function App() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f5f7fa]">
         <svg
-          className="h-10 w-10 animate-spin text-[#2fae9b]"
+          className="h-10 w-10 animate-spin text-[#3f6ea6]"
           fill="none"
           viewBox="0 0 24 24"
         >
@@ -882,7 +928,10 @@ function App() {
             path="/chats"
             element={
               userProfile ? (
-                <ChatRoomList onGoList={handleGoList} userProfile={userProfile} />
+                <ChatRoomList
+                  onGoList={handleGoList}
+                  userProfile={userProfile}
+                />
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -1022,17 +1071,33 @@ function App() {
 
 function HeroMetric({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/30 bg-white/12 px-3 py-3 shadow-sm backdrop-blur">
+    <div className="rounded-2xl border border-white/25 bg-white/10 px-3 py-3 shadow-sm backdrop-blur">
       <p className="text-lg font-black text-white">{value}</p>
       <p className="mt-0.5 text-xs font-medium text-slate-200">{label}</p>
     </div>
   );
 }
 
+function QuickBadge({ text }) {
+  return (
+    <div className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-center text-xs font-semibold text-slate-100 backdrop-blur">
+      {text}
+    </div>
+  );
+}
+
+function ResultChip({ label }) {
+  return (
+    <span className="inline-flex items-center rounded-full border border-[#d4dde8] bg-[#eef3f8] px-3 py-1 text-xs font-semibold text-[#36567a]">
+      {label}
+    </span>
+  );
+}
+
 function SearchField({ label, className = "", children }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1.5 block text-xs font-bold text-slate-600">
+      <span className="mb-1.5 block text-xs font-bold text-[#415162]">
         {label}
       </span>
       {children}
