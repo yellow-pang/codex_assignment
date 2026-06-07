@@ -13,7 +13,7 @@ const emptyForm = {
   image: null,
 };
 
-function CarForm({ mode, initialCar, onCancel, onSubmit }) {
+function CarForm({ mode, initialCar, isSubmitting = false, onCancel, onSubmit }) {
   const [form, setForm] = useState(emptyForm);
   const [errorMessage, setErrorMessage] = useState("");
   const isEditMode = mode === "edit";
@@ -55,6 +55,8 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
     const mileage = Number(form.mileage);
 
     if (!form.name.trim()) return "자동차 이름을 입력해주세요.";
+    if (form.name.trim().length < 2 || form.name.trim().length > 80)
+      return "자동차 이름은 2자 이상 80자 이하로 입력해주세요.";
     if (!form.company.trim()) return "제조사를 입력해주세요.";
     if (!Number.isInteger(year) || year < 1900 || year > currentYear)
       return "올바른 연식을 입력해주세요.";
@@ -65,13 +67,22 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
     if (!Number.isFinite(mileage) || mileage < 0)
       return "올바른 주행거리를 입력해주세요.";
     if (!form.location.trim()) return "지역을 입력해주세요.";
+    if (form.location.trim().length < 2 || form.location.trim().length > 40)
+      return "지역은 2자 이상 40자 이하로 입력해주세요.";
     if (!form.description.trim()) return "차량 설명을 입력해주세요.";
+    if (
+      form.description.trim().length < 10 ||
+      form.description.trim().length > 1000
+    )
+      return "차량 설명은 10자 이상 1000자 이하로 입력해주세요.";
 
     return "";
   }
 
   function handleSubmit(event) {
     event.preventDefault();
+
+    if (isSubmitting) return;
 
     const validationMessage = validateForm();
     if (validationMessage) {
@@ -354,11 +365,22 @@ function CarForm({ mode, initialCar, onCancel, onSubmit }) {
 
         {/* 버튼 */}
         <div className="flex justify-end gap-3 pt-2">
-          <button className="c-btn-outline" type="button" onClick={onCancel}>
+          <button
+            className="c-btn-outline"
+            type="button"
+            disabled={isSubmitting}
+            onClick={onCancel}
+          >
             취소
           </button>
-          <button className="c-btn-primary" type="submit">
-            {isEditMode ? "수정 저장" : "등록"}
+          <button className="c-btn-primary" type="submit" disabled={isSubmitting}>
+            {isSubmitting
+              ? isEditMode
+                ? "수정 중..."
+                : "등록 중..."
+              : isEditMode
+                ? "수정 저장"
+                : "등록"}
           </button>
         </div>
       </form>

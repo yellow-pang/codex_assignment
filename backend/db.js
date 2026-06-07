@@ -32,6 +32,7 @@ async function connectDatabase() {
 
   await database.command({ ping: 1 });
   await ensureBaseCollections();
+  await ensureBaseIndexes();
   console.log(`MongoDB connected: ${databaseName}`);
 
   return database;
@@ -68,6 +69,53 @@ async function ensureBaseCollections() {
       }
     })
   );
+}
+
+async function ensureBaseIndexes() {
+  const indexDefinitions = [
+    {
+      collectionName: collectionNames.users,
+      keys: { uid: 1 },
+      options: { unique: true, name: "unique_users_uid" },
+    },
+    {
+      collectionName: collectionNames.chatRooms,
+      keys: { roomId: 1 },
+      options: { unique: true, name: "unique_chat_rooms_roomId" },
+    },
+    {
+      collectionName: collectionNames.chatRooms,
+      keys: { buyerId: 1, updatedAt: -1 },
+      options: { name: "chat_rooms_buyer_updatedAt" },
+    },
+    {
+      collectionName: collectionNames.chatRooms,
+      keys: { dealerId: 1, updatedAt: -1 },
+      options: { name: "chat_rooms_dealer_updatedAt" },
+    },
+    {
+      collectionName: collectionNames.messages,
+      keys: { roomId: 1, createdAt: 1, _id: 1 },
+      options: { name: "messages_room_createdAt_id" },
+    },
+    {
+      collectionName: collectionNames.cars,
+      keys: { createdAt: -1, _id: -1 },
+      options: { name: "cars_createdAt_id" },
+    },
+  ];
+
+  for (const definition of indexDefinitions) {
+    try {
+      await database
+        .collection(definition.collectionName)
+        .createIndex(definition.keys, definition.options);
+    } catch (error) {
+      console.warn(
+        `MongoDB index 생성 실패(${definition.options.name}): ${error.message}`,
+      );
+    }
+  }
 }
 
 function getDatabase() {

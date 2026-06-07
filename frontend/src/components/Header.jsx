@@ -12,6 +12,7 @@ function Header({
   onGoRegister,
   onGoChats,
   onRequestDealer,
+  isDealerRequesting = false,
   onLogout,
   userProfile,
 }) {
@@ -117,9 +118,10 @@ function Header({
               {canRequestDealer && (
                 <button
                   className="c-btn-outline px-3 py-1.5 text-xs"
+                  disabled={isDealerRequesting}
                   onClick={onRequestDealer}
                 >
-                  딜러 신청
+                  {isDealerRequesting ? "신청 중..." : "딜러 신청"}
                 </button>
               )}
               {isDealerPending && (
@@ -245,9 +247,10 @@ function Header({
                 {canRequestDealer && (
                   <button
                     className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    disabled={isDealerRequesting}
                     onClick={() => handleMobileNav(onRequestDealer)}
                   >
-                    딜러 신청
+                    {isDealerRequesting ? "신청 중..." : "딜러 신청"}
                   </button>
                 )}
                 <button

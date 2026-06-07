@@ -9,6 +9,7 @@ function CarCardGrid({
   onEdit,
   onDelete,
   onStartChat,
+  pendingAction = "",
 }) {
   const defaultCarImageUrl = "/uploads/default-car.png";
 
@@ -20,26 +21,29 @@ function CarCardGrid({
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-      {cars.map((car) => (
-        <article
-          key={car._id}
-          className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-100"
-        >
-          {/* 차량 이미지 */}
-          <div className="relative overflow-hidden bg-slate-100">
-            <img
-              alt={`${car.name} 차량 사진`}
-              className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              src={car.imageUrl || defaultCarImageUrl}
-            />
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/45 to-transparent" />
-            <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">
-              {car.company}
-            </span>
-            <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
-              딜러 상담
-            </span>
-          </div>
+      {cars.map((car) => {
+        const isStartingChat = pendingAction === `start-chat:${car._id}`;
+
+        return (
+          <article
+            key={car._id}
+            className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/70 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-100"
+          >
+            {/* 차량 이미지 */}
+            <div className="relative overflow-hidden bg-slate-100">
+              <img
+                alt={`${car.name} 차량 사진`}
+                className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                src={car.imageUrl || defaultCarImageUrl}
+              />
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-950/45 to-transparent" />
+              <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-blue-700 shadow-sm backdrop-blur">
+                {car.company}
+              </span>
+              <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm backdrop-blur">
+                딜러 상담
+              </span>
+            </div>
 
           {/* 차량 정보 */}
           <div className="flex flex-1 flex-col p-4">
@@ -79,21 +83,24 @@ function CarCardGrid({
               {onStartChat && (
                 <button
                   className="c-btn-primary flex-1 px-3 py-2 text-xs"
+                  disabled={Boolean(pendingAction)}
                   onClick={() => onStartChat(car)}
                 >
-                  상담하기
+                  {isStartingChat ? "준비 중..." : "상담하기"}
                 </button>
               )}
               {canManageCar(car) && (
                 <>
                   <button
                     className="c-btn-outline px-3 py-2 text-xs"
+                    disabled={Boolean(pendingAction)}
                     onClick={() => onEdit(car)}
                   >
                     수정
                   </button>
                   <button
                     className="c-btn-danger px-3 py-1.5 text-xs"
+                    disabled={Boolean(pendingAction)}
                     onClick={() => onDelete(car)}
                   >
                     삭제
@@ -102,8 +109,9 @@ function CarCardGrid({
               )}
             </div>
           </div>
-        </article>
-      ))}
+          </article>
+        );
+      })}
     </div>
   );
 }

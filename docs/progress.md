@@ -1,5 +1,35 @@
 # 작업 진행 기록
 
+## 입력 검증, 정합성, 동시성, 중복 요청 방지
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 입력 검증, 정합성, 동시성, 중복 요청 방지 |
+| 작업 일자 | 2026-06-07 |
+| 작업 내용 | 차량/사용자/메시지 서버 검증 강화, 서버 메모리 TTL 중복 요청 guard, MongoDB index 생성 로직, 메시지 정렬 기준, 프론트 버튼 loading/disabled 보강 |
+| 설치한 패키지 | 없음 |
+| 수정한 주요 파일 | `backend/db.js`, `backend/config/upload.js`, `backend/services/cars.service.js`, `backend/services/users.service.js`, `backend/services/chats.service.js`, `backend/utils/normalizers.js`, `frontend/src/App.jsx`, `frontend/src/components/CarForm.jsx`, `frontend/src/components/CarCardGrid.jsx`, `frontend/src/components/CarDetail.jsx`, `frontend/src/components/DeleteConfirmModal.jsx`, `frontend/src/components/Header.jsx`, `frontend/src/components/AdminUserPanel.jsx`, `frontend/src/components/ChatRoom.jsx` |
+| 추가한 주요 파일 | `backend/utils/requestGuard.js`, `docs/plans/plan-16-validation-consistency.md`, `docs/steps/2026-06-07-16-validation-consistency.md`, `docs/pr/2026-06-07-16-validation-consistency-pr.md` |
+| 확인한 명령어 | `node --check` 주요 서버 수정 파일 성공, `npm.cmd --prefix frontend run build` 성공, `npm.cmd run build` 성공 |
+
+### 작업 내용
+
+- 차량 등록/수정 입력값을 서버에서 필수값, 길이, 숫자 범위, 허용 목록 기준으로 최종 검증하도록 보강했다.
+- 사용자 표시명 길이와 역할/딜러 상태 조합 검증을 강화했다.
+- 상담 메시지는 공백과 1000자 초과를 차단하고, 동일 사용자/상담방/본문의 짧은 시간 중복 전송을 막았다.
+- `backend/utils/requestGuard.js`를 추가해 차량 등록/수정/삭제, 상담방 생성, 딜러 신청, 역할 변경, 메시지 전송 반복 요청을 TTL 기준으로 차단했다.
+- MongoDB 시작 단계에서 `users.uid`, `chat_rooms.roomId` unique index와 상담방/메시지 조회용 일반 index 생성을 시도하도록 했다.
+- 메시지 조회 정렬 기준을 `createdAt`, `_id` 오름차순으로 정리했다.
+- 업로드는 기존 5MB, jpg/jpeg/png/webp 정책을 유지하고 파일 1장 제한 오류 메시지를 보강했다.
+- 프론트엔드에서 검색, 차량 등록/수정/삭제, 상담방 생성, 딜러 신청, 역할 변경, 메시지 전송 버튼의 loading/disabled 처리를 추가했다.
+
+### 남은 확인
+
+1. 실제 MongoDB Atlas에서 중복 데이터 없이 unique index가 생성되는지 확인한다.
+2. 실제 Firebase/MongoDB 환경에서 잘못된 차량 입력, 역할 변경, 메시지 전송이 `400` 또는 `429`로 차단되는지 확인한다.
+3. 브라우저에서 빠른 반복 클릭으로 차량, 상담방, 메시지가 중복 생성되지 않는지 확인한다.
+4. 다중 Render 인스턴스로 확장할 경우 서버 메모리 guard 대신 Redis 또는 DB 기준 idempotency key를 검토한다.
+
 ## 핵심 보안 강화
 
 | 항목 | 내용 |
