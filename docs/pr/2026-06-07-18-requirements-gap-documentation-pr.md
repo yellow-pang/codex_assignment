@@ -37,9 +37,15 @@ docs: 요구사항 차이점과 구현 판단 기준 정리
 - 이번 작업은 문서만 추가하는 작은 작업이므로 `dev`에서 커밋해도 된다고 정리했다.
 - 새 브랜치가 필요하다면 `docs/requirements-gap-notes`를 제안했다.
 
+### README 요약 추가
+
+- 제출물에서 바로 확인할 수 있도록 README에 요구사항과 다른 구현 기준 요약을 추가했다.
+- 자세한 판단 기준은 Step 문서로 연결했다.
+
 ## 변경 파일
 
 ```text
+README.md
 docs/steps/2026-06-07-18-requirements-gap-documentation.md
 docs/pr/2026-06-07-18-requirements-gap-documentation-pr.md
 docs/progress.md

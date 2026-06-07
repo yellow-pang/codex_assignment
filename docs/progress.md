@@ -8,7 +8,7 @@
 | 작업 일자 | 2026-06-07 |
 | 작업 내용 | 요구사항 정의서와 현재 구현의 차이점, 정책 확장 사유, 상담 메시지 REST 저장 API 구현 여부 추천 범위 정리 |
 | 설치한 패키지 | 없음 |
-| 수정한 주요 파일 | `docs/progress.md` |
+| 수정한 주요 파일 | `README.md`, `docs/progress.md` |
 | 추가한 주요 파일 | `docs/steps/2026-06-07-18-requirements-gap-documentation.md`, `docs/pr/2026-06-07-18-requirements-gap-documentation-pr.md` |
 | 확인한 명령어 | 문서 작업만 진행. 직전 점검에서 주요 `node --check`와 `npm.cmd run build` 성공 확인 |
 
@@ -20,6 +20,7 @@
 - 사진 1장 이상 필수 요구사항과 현재 placeholder fallback 정책의 차이를 기록했다.
 - 상담 메시지 저장 REST API 대신 Socket.io `send-message`에서 MongoDB에 저장하는 현재 구조를 설명했다.
 - 특히 `POST /api/chats/rooms/:roomId/messages`는 화면 중심 제출에서는 구현하지 않고, API 표 전체를 직접 검증하는 경우에만 얇은 REST API로 별도 구현하는 것을 추천했다.
+- README에도 제출자가 바로 볼 수 있도록 요구사항과 다른 구현 기준 요약을 추가했다.
 
 ### 남은 확인
 
