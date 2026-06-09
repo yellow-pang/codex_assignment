@@ -8,6 +8,10 @@ function getChatRoomsCollection() {
   return getCollection("chatRooms");
 }
 
+function getChatbotMessagesCollection() {
+  return getCollection("chatbotMessages");
+}
+
 function getMessagesCollection() {
   return getCollection("messages");
 }
@@ -23,6 +27,7 @@ function getUsersCollection() {
 module.exports = {
   getCarsCollection,
   getChatRoomsCollection,
+  getChatbotMessagesCollection,
   getMessagesCollection,
   getSettingsCollection,
   getUsersCollection,

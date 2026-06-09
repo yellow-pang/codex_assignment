@@ -147,6 +147,14 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
 
   function handleSend(event) {
     event.preventDefault();
+    sendMessage({ requestAgent: false });
+  }
+
+  function handleAskAgent() {
+    sendMessage({ requestAgent: true });
+  }
+
+  function sendMessage({ requestAgent }) {
     const text = inputText.trim();
 
     if (!text) return;
@@ -169,6 +177,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
     socketRef.current.emit("send-message", {
       roomId,
       text,
+      requestAgent,
     });
     setInputText("");
   }
@@ -337,6 +346,8 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
             <div className="space-y-3">
               {messages.map((msg, index) => {
                 const isMine = msg.senderId === myUid;
+                const isAgentMessage =
+                  msg.isAgentMessage || msg.senderType === "agent";
                 return (
                   <div
                     key={msg._id || index}
@@ -344,20 +355,35 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
                   >
                     <div
                       className={`max-w-[82%] rounded-3xl px-4 py-3 text-sm shadow-sm sm:max-w-[68%] ${
-                        isMine
+                        isAgentMessage
+                          ? "rounded-bl-md border border-[#8dd7ca] bg-[#e8fbf7] text-[#123f3a] shadow-[#c7eee6]"
+                          : isMine
                           ? "rounded-br-md bg-[#3f6ea6] text-white shadow-[#bfd0e4]"
                           : "rounded-bl-md bg-slate-100 text-slate-900 shadow-slate-200"
                       }`}
                     >
                       {!isMine && (
-                        <p className="mb-1 text-xs font-bold text-slate-500">
-                          {msg.senderName || "상대방"}
+                        <p
+                          className={`mb-1 flex items-center gap-2 text-xs font-bold ${
+                            isAgentMessage ? "text-[#197c70]" : "text-slate-500"
+                          }`}
+                        >
+                          {isAgentMessage && (
+                            <span className="rounded-full bg-[#2fae9b] px-2 py-0.5 text-[10px] font-black text-white">
+                              AI 상담원
+                            </span>
+                          )}
+                          <span>{msg.senderName || "상대방"}</span>
                         </p>
                       )}
-                      <p className="leading-6">{msg.text}</p>
+                      <p className="whitespace-pre-line leading-6">{msg.text}</p>
                       <p
                         className={`mt-1 text-right text-xs ${
-                          isMine ? "text-blue-100" : "text-slate-400"
+                          isAgentMessage
+                            ? "text-[#3e8e83]"
+                            : isMine
+                              ? "text-blue-100"
+                              : "text-slate-400"
                         }`}
                       >
                         {formatTime(msg.createdAt)}
@@ -373,7 +399,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
 
         <div className="border-t border-slate-100 bg-white px-3 py-3 sm:px-4">
           <form
-            className="flex items-center gap-2 sm:gap-3"
+            className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
             onSubmit={handleSend}
           >
             <input
@@ -383,13 +409,25 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
               placeholder="메시지를 입력하세요"
               maxLength={1000}
             />
-            <button
-              className="c-btn-primary px-4 py-2.5"
-              type="submit"
-              disabled={!inputText.trim() || !isConnected || isSending}
-            >
-              {isSending ? "전송 중..." : "전송"}
-            </button>
+            <div className="flex gap-2 sm:flex-shrink-0">
+              {!isDealer && (
+                <button
+                  className="rounded-xl border border-[#8dd7ca] bg-[#e8fbf7] px-4 py-2.5 text-sm font-black text-[#197c70] shadow-sm transition hover:bg-[#d4f6ef] disabled:cursor-not-allowed disabled:opacity-60"
+                  type="button"
+                  onClick={handleAskAgent}
+                  disabled={!inputText.trim() || !isConnected || isSending}
+                >
+                  AI에게 질문
+                </button>
+              )}
+              <button
+                className="c-btn-primary px-4 py-2.5"
+                type="submit"
+                disabled={!inputText.trim() || !isConnected || isSending}
+              >
+                {isSending ? "전송 중..." : "전송"}
+              </button>
+            </div>
           </form>
         </div>
       </section>

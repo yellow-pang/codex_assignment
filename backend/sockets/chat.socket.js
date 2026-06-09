@@ -97,11 +97,15 @@ function setupChatSocketHandlers(io) {
 
     socket.on("send-message", async (payload = {}) => {
       try {
-        const { message } = await handleChatMessage(
+        const { agentMessage, message } = await handleChatMessage(
           payload,
           socket.data.userProfile,
         );
         io.to(message.roomId).emit("receive-message", message);
+
+        if (agentMessage) {
+          io.to(agentMessage.roomId).emit("receive-message", agentMessage);
+        }
       } catch (error) {
         socket.emit("chat-error", createChatError(error.message));
       }

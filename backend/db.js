@@ -8,6 +8,8 @@ const collectionNames = {
   users: process.env.COLLECTION_USERS || "users",
   chatRooms: process.env.COLLECTION_CHAT_ROOMS || "chat_rooms",
   messages: process.env.COLLECTION_MESSAGES || "messages",
+  chatbotMessages:
+    process.env.COLLECTION_CHATBOT_MESSAGES || "chatbot_messages",
   settings: process.env.COLLECTION_SETTINGS || "settings",
 };
 
@@ -98,6 +100,21 @@ async function ensureBaseIndexes() {
       collectionName: collectionNames.messages,
       keys: { roomId: 1, createdAt: 1, _id: 1 },
       options: { name: "messages_room_createdAt_id" },
+    },
+    {
+      collectionName: collectionNames.chatbotMessages,
+      keys: { roomId: 1, createdAt: 1, _id: 1 },
+      options: { name: "chatbot_messages_room_createdAt_id" },
+    },
+    {
+      collectionName: collectionNames.chatbotMessages,
+      keys: { buyerId: 1, createdAt: -1 },
+      options: { name: "chatbot_messages_buyer_createdAt" },
+    },
+    {
+      collectionName: collectionNames.chatbotMessages,
+      keys: { roomId: 1, triggerType: 1, createdAt: -1 },
+      options: { name: "chatbot_messages_room_trigger_createdAt" },
     },
     {
       collectionName: collectionNames.cars,
