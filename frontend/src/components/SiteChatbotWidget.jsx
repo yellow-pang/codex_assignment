@@ -195,9 +195,7 @@ function SiteChatbotWidget({ isHidden = false, onGoLogin, userProfile }) {
                                 AI 상담원
                               </p>
                             )}
-                            <p className="whitespace-pre-wrap break-words leading-6 [overflow-wrap:anywhere]">
-                              {message.text}
-                            </p>
+                            <ChatbotText text={message.text} />
                             <p
                               className={`mt-1 text-right text-xs ${
                                 isAgent ? "text-[#3e8e83]" : "text-blue-100"
@@ -262,11 +260,33 @@ function GuideBubble({ text }) {
       <p className="mb-1 inline-flex rounded-full bg-[#2fae9b] px-2 py-0.5 text-[10px] font-black text-white">
         AI 상담원
       </p>
-      <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-        {text}
-      </p>
+      <ChatbotText text={text} />
     </div>
   );
+}
+
+function ChatbotText({ text }) {
+  return (
+    <p className="whitespace-pre-wrap break-words leading-6 [overflow-wrap:anywhere]">
+      {renderInlineMarkdown(text)}
+    </p>
+  );
+}
+
+function renderInlineMarkdown(text) {
+  const parts = String(text || "").split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return (
+        <strong key={`${part}-${index}`} className="font-black">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return part;
+  });
 }
 
 export default SiteChatbotWidget;

@@ -453,9 +453,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
                           <span>{msg.senderName || "상대방"}</span>
                         </p>
                       )}
-                      <p className="whitespace-pre-wrap break-words leading-6 [overflow-wrap:anywhere]">
-                        {msg.text}
-                      </p>
+                      <ChatMessageText text={msg.text} />
                       {msg.isPending && (
                         <div className="mt-2 flex items-center gap-1.5 text-[#3e8e83]">
                           <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2fae9b]" />
@@ -536,6 +534,30 @@ function InfoRow({ label, value }) {
       <span className="truncate font-bold text-slate-800">{value || "-"}</span>
     </div>
   );
+}
+
+function ChatMessageText({ text }) {
+  return (
+    <p className="whitespace-pre-wrap break-words leading-6 [overflow-wrap:anywhere]">
+      {renderInlineMarkdown(text)}
+    </p>
+  );
+}
+
+function renderInlineMarkdown(text) {
+  const parts = String(text || "").split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return (
+        <strong key={`${part}-${index}`} className="font-black">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return part;
+  });
 }
 
 export default ChatRoom;

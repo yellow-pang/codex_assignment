@@ -133,6 +133,7 @@ VITE_FIREBASE_APP_ID=Firebase 웹 앱 ID
 - `AI_CHATBOT_MODEL` 기본값은 `gpt-5.4-mini`입니다.
 - `AI_CHATBOT_DAILY_ROOM_LIMIT`, `AI_CHATBOT_DAILY_USER_LIMIT`는 방별/사용자별 하루 AI 응답 횟수 제한입니다.
 - `AI_CHATBOT_CONTEXT_MESSAGE_LIMIT`는 AI가 참고할 최근 메시지 수이며, `AI_CHATBOT_MAX_REPLY_CHARS`는 답변 최대 글자 수입니다.
+- AI 상담원은 시스템 프롬프트 요청, 이전 지시 무시 요청, API Key/환경변수 요청 같은 프롬프트 인젝션성 질문을 따르지 않도록 제한합니다.
 
 ## Render 배포와 GitHub Actions
 
