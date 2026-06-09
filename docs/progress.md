@@ -1,5 +1,42 @@
 # 작업 진행 기록
 
+## 22단계 챗봇 위젯 UI와 보안 보강
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | 챗봇 위젯 UI와 보안 보강 |
+| 작업 일자 | 2026-06-09 |
+| 작업 목적 | AI 챗봇 사용성 문제와 보안 점검 항목 보강 |
+| 설치한 패키지 | 없음 |
+| 수정한 주요 파일 | `.env.example`, `README.md`, `backend/services/agentGraph.service.js`, `backend/services/siteChatbot.service.js`, `docs/deploy-checklist.md`, `frontend/src/components/ChatRoom.jsx`, `frontend/src/components/SiteChatbotWidget.jsx` |
+| 추가한 주요 파일 | `docs/plans/plan-22-chatbot-widget-ux-security-fix.md`, `docs/steps/2026-06-09-22-chatbot-widget-ux-security-fix.md`, `docs/pr/2026-06-09-22-chatbot-widget-ux-security-fix-pr.md` |
+| 확인한 명령어 | `node --check backend/services/agentGraph.service.js`, `node --check backend/services/siteChatbot.service.js`, `npm.cmd --prefix frontend run build` |
+
+### 작업 내용
+
+- 공통 챗봇과 상담방 AI 말풍선에서 긴 URL과 문의 문구가 영역 밖으로 벗어나지 않도록 줄바꿈을 보강했다.
+- AI 답변의 `**굵게**` Markdown 문법을 제한적으로 해석해 실제 굵은 글씨로 표시했다.
+- 채팅방에서 `AI에게 질문` 전송 직후 답변 대기 말풍선을 표시하고, 실제 응답이 오면 교체되도록 했다.
+- 30초 이상 AI 응답이 없으면 네트워크 또는 AI API 지연 가능성을 사용자에게 안내하도록 했다.
+- `AI_CHATBOT_ENABLED`가 AI API 호출 활성화 플래그라는 점을 README와 배포 가이드에 명확히 설명했다.
+- 프롬프트 인젝션성 질문에 대한 차단 키워드와 시스템 프롬프트 방어 문구를 보강했다.
+- 사이트 공통 챗봇의 짧은 시간 동일 질문 반복 요청을 `429`로 차단하도록 했다.
+- `.env.example`의 OpenAI 키 예시를 실제 키처럼 보이지 않는 placeholder로 변경했다.
+- 배포 체크리스트에 AI Secret, 프롬프트 인젝션, 반복 요청 보안 점검 항목을 추가했다.
+
+### 확인 결과
+
+- `node --check backend/services/agentGraph.service.js` 성공
+- `node --check backend/services/siteChatbot.service.js` 성공
+- `npm.cmd --prefix frontend run build` 성공
+- Vite의 기존 `NODE_ENV=production` 경고는 출력되지만 빌드는 성공했다.
+
+### 남은 확인
+
+1. 실제 브라우저에서 긴 URL과 문의 채널 문구가 말풍선 안에서 줄바꿈되는지 확인한다.
+2. 실제 OpenAI 응답에서 `**굵게**` 문법이 굵은 글씨로 표시되는지 확인한다.
+3. 같은 AI 질문을 빠르게 반복했을 때 `429` 응답과 사용자 안내가 적절한지 확인한다.
+
 ## 21단계 LangGraph 챗봇 기능 구현
 
 | 항목 | 내용 |
@@ -23,9 +60,6 @@
 - 자동차와 무관한 질문, 보안 정보 요청, 사용량 제한 초과는 OpenAI 호출 없이 직접 문의 안내로 처리하도록 했다.
 - AI 시스템 프롬프트에 근거 없는 가격 보장, 사고 이력 보장, 금융/법률/보험/세금 단정 금지 문구를 추가했다.
 - 프론트 상담 화면에 `AI에게 질문` 버튼과 `AI 상담원` 배지, 전용 민트 계열 말풍선을 추가했다.
-- 채팅방에서 AI 질문 전송 후 답변이 늦을 때 사용자가 상황을 알 수 있도록 AI 답변 대기 말풍선과 30초 지연 안내를 추가했다.
-- 일반 사이트처럼 오른쪽 아래 플로팅 AI 챗봇 버튼과 모달형 챗봇 UI를 추가했다.
-- 공통 챗봇 API `/api/chats/site-bot/messages`를 추가하고, 기록을 `chatbot_messages`에 `contextType: "site"`로 저장하도록 했다.
 - README, 배포 가이드, 배포 체크리스트, step 문서에 Render Environment 등록 가이드를 추가했다.
 
 ### 확인 결과
@@ -35,8 +69,6 @@
 - `node --check backend/services/chats.service.js` 성공
 - `node --check backend/sockets/chat.socket.js` 성공
 - `node --check backend/db.js` 성공
-- `node --check backend/services/siteChatbot.service.js` 성공
-- `node --check backend/routes/chats.routes.js` 성공
 - OpenAI API Key 없이 범위 밖 질문을 LangGraph로 실행하는 테스트 성공
 - `npm.cmd --prefix frontend run build` 성공
 - `npm.cmd run build` 성공
@@ -46,8 +78,7 @@
 1. 실제 `OPENAI_API_KEY`, Firebase, MongoDB Atlas 환경에서 AI 답변 생성과 `chatbot_messages` 저장을 확인한다.
 2. 딜러 오프라인 조건에서 자동 AI 응답이 동작하는지 확인한다.
 3. 구매자 화면의 `AI에게 질문` 버튼으로 AI 응답이 표시되는지 확인한다.
-4. 사이트 공통 플로팅 AI 챗봇에서 사용법과 차량 추천 질문이 동작하는지 확인한다.
-5. 사용자가 Render Environment에 `OPENAI_API_KEY`와 AI 환경변수를 직접 등록한 뒤 재배포한다.
+4. 사용자가 Render Environment에 `OPENAI_API_KEY`와 AI 환경변수를 직접 등록한 뒤 재배포한다.
 
 ## 20단계 제출용 개발 문서 작성
 
