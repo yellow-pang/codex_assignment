@@ -20,6 +20,7 @@ import Header from "./components/Header.jsx";
 import LoginForm from "./components/LoginForm.jsx";
 import MobileBottomNav from "./components/MobileBottomNav.jsx";
 import RegisterForm from "./components/RegisterForm.jsx";
+import SiteChatbotWidget from "./components/SiteChatbotWidget.jsx";
 import { authenticatedFetch } from "./api/authenticatedFetch.js";
 import { useAuth } from "./contexts/AuthContext.jsx";
 
@@ -1063,6 +1064,11 @@ function App() {
         onGoChats={handleGoChats}
         onGoDealer={handleGoDealer}
         onGoList={handleGoList}
+        userProfile={userProfile}
+      />
+      <SiteChatbotWidget
+        isHidden={activeView === "chat"}
+        onGoLogin={() => navigate("/login")}
         userProfile={userProfile}
       />
     </div>

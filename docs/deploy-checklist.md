@@ -37,6 +37,7 @@
 | 루트 `package.json` | `build` 스크립트 | `frontend` devDependencies 포함 설치 및 Vite 빌드 실행 |
 | 루트 `package.json` | `engines` | Node.js `20.19` 이상 사용 |
 | 루트 `package.json` | `dependencies` | `multer`, `socket.io` 포함 |
+| 루트 `package.json` | `dependencies` | `langchain`, `@langchain/core`, `@langchain/langgraph`, `@langchain/openai` 포함 |
 | `frontend/package.json` | `build` 스크립트 | `vite build` 실행 |
 | `frontend/package.json` | `dependencies` | `react-router-dom`, `socket.io-client` 포함 |
 | `frontend/package.json` | `test` 스크립트 | 없음, CI에서 건너뜀 |
@@ -63,6 +64,7 @@
 | `.gitignore` | `.env`, `.env.*`, `node_modules`, `dist`, 로그 파일 제외 |
 | `.gitignore` | `uploads/*` 런타임 업로드 파일 제외, `uploads/default-car.png` 기본 이미지는 커밋 가능 |
 | Render Environment | `FIREBASE_SERVICE_ACCOUNT_JSON`을 새로 등록해야 함. 실제 Secret 값은 Render에만 등록. 분리 배포가 아니면 `VITE_API_BASE_URL`은 비워둘 수 있음 |
+| Render Environment | `OPENAI_API_KEY`, `AI_CHATBOT_ENABLED`, `AI_CHATBOT_MODEL` 등 AI 상담원 환경변수는 사용자가 직접 등록 |
 | GitHub Secrets | `RENDER_DEPLOY_HOOK_URL` 필요 |
 
 ## 5. GitHub Actions 점검 항목
@@ -135,6 +137,16 @@ Render Auto-Deploy를 켜면 GitHub Actions Deploy Hook 방식과 중복될 수 
 - [ ] MongoDB `chat_rooms` 컬렉션에 상담방 문서가 저장된다.
 - [ ] `/chats/:roomId`에서 이전 메시지 목록이 조회된다.
 - [ ] `/chats/:roomId`에서 메시지 전송 시 MongoDB `messages` 컬렉션에 저장된다.
+- [ ] 딜러가 오프라인일 때 구매자 메시지 후 AI 상담원이 응답한다.
+- [ ] `AI에게 질문` 버튼으로 보낸 메시지에 AI 상담원이 응답한다.
+- [ ] 상담방 외 일반 화면 오른쪽 아래에 플로팅 AI 챗봇 버튼이 표시된다.
+- [ ] 플로팅 AI 챗봇 버튼을 누르면 모달형 챗봇 화면이 열린다.
+- [ ] 비로그인 사용자는 플로팅 챗봇 모달에서 로그인 안내를 본다.
+- [ ] 로그인 사용자는 플로팅 챗봇에서 사이트 사용법과 차량 추천 질문을 보낼 수 있다.
+- [ ] MongoDB `chatbot_messages` 컬렉션에 AI 상담 메시지가 저장된다.
+- [ ] AI 상담원 메시지는 채팅 화면에서 배지와 전용 말풍선 색상으로 구분된다.
+- [ ] 자동차와 무관한 질문은 직접 문의 안내로 전환된다.
+- [ ] 하루 AI 응답 제한을 넘으면 OpenAI API 호출 없이 직접 문의 안내가 표시된다.
 - [ ] 브라우저 2개 또는 탭 2개에서 같은 상담방 메시지가 실시간으로 송수신된다.
 - [ ] 딜러 접속 시 구매자 화면에 온라인 상태가 표시된다.
 - [ ] 딜러 접속 종료 시 구매자 화면에 오프라인 상태가 표시된다.

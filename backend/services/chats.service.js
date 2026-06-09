@@ -7,6 +7,7 @@ const { assertNotDuplicateRequest, createStableHash } = require("../utils/reques
 const { buildAgentContext, generateAgentReply } = require("./agent.service");
 const {
   getCarsCollection,
+  getChatbotMessagesCollection,
   getChatRoomsCollection,
   getMessagesCollection,
 } = require("./collections");
@@ -216,13 +217,41 @@ async function handleChatMessage(payload, senderProfile) {
     room,
     userMessage: savedMessage,
   });
-  const agentReply = await generateAgentReply(agentContext);
+  const triggerType = getChatbotTriggerType({
+    agentContext,
+    requestAgent: payload?.requestAgent,
+    senderId,
+  });
 
-  // 딜러가 오프라인이고 agentReply가 있으면 이후 단계에서 AI 메시지를
-  // messages 컬렉션에 저장하고 receive-message로 전송할 수 있다.
+  if (triggerType) {
+    agentContext.triggerType = triggerType;
+  }
+
+  const agentReply = await generateAgentReply(agentContext);
+  const agentMessage = agentReply
+    ? await createChatbotMessage({
+        room,
+        userMessage: savedMessage,
+        agentReply,
+      })
+    : null;
+
+  if (agentMessage) {
+    await getChatRoomsCollection().updateOne(
+      { roomId },
+      {
+        $set: {
+          lastMessage: agentMessage.text,
+          lastMessageAt: agentMessage.createdAt,
+          updatedAt: agentMessage.createdAt,
+        },
+      },
+    );
+  }
+
   return {
     message: savedMessage,
-    agentReply,
+    agentMessage,
   };
 }
 
@@ -243,10 +272,14 @@ async function listChatRoomMessages(roomId, userId) {
 
   assertChatRoomParticipant(room, normalizeUid(userId));
 
-  return getMessagesCollection()
-    .find({ roomId })
-    .sort({ createdAt: 1, _id: 1 })
-    .toArray();
+  const [messages, chatbotMessages] = await Promise.all([
+    getMessagesCollection().find({ roomId }).toArray(),
+    getChatbotMessagesCollection().find({ roomId }).toArray(),
+  ]);
+
+  return [...messages, ...chatbotMessages]
+    .map(normalizeChatMessageForClient)
+    .sort(compareMessagesByCreatedAt);
 }
 
 async function listChatRooms(userProfile) {
@@ -289,6 +322,70 @@ function validateChatMessageOrThrow(text) {
   const error = new Error(validationMessage);
   error.statusCode = 400;
   throw error;
+}
+
+async function createChatbotMessage({ room, userMessage, agentReply }) {
+  const now = new Date();
+  const chatbotMessage = {
+    roomId: room.roomId,
+    buyerId: room.buyerId,
+    dealerId: room.dealerId,
+    carId: room.carId,
+    triggerType: agentReply.triggerType,
+    userMessageId: userMessage._id,
+    senderId: "ai-agent",
+    senderName: "AI 상담원",
+    senderType: "agent",
+    isAgentMessage: true,
+    text: agentReply.text,
+    model: agentReply.model,
+    provider: agentReply.provider,
+    metadata: {
+      ...(agentReply.metadata || {}),
+      intent: agentReply.intent,
+    },
+    createdAt: now,
+  };
+  const result = await getChatbotMessagesCollection().insertOne(chatbotMessage);
+
+  return normalizeChatMessageForClient({
+    _id: result.insertedId,
+    ...chatbotMessage,
+  });
+}
+
+function getChatbotTriggerType({ agentContext, requestAgent, senderId }) {
+  if (senderId !== agentContext.room?.buyerId) {
+    return "";
+  }
+
+  if (requestAgent) {
+    return "user_ai_button";
+  }
+
+  if (agentContext.dealerPresence && !agentContext.dealerPresence.isOnline) {
+    return "dealer_offline";
+  }
+
+  return "";
+}
+
+function normalizeChatMessageForClient(message) {
+  return {
+    ...message,
+    _id: String(message._id || ""),
+  };
+}
+
+function compareMessagesByCreatedAt(first, second) {
+  const firstTime = new Date(first.createdAt || 0).getTime();
+  const secondTime = new Date(second.createdAt || 0).getTime();
+
+  if (firstTime !== secondTime) {
+    return firstTime - secondTime;
+  }
+
+  return String(first._id || "").localeCompare(String(second._id || ""));
 }
 
 module.exports = {

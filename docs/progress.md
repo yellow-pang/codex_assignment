@@ -1,5 +1,53 @@
 # 작업 진행 기록
 
+## 21단계 LangGraph 챗봇 기능 구현
+
+| 항목 | 내용 |
+| --- | --- |
+| 작업 단계명 | LangGraph 챗봇 기능 구현 |
+| 작업 일자 | 2026-06-09 |
+| 작업 목적 | 기존 실시간 상담에 OpenAI, LangChain, LangGraph 기반 AI 상담원 응답 추가 |
+| 설치한 패키지 | 사용자가 루트에 `langchain`, `@langchain/core`, `@langchain/langgraph`, `@langchain/openai` 직접 설치 |
+| 수정한 주요 파일 | `package.json`, `package-lock.json`, `.env.example`, `backend/db.js`, `backend/services/collections.js`, `backend/services/agent.service.js`, `backend/services/chats.service.js`, `backend/sockets/chat.socket.js`, `frontend/src/components/ChatRoom.jsx`, `README.md`, `docs/deploy-guide.md`, `docs/deploy-checklist.md`, `docs/plans/plan-19-langgraph-chatbot.md` |
+| 추가한 주요 파일 | `backend/services/agentGraph.service.js`, `docs/steps/2026-06-09-21-langgraph-chatbot.md`, `docs/pr/2026-06-09-21-langgraph-chatbot-pr.md` |
+| 확인한 명령어 | `node --check` 주요 서버 파일 성공, LangGraph 범위 밖 질문 실행 테스트 성공 |
+
+### 작업 내용
+
+- 기존 `agent.service.js` 확장 지점에 OpenAI + LangGraph 기반 응답 생성 흐름을 연결했다.
+- AI 메시지는 유지보수와 관리를 위해 기존 `messages` 컬렉션이 아닌 신규 `chatbot_messages` 컬렉션에 저장하도록 했다.
+- `backend/db.js`에 `chatbot_messages` 컬렉션명과 조회용 인덱스를 추가했다.
+- 상담 메시지 조회 API가 일반 메시지와 AI 메시지를 합쳐 시간순으로 반환하도록 했다.
+- 딜러가 오프라인이거나 구매자가 `AI에게 질문` 버튼으로 메시지를 보낸 경우에만 AI 상담원이 응답하도록 했다.
+- 방별/사용자별 하루 AI 응답 제한을 환경변수로 제어할 수 있게 했다.
+- 자동차와 무관한 질문, 보안 정보 요청, 사용량 제한 초과는 OpenAI 호출 없이 직접 문의 안내로 처리하도록 했다.
+- AI 시스템 프롬프트에 근거 없는 가격 보장, 사고 이력 보장, 금융/법률/보험/세금 단정 금지 문구를 추가했다.
+- 프론트 상담 화면에 `AI에게 질문` 버튼과 `AI 상담원` 배지, 전용 민트 계열 말풍선을 추가했다.
+- 일반 사이트처럼 오른쪽 아래 플로팅 AI 챗봇 버튼과 모달형 챗봇 UI를 추가했다.
+- 공통 챗봇 API `/api/chats/site-bot/messages`를 추가하고, 기록을 `chatbot_messages`에 `contextType: "site"`로 저장하도록 했다.
+- README, 배포 가이드, 배포 체크리스트, step 문서에 Render Environment 등록 가이드를 추가했다.
+
+### 확인 결과
+
+- `node --check backend/services/agentGraph.service.js` 성공
+- `node --check backend/services/agent.service.js` 성공
+- `node --check backend/services/chats.service.js` 성공
+- `node --check backend/sockets/chat.socket.js` 성공
+- `node --check backend/db.js` 성공
+- `node --check backend/services/siteChatbot.service.js` 성공
+- `node --check backend/routes/chats.routes.js` 성공
+- OpenAI API Key 없이 범위 밖 질문을 LangGraph로 실행하는 테스트 성공
+- `npm.cmd --prefix frontend run build` 성공
+- `npm.cmd run build` 성공
+
+### 남은 확인
+
+1. 실제 `OPENAI_API_KEY`, Firebase, MongoDB Atlas 환경에서 AI 답변 생성과 `chatbot_messages` 저장을 확인한다.
+2. 딜러 오프라인 조건에서 자동 AI 응답이 동작하는지 확인한다.
+3. 구매자 화면의 `AI에게 질문` 버튼으로 AI 응답이 표시되는지 확인한다.
+4. 사이트 공통 플로팅 AI 챗봇에서 사용법과 차량 추천 질문이 동작하는지 확인한다.
+5. 사용자가 Render Environment에 `OPENAI_API_KEY`와 AI 환경변수를 직접 등록한 뒤 재배포한다.
+
 ## 20단계 제출용 개발 문서 작성
 
 | 항목        | 내용                                                                                                                                                                                                                                                                                                                                                             |
