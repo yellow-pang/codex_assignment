@@ -354,7 +354,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
                     className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[82%] rounded-3xl px-4 py-3 text-sm shadow-sm sm:max-w-[68%] ${
+                      className={`min-w-0 max-w-[82%] overflow-hidden rounded-3xl px-4 py-3 text-sm shadow-sm sm:max-w-[68%] ${
                         isAgentMessage
                           ? "rounded-bl-md border border-[#8dd7ca] bg-[#e8fbf7] text-[#123f3a] shadow-[#c7eee6]"
                           : isMine
@@ -376,7 +376,9 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
                           <span>{msg.senderName || "상대방"}</span>
                         </p>
                       )}
-                      <p className="whitespace-pre-line leading-6">{msg.text}</p>
+                      <p className="whitespace-pre-wrap break-words leading-6 [overflow-wrap:anywhere]">
+                        {msg.text}
+                      </p>
                       <p
                         className={`mt-1 text-right text-xs ${
                           isAgentMessage

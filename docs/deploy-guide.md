@@ -153,6 +153,7 @@ private key 안의 줄바꿈은 환경변수에 넣을 때 `\n` 형태로 보존
 
 AI 상담원은 OpenAI, LangChain, LangGraph를 백엔드에서만 실행한다.
 Render Environment에 `OPENAI_API_KEY`를 등록하고, 실제 운영에서 AI 상담을 켤 때 `AI_CHATBOT_ENABLED=true`로 설정한다.
+`AI_CHATBOT_ENABLED`는 AI API 호출 활성화 플래그다. `false`이면 `OPENAI_API_KEY`가 있어도 OpenAI를 호출하지 않고 비활성 안내를 반환한다.
 비용 방지를 위해 로컬 예시와 초기 설정에서는 `AI_CHATBOT_ENABLED=false`를 사용할 수 있다.
 
 AI 상담원은 아래 조건에서만 응답한다.
