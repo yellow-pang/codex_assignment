@@ -27,11 +27,8 @@
 - `backend/services/agent.service.js`
 - `backend/services/agentGraph.service.js`
 - `backend/services/chats.service.js`
-- `backend/services/siteChatbot.service.js`
 - `backend/sockets/chat.socket.js`
-- `frontend/src/App.jsx`
 - `frontend/src/components/ChatRoom.jsx`
-- `frontend/src/components/SiteChatbotWidget.jsx`
 - `README.md`
 - `docs/deploy-guide.md`
 - `docs/deploy-checklist.md`
@@ -108,19 +105,6 @@ AI 상담원 메시지는 아래 방식으로 구분한다.
 - 일반 딜러/구매자 메시지와 다른 텍스트 색상
 - 줄바꿈 보존
 
-### 4.7 사이트 공통 플로팅 챗봇
-
-일반 사이트처럼 오른쪽 아래에 플로팅 AI 챗봇 버튼을 추가했다.
-버튼을 누르면 모달형 챗봇 화면이 열리고, 로그인 사용자는 사이트 사용법과 차량 추천 질문을 보낼 수 있다.
-
-구현 기준:
-
-- 상담방 화면에서는 기존 실시간 상담 UI와 겹치지 않도록 플로팅 챗봇을 숨긴다.
-- 비로그인 사용자는 모달 안에서 로그인 안내와 로그인 이동 버튼을 본다.
-- 공통 챗봇 API는 `/api/chats/site-bot/messages`를 사용한다.
-- 공통 챗봇 기록도 `chatbot_messages` 컬렉션에 저장하며 `contextType: "site"`로 구분한다.
-- `roomId`는 `site:<사용자UID>` 형식의 가상 방 ID를 사용한다.
-
 ## 5. 사용자 작업 가이드
 
 ### 5.1 로컬 `.env` 설정
@@ -182,8 +166,6 @@ Render에 Secret을 등록한 뒤 재배포해야 서버가 새 환경변수를 
 | `node --check backend/services/chats.service.js` | 성공 |
 | `node --check backend/sockets/chat.socket.js` | 성공 |
 | `node --check backend/db.js` | 성공 |
-| `node --check backend/services/siteChatbot.service.js` | 성공 |
-| `node --check backend/routes/chats.routes.js` | 성공 |
 | LangGraph 범위 밖 질문 실행 테스트 | 성공 |
 | `npm.cmd --prefix frontend run build` | 성공 |
 | `npm.cmd run build` | 성공 |

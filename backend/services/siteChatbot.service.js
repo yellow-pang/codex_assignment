@@ -1,4 +1,5 @@
 const { normalizeChatMessageText, validateChatMessageText } = require("../utils/normalizers");
+const { assertNotDuplicateRequest, createStableHash } = require("../utils/requestGuard");
 const { getChatbotMessagesCollection, getCarsCollection } = require("./collections");
 const {
   directContactText,
@@ -47,6 +48,11 @@ async function createSiteChatbotReply({ userProfile, text: rawText }) {
   }
 
   const roomId = createSiteChatbotRoomId(userProfile);
+  assertNotDuplicateRequest({
+    keyParts: ["site-chatbot:message", userProfile.uid, createStableHash(text)],
+    message: "같은 AI 상담 요청이 너무 빠르게 반복되었습니다.",
+    ttlMs: 3000,
+  });
   const now = new Date();
   const userMessage = {
     roomId,

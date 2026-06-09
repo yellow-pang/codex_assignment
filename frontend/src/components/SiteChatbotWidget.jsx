@@ -97,7 +97,7 @@ function SiteChatbotWidget({ isHidden = false, onGoLogin, userProfile }) {
       {isOpen && (
         <section className="mb-3 flex h-[34rem] max-h-[calc(100vh-7rem)] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl border border-[#b9e8df] bg-white shadow-2xl shadow-slate-900/20">
           <div className="flex items-start justify-between gap-3 bg-[linear-gradient(135deg,_#123f3a,_#2fae9b)] px-4 py-4 text-white">
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-white/75">
                 AI Assistant
               </p>
@@ -184,7 +184,7 @@ function SiteChatbotWidget({ isHidden = false, onGoLogin, userProfile }) {
                           className={`flex ${isAgent ? "justify-start" : "justify-end"}`}
                         >
                           <div
-                            className={`max-w-[86%] rounded-3xl px-4 py-3 text-sm shadow-sm ${
+                            className={`min-w-0 max-w-[86%] overflow-hidden rounded-3xl px-4 py-3 text-sm shadow-sm ${
                               isAgent
                                 ? "rounded-bl-md border border-[#8dd7ca] bg-[#e8fbf7] text-[#123f3a]"
                                 : "rounded-br-md bg-[#1c4e6d] text-white"
@@ -195,9 +195,7 @@ function SiteChatbotWidget({ isHidden = false, onGoLogin, userProfile }) {
                                 AI 상담원
                               </p>
                             )}
-                            <p className="whitespace-pre-line leading-6">
-                              {message.text}
-                            </p>
+                            <ChatbotText text={message.text} />
                             <p
                               className={`mt-1 text-right text-xs ${
                                 isAgent ? "text-[#3e8e83]" : "text-blue-100"
@@ -258,13 +256,37 @@ function SiteChatbotWidget({ isHidden = false, onGoLogin, userProfile }) {
 
 function GuideBubble({ text }) {
   return (
-    <div className="rounded-3xl rounded-bl-md border border-[#8dd7ca] bg-[#e8fbf7] px-4 py-3 text-sm leading-6 text-[#123f3a] shadow-sm">
+    <div className="min-w-0 overflow-hidden rounded-3xl rounded-bl-md border border-[#8dd7ca] bg-[#e8fbf7] px-4 py-3 text-sm leading-6 text-[#123f3a] shadow-sm">
       <p className="mb-1 inline-flex rounded-full bg-[#2fae9b] px-2 py-0.5 text-[10px] font-black text-white">
         AI 상담원
       </p>
-      <p>{text}</p>
+      <ChatbotText text={text} />
     </div>
   );
+}
+
+function ChatbotText({ text }) {
+  return (
+    <p className="whitespace-pre-wrap break-words leading-6 [overflow-wrap:anywhere]">
+      {renderInlineMarkdown(text)}
+    </p>
+  );
+}
+
+function renderInlineMarkdown(text) {
+  const parts = String(text || "").split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return (
+        <strong key={`${part}-${index}`} className="font-black">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return part;
+  });
 }
 
 export default SiteChatbotWidget;

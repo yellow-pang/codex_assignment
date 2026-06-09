@@ -129,10 +129,11 @@ VITE_FIREBASE_APP_ID=Firebase 웹 앱 ID
 - `FIREBASE_SERVICE_ACCOUNT_JSON`은 서버가 Firebase 로그인 토큰을 검증하기 위한 비밀값입니다. Firebase 콘솔의 Service accounts에서 새 private key를 만든 뒤 JSON 내용을 한 줄 문자열로 등록합니다.
 - `FIREBASE_SERVICE_ACCOUNT_JSON`은 절대 프론트엔드 코드, GitHub 저장소, README 실제 값에 작성하지 않습니다.
 - `OPENAI_API_KEY`는 AI 상담원이 OpenAI API를 호출할 때 사용하는 서버 Secret입니다. 프론트엔드 코드나 `VITE_*` 환경변수로 만들지 않습니다.
-- `AI_CHATBOT_ENABLED`는 비용 방지를 위해 기본 `false`를 권장합니다. 실제 AI 상담을 켤 때 Render Environment 또는 로컬 `.env`에서 `true`로 설정합니다.
+- `AI_CHATBOT_ENABLED`는 AI API 호출 활성화 플래그입니다. 비용 방지를 위해 기본 `false`를 권장하며, `false`이면 `OPENAI_API_KEY`가 있어도 AI 상담원이 OpenAI를 호출하지 않고 비활성 안내를 반환합니다. 실제 AI 상담을 켤 때 Render Environment 또는 로컬 `.env`에서 `true`로 설정합니다.
 - `AI_CHATBOT_MODEL` 기본값은 `gpt-5.4-mini`입니다.
 - `AI_CHATBOT_DAILY_ROOM_LIMIT`, `AI_CHATBOT_DAILY_USER_LIMIT`는 방별/사용자별 하루 AI 응답 횟수 제한입니다.
 - `AI_CHATBOT_CONTEXT_MESSAGE_LIMIT`는 AI가 참고할 최근 메시지 수이며, `AI_CHATBOT_MAX_REPLY_CHARS`는 답변 최대 글자 수입니다.
+- AI 상담원은 시스템 프롬프트 요청, 이전 지시 무시 요청, API Key/환경변수 요청 같은 프롬프트 인젝션성 질문을 따르지 않도록 제한합니다.
 
 ## Render 배포와 GitHub Actions
 

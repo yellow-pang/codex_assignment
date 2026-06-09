@@ -20,6 +20,8 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
   });
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
+  const pendingAgentMessageIdRef = useRef("");
+  const pendingAgentTimeoutRef = useRef(null);
 
   useEffect(() => {
     setCurrentRoom(chatRoom || null);
@@ -92,14 +94,26 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
         socket.on("receive-message", (message) => {
           setIsSending(false);
           setMessages((prevMessages) => {
+            const nextMessages =
+              message.isAgentMessage || message.senderType === "agent"
+                ? prevMessages.filter(
+                    (item) => item._id !== pendingAgentMessageIdRef.current,
+                  )
+                : prevMessages;
+
             if (
               message._id &&
-              prevMessages.some((item) => item._id === message._id)
+              nextMessages.some((item) => item._id === message._id)
             ) {
-              return prevMessages;
+              return nextMessages;
             }
 
-            return [...prevMessages, message];
+            if (message.isAgentMessage || message.senderType === "agent") {
+              pendingAgentMessageIdRef.current = "";
+              clearPendingAgentTimeout();
+            }
+
+            return [...nextMessages, message];
           });
         });
 
@@ -119,6 +133,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
           setSocketError(
             error?.message || "실시간 상담 처리 중 오류가 발생했습니다.",
           );
+          removePendingAgentMessage();
         });
 
         socket.on("connect_error", (error) => {
@@ -135,6 +150,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
 
     return () => {
       isMounted = false;
+      clearPendingAgentTimeout();
       socket?.emit("leave-room", { roomId });
       socket?.disconnect();
       socketRef.current = null;
@@ -174,12 +190,73 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
     }
 
     setIsSending(true);
+    if (requestAgent) {
+      showPendingAgentMessage();
+    }
     socketRef.current.emit("send-message", {
       roomId,
       text,
       requestAgent,
     });
     setInputText("");
+  }
+
+  function showPendingAgentMessage() {
+    const pendingMessageId = `pending-agent-${Date.now()}`;
+    const previousPendingMessageId = pendingAgentMessageIdRef.current;
+    pendingAgentMessageIdRef.current = pendingMessageId;
+    setMessages((prevMessages) => [
+      ...prevMessages.filter((item) => item._id !== previousPendingMessageId),
+      {
+        _id: pendingMessageId,
+        senderId: "ai-agent",
+        senderName: "AI 상담원",
+        senderType: "agent",
+        isAgentMessage: true,
+        isPending: true,
+        text: "AI 상담원이 답변을 준비 중입니다.",
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+    clearPendingAgentTimeout();
+    pendingAgentTimeoutRef.current = window.setTimeout(() => {
+      setMessages((prevMessages) =>
+        prevMessages.map((message) =>
+          message._id === pendingMessageId
+            ? {
+                ...message,
+                text:
+                  "AI 상담원 응답이 평소보다 늦어지고 있습니다. 잠시 후에도 답변이 없으면 다시 질문해주세요.",
+                isPending: false,
+                isDelayed: true,
+              }
+            : message,
+        ),
+      );
+    }, 30000);
+  }
+
+  function removePendingAgentMessage() {
+    const pendingMessageId = pendingAgentMessageIdRef.current;
+
+    if (!pendingMessageId) {
+      return;
+    }
+
+    pendingAgentMessageIdRef.current = "";
+    clearPendingAgentTimeout();
+    setMessages((prevMessages) =>
+      prevMessages.filter((message) => message._id !== pendingMessageId),
+    );
+  }
+
+  function clearPendingAgentTimeout() {
+    if (!pendingAgentTimeoutRef.current) {
+      return;
+    }
+
+    window.clearTimeout(pendingAgentTimeoutRef.current);
+    pendingAgentTimeoutRef.current = null;
   }
 
   function formatTime(dateString) {
@@ -354,7 +431,7 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
                     className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[82%] rounded-3xl px-4 py-3 text-sm shadow-sm sm:max-w-[68%] ${
+                      className={`min-w-0 max-w-[82%] overflow-hidden rounded-3xl px-4 py-3 text-sm shadow-sm sm:max-w-[68%] ${
                         isAgentMessage
                           ? "rounded-bl-md border border-[#8dd7ca] bg-[#e8fbf7] text-[#123f3a] shadow-[#c7eee6]"
                           : isMine
@@ -376,7 +453,22 @@ function ChatRoom({ roomId, chatRoom, userProfile, onBack }) {
                           <span>{msg.senderName || "상대방"}</span>
                         </p>
                       )}
-                      <p className="whitespace-pre-line leading-6">{msg.text}</p>
+                      <ChatMessageText text={msg.text} />
+                      {msg.isPending && (
+                        <div className="mt-2 flex items-center gap-1.5 text-[#3e8e83]">
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2fae9b]" />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2fae9b] [animation-delay:120ms]" />
+                          <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#2fae9b] [animation-delay:240ms]" />
+                          <span className="ml-1 text-xs font-bold">
+                            잠시만 기다려주세요
+                          </span>
+                        </div>
+                      )}
+                      {msg.isDelayed && (
+                        <p className="mt-2 rounded-2xl bg-white/70 px-3 py-2 text-xs font-bold leading-5 text-[#3e8e83]">
+                          네트워크나 AI API 응답 지연일 수 있습니다.
+                        </p>
+                      )}
                       <p
                         className={`mt-1 text-right text-xs ${
                           isAgentMessage
@@ -442,6 +534,30 @@ function InfoRow({ label, value }) {
       <span className="truncate font-bold text-slate-800">{value || "-"}</span>
     </div>
   );
+}
+
+function ChatMessageText({ text }) {
+  return (
+    <p className="whitespace-pre-wrap break-words leading-6 [overflow-wrap:anywhere]">
+      {renderInlineMarkdown(text)}
+    </p>
+  );
+}
+
+function renderInlineMarkdown(text) {
+  const parts = String(text || "").split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return (
+        <strong key={`${part}-${index}`} className="font-black">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return part;
+  });
 }
 
 export default ChatRoom;
