@@ -53,7 +53,15 @@ langchain
 - AI 메시지에는 `AI 상담원` 배지와 전용 민트 계열 말풍선을 적용했다.
 - AI 답변 줄바꿈이 유지되도록 표시를 보강했다.
 
-### 6) 문서와 배포 가이드 갱신
+### 6) 사이트 공통 플로팅 챗봇 추가
+
+- 오른쪽 아래 플로팅 AI 챗봇 버튼을 추가했다.
+- 버튼 클릭 시 모달형 AI 챗봇 화면이 열린다.
+- 비로그인 사용자는 로그인 안내를 보고, 로그인 사용자는 사이트 사용법과 차량 추천 질문을 보낼 수 있다.
+- 공통 챗봇 기록은 `chatbot_messages` 컬렉션에 `contextType: "site"`로 저장한다.
+- 상담방 화면에서는 기존 상담 UI와 겹치지 않도록 플로팅 챗봇을 숨긴다.
+
+### 7) 문서와 배포 가이드 갱신
 
 - `.env.example`에 AI 상담원 환경변수를 추가했다.
 - README, Render 배포 가이드, 배포 체크리스트에 OpenAI Secret과 사용 제한 설정을 문서화했다.
@@ -70,8 +78,11 @@ backend/services/collections.js
 backend/services/agent.service.js
 backend/services/agentGraph.service.js
 backend/services/chats.service.js
+backend/services/siteChatbot.service.js
 backend/sockets/chat.socket.js
+frontend/src/App.jsx
 frontend/src/components/ChatRoom.jsx
+frontend/src/components/SiteChatbotWidget.jsx
 README.md
 docs/deploy-guide.md
 docs/deploy-checklist.md

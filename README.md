@@ -29,6 +29,7 @@ https://codex-assignment.onrender.com/
 - MongoDB `chat_rooms`, `messages` 컬렉션 기반 상담방과 메시지 저장
 - MongoDB `users` 문서 기반 딜러 온라인 상태 표시
 - OpenAI, LangChain, LangGraph 기반 AI 상담원 응답
+- 사이트 공통 플로팅 AI 챗봇 버튼과 모달형 상담 UI
 - MongoDB `chatbot_messages` 컬렉션 기반 AI 상담 메시지 분리 저장
 
 ## 기술 스택
@@ -185,6 +186,18 @@ curl -H "Authorization: Bearer Firebase_ID_TOKEN" \
   https://codex-assignment.onrender.com/api/chats/rooms/상담방ID
 curl -H "Authorization: Bearer Firebase_ID_TOKEN" \
   https://codex-assignment.onrender.com/api/chats/rooms/상담방ID/messages
+```
+
+사이트 공통 AI 챗봇:
+
+```bash
+curl -H "Authorization: Bearer Firebase_ID_TOKEN" \
+  https://codex-assignment.onrender.com/api/chats/site-bot/messages
+
+curl -X POST https://codex-assignment.onrender.com/api/chats/site-bot/messages \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer Firebase_ID_TOKEN" \
+  -d "{\"text\":\"3000만원 이하 SUV 추천해줘\"}"
 ```
 
 ## Socket.io 이벤트

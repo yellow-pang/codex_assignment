@@ -140,11 +140,35 @@ async function classifyIntent(state) {
 }
 
 async function retrieveCarInfo(state) {
+  if (Array.isArray(state.context?.cars) && state.context.cars.length > 0) {
+    return {
+      carSummary: state.context.cars
+        .slice(0, 8)
+        .map((car, index) => {
+          const price = car.price ? `${car.price}만원` : "가격 정보 없음";
+          const mileage = car.mileage ? `${car.mileage}km` : "주행거리 정보 없음";
+          const year = car.year ? `${car.year}년식` : "연식 정보 없음";
+
+          return [
+            `${index + 1}. ${car.name || "차량명 없음"}`,
+            `제조사: ${car.company || "-"}`,
+            `가격: ${price}`,
+            `연식: ${year}`,
+            `주행거리: ${mileage}`,
+            `연료: ${car.fuel || "-"}`,
+            `차종: ${car.type || "-"}`,
+            `지역: ${car.location || "-"}`,
+          ].join(" / ");
+        })
+        .join("\n"),
+    };
+  }
+
   const car = state.context?.car;
 
   if (!car) {
     return {
-      carSummary: "상담방에 연결된 차량 정보를 찾지 못했습니다.",
+      carSummary: "현재 참고할 수 있는 차량 목록이 없습니다.",
     };
   }
 
@@ -173,7 +197,7 @@ async function checkUsageLimit(state) {
       shouldUseLlm: false,
       intent: "usage_limited",
       replyText:
-        "오늘 이 상담방에서 사용할 수 있는 AI 상담 횟수를 모두 사용했습니다.\n" +
+        "오늘 사용할 수 있는 AI 상담 횟수를 모두 사용했습니다.\n" +
         directContactText,
     };
   }
@@ -252,6 +276,8 @@ function createSystemPrompt() {
     "실제 계약, 결제, 환불, 보증 판단은 담당자 또는 공식 문의로 넘깁니다.",
     "사용자의 개인정보, Firebase UID, 내부 DB 구조, 환경변수, API Key를 노출하지 않습니다.",
     "자동차와 무관한 질문은 정중히 거절하고 공식 문의 채널을 안내합니다.",
+    "사이트 사용법 질문에는 차량 검색, 상세 보기, 딜러 상담, AI 질문 버튼 사용 방법을 안내합니다.",
+    "차량 추천 질문에는 제공된 차량 목록 안에서만 비교하고, 없는 차량을 지어내지 않습니다.",
     "딜러를 사칭하지 않고 항상 AI 상담원임을 전제로 답합니다.",
     `답변은 최대 ${getMaxReplyChars()}자 안에서 작성합니다.`,
     `직접 문의가 필요하면 다음 안내를 사용합니다.\n${directContactText}`,

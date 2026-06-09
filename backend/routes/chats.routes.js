@@ -7,6 +7,10 @@ const {
   listChatRoomMessages,
   listChatRooms,
 } = require("../services/chats.service");
+const {
+  createSiteChatbotReply,
+  listSiteChatbotMessages,
+} = require("../services/siteChatbot.service");
 
 function createChatsRouter() {
   const router = express.Router();
@@ -31,6 +35,29 @@ function createChatsRouter() {
     requireUserProfile,
     asyncRoute(async (req, res) => {
       res.json(await listChatRooms(req.userProfile));
+    }),
+  );
+
+  router.get(
+    "/site-bot/messages",
+    requireAuth,
+    requireUserProfile,
+    asyncRoute(async (req, res) => {
+      res.json(await listSiteChatbotMessages(req.userProfile));
+    }),
+  );
+
+  router.post(
+    "/site-bot/messages",
+    requireAuth,
+    requireUserProfile,
+    asyncRoute(async (req, res) => {
+      res.status(201).json(
+        await createSiteChatbotReply({
+          userProfile: req.userProfile,
+          text: req.body.text,
+        }),
+      );
     }),
   );
 
